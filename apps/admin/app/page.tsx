@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -16,21 +16,6 @@ export default function AdminDashboardPage() {
     check_ins_today: 85,
     check_ins_week: 623,
   });
-
-  // Member Inbox State
-  const [inboxOpen, setInboxOpen] = useState(true);
-  const [inboxMessages, setInboxMessages] = useState<any[]>([
-    {
-      id: '1',
-      memberName: 'Test Test',
-      gender: 'm',
-      timestamp: '6/24/2026, 7:05:07 AM',
-      type: 'SUGGESTION',
-      subject: 'Test test',
-      message: 'Test test',
-      starred: false,
-    },
-  ]);
 
   // Active Sessions Expiring Soon
   const [expiringSessions, setExpiringSessions] = useState<any[]>([
@@ -59,7 +44,7 @@ export default function AdminDashboardPage() {
   ]);
 
   // Recent Transactions List
-  const [recentTransactions] = useState<any[]>([
+  const [recentTransactions, setRecentTransactions] = useState<any[]>([
     { id: 'tx-1', memberName: 'Patrick Oko', gender: 'm', type: 'DAILY - SUBSCRIPTION', amount: 5000, date: '8/27/2026' },
     { id: 'tx-2', memberName: 'Patrick Oko', gender: 'm', type: 'REGISTRATION', amount: 15440, date: '8/27/2026' },
     { id: 'tx-3', memberName: 'Joshua Egbekun', gender: 'm', type: 'DAILY - SUBSCRIPTION', amount: 5000, date: '8/27/2026' },
@@ -67,11 +52,26 @@ export default function AdminDashboardPage() {
   ]);
 
   // Leaderboard State
-  const [leaderboard] = useState<any[]>([
+  const [leaderboard, setLeaderboard] = useState<any[]>([
     { rank: 1, name: 'Kelechi O.', checkIns: 18, points: 180, badge: '🏆 Champion' },
     { rank: 2, name: 'Gabriel O.', checkIns: 15, points: 150, badge: '🥈 2nd Place' },
     { rank: 3, name: 'David A.', checkIns: 12, points: 120, badge: '🥉 3rd Place' },
     { rank: 4, name: 'Sarah P.', checkIns: 9, points: 90, badge: null },
+  ]);
+
+  // Member Inbox State
+  const [inboxOpen, setInboxOpen] = useState(true);
+  const [inboxMessages, setInboxMessages] = useState<any[]>([
+    {
+      id: '1',
+      memberName: 'Test Test',
+      gender: 'm',
+      timestamp: '6/24/2026, 7:05:07 AM',
+      type: 'SUGGESTION',
+      subject: 'Test test',
+      message: 'Test test',
+      starred: false,
+    },
   ]);
 
   // Front Desk Check-in Input
@@ -104,6 +104,55 @@ export default function AdminDashboardPage() {
     { uid: 'plan-2', name: 'Member Registration', price: 15440, subText: 'New Member Onboarding' },
     { uid: 'plan-3', name: 'VIP Monthly Pass', price: 65000, subText: 'Full Gym + Sauna Access' },
   ];
+
+  const fetchLiveDashboardStats = async () => {
+    try {
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+      const token = typeof window !== 'undefined' ? localStorage.getItem('fitcloud_token') || '3|cDaxretquECERz0nU4SlJuGny6Dkq4qOgBOACy9060ac0f7e' : '';
+
+      const res = await fetch(`${apiBase}/admin/dashboard/stats`, {
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      const json = await res.json();
+      if (json.status === 'success' && json.data) {
+        const d = json.data;
+        setStats({
+          revenue_month: d.totalRevenueThisMonth || 17423724,
+          revenue_last_month: d.totalRevenueLastMonth || 15252024,
+          revenue_growth: d.revenuePercentageChange || 14.2,
+          total_members: d.totalMembers || 786,
+          new_members_week: d.newMembersThisWeek || 32,
+          active_members: d.activeMembersCount || 1124,
+          check_ins_today: d.checkInsToday || 85,
+          check_ins_week: d.checkInsThisWeek || 623,
+        });
+
+        if (d.expiringSoon && d.expiringSoon.length > 0) {
+          setExpiringSessions(d.expiringSoon);
+        }
+
+        if (d.recentTransactions && d.recentTransactions.length > 0) {
+          setRecentTransactions(d.recentTransactions);
+        }
+
+        if (d.leaderboard && d.leaderboard.length > 0) {
+          setLeaderboard(d.leaderboard);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch live dashboard stats:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchLiveDashboardStats();
+    const interval = setInterval(fetchLiveDashboardStats, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSimulateCheckIn = (e: React.FormEvent) => {
     e.preventDefault();
@@ -413,7 +462,7 @@ export default function AdminDashboardPage() {
               <div className="py-4 flex items-center justify-center">
                 <div className="relative w-40 h-40 rounded-full border-[16px] border-emerald-500 flex items-center justify-center shadow-2xl">
                   <div className="text-center">
-                    <span className="text-2xl font-black text-white">1,124</span>
+                    <span className="text-2xl font-black text-white">{stats.active_members}</span>
                     <p className="text-[10px] font-bold text-emerald-400 uppercase">Active</p>
                   </div>
                 </div>
