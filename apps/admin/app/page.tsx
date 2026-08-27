@@ -66,6 +66,22 @@ export default function AdminDashboardPage() {
     { id: 'tx-4', memberName: 'Joshua Egbekun', gender: 'm', type: 'REGISTRATION', amount: 15440, date: '8/27/2026' },
   ]);
 
+  // Leaderboard State
+  const [leaderboard] = useState<any[]>([
+    { rank: 1, name: 'Kelechi O.', checkIns: 18, points: 180, badge: '🏆 Champion' },
+    { rank: 2, name: 'Gabriel O.', checkIns: 15, points: 150, badge: '🥈 2nd Place' },
+    { rank: 3, name: 'David A.', checkIns: 12, points: 120, badge: '🥉 3rd Place' },
+    { rank: 4, name: 'Sarah P.', checkIns: 9, points: 90, badge: null },
+  ]);
+
+  // Front Desk Check-in Input
+  const [checkInInput, setCheckInInput] = useState('');
+  const [deskLogs, setDeskLogs] = useState<any[]>([
+    { id: 1, name: 'Gabriel O.', time: '10:45 AM', method: 'Fingerprint' },
+    { id: 2, name: 'Kelechi O.', time: '09:30 AM', method: 'QR Code' },
+    { id: 3, name: 'David A.', time: '08:15 AM', method: 'Manual' },
+  ]);
+
   // Record Payment Modal State
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
@@ -88,6 +104,22 @@ export default function AdminDashboardPage() {
     { uid: 'plan-2', name: 'Member Registration', price: 15440, subText: 'New Member Onboarding' },
     { uid: 'plan-3', name: 'VIP Monthly Pass', price: 65000, subText: 'Full Gym + Sauna Access' },
   ];
+
+  const handleSimulateCheckIn = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!checkInInput.trim()) return;
+
+    const newLog = {
+      id: Date.now(),
+      name: checkInInput,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      method: 'Manual Staff Gate',
+    };
+
+    setDeskLogs([newLog, ...deskLogs]);
+    setCheckInInput('');
+    setStats((prev: any) => ({ ...prev, check_ins_today: prev.check_ins_today + 1 }));
+  };
 
   const handleCancelSession = (uid: string) => {
     if (confirm('Are you sure you want to end this active session?')) {
@@ -433,6 +465,90 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
+          </div>
+
+          {/* Bottom Split Row: Front Desk Quick Check-in & Live Campaign Leaderboard */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
+            {/* Front Desk Desk Quick Scanner / Entry Form */}
+            <div className="lg:col-span-1 p-6 rounded-3xl bg-[#121217] border border-gray-800/80 shadow-xl space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-extrabold text-white">Front Desk Quick Check-in</h3>
+                <span className="text-[10px] font-mono font-bold text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded">
+                  Desk API
+                </span>
+              </div>
+
+              <form onSubmit={handleSimulateCheckIn} className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Enter Member Name / ID..."
+                  value={checkInInput}
+                  onChange={(e) => setCheckInInput(e.target.value)}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-[#0a0a0c] border border-gray-800 text-white text-xs font-medium focus:border-orange-500 outline-none"
+                />
+                <button
+                  type="submit"
+                  className="px-4 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 font-extrabold text-black text-xs transition"
+                >
+                  Check In
+                </button>
+              </form>
+
+              <div className="space-y-2 pt-2">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
+                  Recent Reception Logs
+                </span>
+                {deskLogs.map((log) => (
+                  <div key={log.id} className="p-3 rounded-xl bg-[#0a0a0c] border border-gray-800/80 flex items-center justify-between text-xs">
+                    <div>
+                      <p className="font-bold text-white">{log.name}</p>
+                      <p className="text-[10px] text-gray-500">{log.time} • {log.method}</p>
+                    </div>
+                    <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[10px] font-bold">
+                      Active
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Live Campaign Leaderboard Standings */}
+            <div className="lg:col-span-2 p-6 rounded-3xl bg-[#121217] border border-gray-800/80 shadow-xl space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b border-gray-800">
+                <div>
+                  <h3 className="text-base font-extrabold text-white">🏆 Live Campaign Leaderboard</h3>
+                  <p className="text-xs text-gray-400">Current Campaign: <span className="text-orange-400 font-bold">September 2 Remember Challenge</span></p>
+                </div>
+                <span className="text-[10px] font-bold bg-orange-500/10 text-orange-400 border border-orange-500/30 px-3 py-1 rounded-full">
+                  10 PTS / Check-in
+                </span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-[#0a0a0c] border-b border-gray-800 text-gray-400 font-semibold uppercase tracking-wider">
+                    <tr>
+                      <th className="py-3 px-4">Rank</th>
+                      <th className="py-3 px-4">Member Name</th>
+                      <th className="py-3 px-4">Check-ins</th>
+                      <th className="py-3 px-4">Points</th>
+                      <th className="py-3 px-4 text-right">Badge</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-800/60 font-medium">
+                    {leaderboard.map((item) => (
+                      <tr key={item.rank} className="hover:bg-gray-800/30 transition">
+                        <td className="py-3.5 px-4 font-mono font-bold text-orange-400">#{item.rank}</td>
+                        <td className="py-3.5 px-4 font-bold text-white">{item.name}</td>
+                        <td className="py-3.5 px-4 font-mono text-gray-300">{item.checkIns} Sessions</td>
+                        <td className="py-3.5 px-4 font-mono font-extrabold text-emerald-400">{item.points} PTS</td>
+                        <td className="py-3.5 px-4 text-right font-bold text-gray-300">{item.badge || '--'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
 
         </main>
