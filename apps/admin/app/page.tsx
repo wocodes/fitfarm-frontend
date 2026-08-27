@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Sidebar from './components/Sidebar';
+import Header from './components/Header';
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<any>({
@@ -26,9 +28,7 @@ export default function AdminDashboardPage() {
   ]);
 
   const [checkInName, setCheckInName] = useState('');
-  const [loading, setLoading] = useState(false);
 
-  // Quick Check-in Simulator
   const handleSimulateCheckIn = (e: React.FormEvent) => {
     e.preventDefault();
     if (!checkInName.trim()) return;
@@ -51,33 +51,13 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f0f11] text-white flex flex-col font-sans">
-      {/* Top Navbar */}
-      <header className="sticky top-0 z-50 bg-[#18181b]/90 backdrop-blur-md border-b border-gray-800 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center font-bold text-black text-lg">
-            FC
-          </div>
-          <div>
-            <h1 className="font-bold text-white leading-tight text-base">PolanFit Admin Center</h1>
-            <span className="text-xs text-orange-400 font-mono">admin.polanfit-arena.fitcloud.io</span>
-          </div>
-        </div>
+    <div className="flex min-h-screen bg-[#0a0a0c] text-white font-sans">
+      <Sidebar />
 
-        <div className="flex items-center gap-4 text-xs font-semibold">
-          <span className="px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-            {stats.active_sessions_now} Active Gym Sessions
-          </span>
+      <div className="flex-1 flex flex-col min-w-0">
+        <Header title="Dashboard Overview" subtitle="Real-time gym performance, active sessions, and attendance metrics" />
 
-          <Link href="/settings" className="px-3.5 py-1.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-white transition">
-            Gym Settings
-          </Link>
-        </div>
-      </header>
-
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-6 md:p-8 space-y-8">
+        <main className="flex-1 p-6 md:p-8 space-y-8 max-w-7xl">
         {/* Stat Cards Row */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="p-5 rounded-2xl bg-[#18181b] border border-gray-800">
@@ -200,6 +180,7 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       </main>
+      </div>
     </div>
   );
 }

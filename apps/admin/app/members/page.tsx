@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
+import Sidebar from '../components/Sidebar';
+import Header from '../components/Header';
 
 export default function MemberDirectoryPage() {
   const [search, setSearch] = useState('');
@@ -46,7 +47,6 @@ export default function MemberDirectoryPage() {
     },
   ]);
 
-  // Form State for new member
   const [newFirstName, setNewFirstName] = useState('');
   const [newLastName, setNewLastName] = useState('');
   const [newEmail, setNewEmail] = useState('');
@@ -82,168 +82,148 @@ export default function MemberDirectoryPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#0f0f11] text-white flex flex-col font-sans">
-      {/* Top Header Navigation */}
-      <header className="sticky top-0 z-50 bg-[#18181b]/90 backdrop-blur-md border-b border-gray-800 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center font-bold text-black text-lg">
-            FC
-          </Link>
-          <div>
-            <h1 className="font-bold text-white leading-tight text-base">Member Directory</h1>
-            <span className="text-xs text-gray-400">PolanFit Arena • Gym Admin Center</span>
-          </div>
-        </div>
+    <div className="flex min-h-screen bg-[#0a0a0c] text-white font-sans">
+      <Sidebar />
 
-        <div className="flex items-center gap-3">
-          <Link href="/" className="px-3.5 py-1.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-xs font-semibold text-white transition">
-            ← Dashboard
-          </Link>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 font-bold text-black text-xs rounded-xl shadow-lg shadow-orange-500/20 transition"
-          >
-            + Register New Member
-          </button>
-        </div>
-      </header>
+      <div className="flex-1 flex flex-col min-w-0">
+        <Header title="Gym Member Directory" subtitle="Manage registered gym members, biometric fingerprint enrollment, and active plans" />
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-6 md:p-8 space-y-6">
-        {/* Filters & Search */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-[#18181b] border border-gray-800">
-          <div className="relative w-full md:w-96">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name, email, or phone..."
-              className="w-full px-4 py-2.5 bg-[#0f0f11] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-orange-500"
-            />
+        <main className="flex-1 p-6 md:p-8 space-y-6 max-w-7xl">
+          {/* Filters & Search */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-[#18181b] border border-gray-800">
+            <div className="relative w-full md:w-96">
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by name, email, or phone..."
+                className="w-full px-4 py-2.5 bg-[#0f0f11] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-orange-500"
+              />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-gray-400 font-medium">
+                Showing <span className="text-white font-bold">{filteredMembers.length}</span> members
+              </span>
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="px-4 py-2 bg-orange-500 hover:bg-orange-600 font-bold text-black text-xs rounded-xl shadow-lg shadow-orange-500/20 transition"
+              >
+                + Register New Member
+              </button>
+            </div>
           </div>
 
-          <div className="text-xs text-gray-400 font-medium">
-            Showing <span className="text-white font-bold">{filteredMembers.length}</span> members
+          {/* Members Table */}
+          <div className="rounded-2xl bg-[#18181b] border border-gray-800 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-gray-300">
+                <thead className="bg-[#0f0f11] text-xs font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-800">
+                  <tr>
+                    <th className="px-6 py-4">Member</th>
+                    <th className="px-6 py-4">Contact</th>
+                    <th className="px-6 py-4">Subscription Plan</th>
+                    <th className="px-6 py-4">Status</th>
+                    <th className="px-6 py-4">Joined Date</th>
+                    <th className="px-6 py-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-800">
+                  {filteredMembers.map((member) => (
+                    <tr key={member.id} className="hover:bg-[#202025] transition">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center font-bold text-orange-400 text-sm">
+                            {member.firstName.charAt(0)}{member.lastName.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-white">{member.firstName} {member.lastName}</p>
+                            <span className="text-xs text-gray-400 font-mono">{member.uuid}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="text-xs text-white">{member.email}</p>
+                        <p className="text-xs text-gray-400">{member.phone}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-xs font-medium text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2.5 py-1 rounded-full">
+                          {member.plan}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`text-xs font-bold px-2.5 py-1 rounded-full uppercase ${
+                          member.status === 'active'
+                            ? 'bg-green-500/10 text-green-400 border border-green-500/30'
+                            : 'bg-red-500/10 text-red-400 border border-red-500/30'
+                        }`}>
+                          {member.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-xs text-gray-400">{member.joinedAt}</td>
+                      <td className="px-6 py-4 text-right">
+                        <button className="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs text-white transition">
+                          View Profile
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-
-        {/* Member Table */}
-        <div className="p-6 rounded-2xl bg-[#18181b] border border-gray-800 overflow-x-auto shadow-2xl">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="text-xs font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-800">
-                <th className="py-3 px-4">Member Name</th>
-                <th className="py-3 px-4">Phone</th>
-                <th className="py-3 px-4">Subscription Plan</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4">Joined Date</th>
-                <th className="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-800/60">
-              {filteredMembers.map((m) => (
-                <tr key={m.id} className="hover:bg-gray-800/30 transition">
-                  <td className="py-3.5 px-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-orange-500/20 text-orange-400 font-bold flex items-center justify-center text-sm border border-orange-500/30">
-                        {m.firstName.charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <Link
-                          href={`/members/profile?uid=${m.uuid}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-bold text-white hover:text-orange-400 transition flex items-center gap-1.5"
-                        >
-                          <span>{m.firstName} {m.lastName.charAt(0)}.</span>
-                          <span className="text-xs text-gray-500 font-normal">↗</span>
-                        </Link>
-                        <div className="text-xs text-gray-500">{m.email}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-4 text-gray-300 font-mono text-xs">{m.phone}</td>
-                  <td className="py-3.5 px-4 font-semibold text-orange-400">{m.plan}</td>
-                  <td className="py-3.5 px-4">
-                    <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
-                      m.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-gray-800 text-gray-400'
-                    }`}>
-                      {m.status}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 text-xs text-gray-400">{m.joinedAt}</td>
-                  <td className="py-3.5 px-4 text-right">
-                    <Link
-                      href={`/members/profile?uid=${m.uuid}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-xs font-semibold text-white rounded-lg transition"
-                    >
-                      View Profile
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </main>
+        </main>
+      </div>
 
       {/* Add Member Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-[999999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#18181b] border border-gray-800 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl relative">
-            <button
-              onClick={() => setShowAddModal(false)}
-              className="absolute top-6 right-6 text-gray-400 hover:text-white font-bold"
-            >
-              ✕
-            </button>
-
-            <h2 className="text-xl font-bold text-white">Register New Member</h2>
-
-            <form onSubmit={handleAddMember} className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-400 uppercase mb-1">First Name</label>
-                <input
-                  type="text"
-                  value={newFirstName}
-                  onChange={(e) => setNewFirstName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-[#0f0f11] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-orange-500"
-                  required
-                />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md bg-[#18181b] border border-gray-800 rounded-3xl p-6 shadow-2xl text-white">
+            <h3 className="text-xl font-bold text-white mb-4">Register New Member</h3>
+            
+            <form onSubmit={handleAddMember} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-300 uppercase mb-1">First Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={newFirstName}
+                    onChange={(e) => setNewFirstName(e.target.value)}
+                    className="w-full px-3.5 py-2 bg-[#0f0f11] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-orange-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-300 uppercase mb-1">Last Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={newLastName}
+                    onChange={(e) => setNewLastName(e.target.value)}
+                    className="w-full px-3.5 py-2 bg-[#0f0f11] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-orange-500"
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-400 uppercase mb-1">Last Name</label>
-                <input
-                  type="text"
-                  value={newLastName}
-                  onChange={(e) => setNewLastName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-[#0f0f11] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-orange-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-400 uppercase mb-1">Email Address</label>
+                <label className="block text-xs font-semibold text-gray-300 uppercase mb-1">Email Address</label>
                 <input
                   type="email"
+                  required
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-[#0f0f11] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-orange-500"
-                  required
+                  className="w-full px-3.5 py-2 bg-[#0f0f11] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-orange-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-400 uppercase mb-1">Phone Number</label>
+                <label className="block text-xs font-semibold text-gray-300 uppercase mb-1">Phone Number</label>
                 <input
-                  type="text"
+                  type="tel"
+                  required
                   value={newPhone}
                   onChange={(e) => setNewPhone(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-[#0f0f11] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-orange-500"
-                  required
+                  className="w-full px-3.5 py-2 bg-[#0f0f11] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-orange-500"
                 />
               </div>
 
