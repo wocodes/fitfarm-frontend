@@ -7,45 +7,63 @@ import Header from './components/Header';
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<any>({
-    total_members: 142,
-    new_members_week: 12,
-    check_ins_today: 28,
-    check_ins_week: 185,
-    revenue_today: 148500,
-    total_revenue_gross: 312500,
+    revenue_month: 17423724,
+    revenue_last_month: 15252024,
+    revenue_growth: 14.2,
+    total_members: 786,
+    new_members_week: 32,
+    active_members: 1124,
+    check_ins_today: 85,
+    check_ins_week: 623,
   });
+
+  // Member Inbox State
+  const [inboxOpen, setInboxOpen] = useState(true);
+  const [inboxMessages, setInboxMessages] = useState<any[]>([
+    {
+      id: '1',
+      memberName: 'Test Test',
+      gender: 'm',
+      timestamp: '6/24/2026, 7:05:07 AM',
+      type: 'SUGGESTION',
+      subject: 'Test test',
+      message: 'Test test',
+      starred: false,
+    },
+  ]);
 
   // Active Sessions Expiring Soon
   const [expiringSessions, setExpiringSessions] = useState<any[]>([
-    { uid: 'sess-1', memberName: 'Kelechi Oshoname', gender: 'male', memberUid: 'fc-m-001', method: 'FINGERPRINT', sessionType: 'MORNING', checkInTime: '08:15 AM', endTime: '10:15 AM', remainingMinutes: 15 },
-    { uid: 'sess-2', memberName: 'Gabriel Omokpoga', gender: 'male', memberUid: 'fc-m-002', method: 'QR_CODE', sessionType: 'MORNING', checkInTime: '09:00 AM', endTime: '11:00 AM', remainingMinutes: 28 },
+    {
+      uid: 'sess-1',
+      memberName: 'Omonafe Ezekiel',
+      gender: 'm',
+      memberUid: 'fc-m-001',
+      method: 'BIOMETRIC SCAN',
+      sessionType: 'MORNING',
+      checkInTime: '01:21 PM',
+      endTime: '03:21 PM',
+      remainingMinutes: 11,
+    },
+    {
+      uid: 'sess-2',
+      memberName: 'Grace Roland',
+      gender: 'f',
+      memberUid: 'fc-m-002',
+      method: 'BIOMETRIC SCAN',
+      sessionType: 'MORNING',
+      checkInTime: '01:33 PM',
+      endTime: '03:33 PM',
+      remainingMinutes: 23,
+    },
   ]);
 
-  // Activity Chart Range Filter
-  const [activityRange, setActivityRange] = useState('weekly');
-
-  // Member Feedback & Receptionist Messages
-  const [feedbackOpen, setFeedbackOpen] = useState(true);
-  const [feedbackMessages, setFeedbackMessages] = useState<any[]>([
-    { id: '1', memberName: 'Kelechi O.', type: 'COMPLAINT', subject: 'Locker 14 Hinge Issue', message: 'The locker door hinge on unit 14 needs oiling.', dateSent: '10 mins ago', read: false },
-    { id: '2', memberName: 'Gabriel O.', type: 'SUGGESTION', subject: 'More Kettlebells', message: 'Please add 24kg kettlebells to the functional area.', dateSent: '1 hour ago', read: false },
-    { id: '3', memberName: 'David A.', type: 'ACKNOWLEDGEMENT', subject: 'Great Personal Trainer', message: 'Coach Kelechi was excellent during morning session today!', dateSent: 'Yesterday', read: true },
-  ]);
-
-  // Leaderboard State
-  const [leaderboard] = useState<any[]>([
-    { rank: 1, name: 'Kelechi O.', checkIns: 18, points: 180, badge: '🏆 Champion' },
-    { rank: 2, name: 'Gabriel O.', checkIns: 15, points: 150, badge: '🥈 2nd Place' },
-    { rank: 3, name: 'David A.', checkIns: 12, points: 120, badge: '🥉 3rd Place' },
-    { rank: 4, name: 'Sarah P.', checkIns: 9, points: 90, badge: null },
-  ]);
-
-  // Front Desk Check-in Input
-  const [checkInInput, setCheckInInput] = useState('');
-  const [deskLogs, setDeskLogs] = useState<any[]>([
-    { id: 1, name: 'Gabriel O.', time: '10:45 AM', method: 'Fingerprint' },
-    { id: 2, name: 'Kelechi O.', time: '09:30 AM', method: 'QR Code' },
-    { id: 3, name: 'David A.', time: '08:15 AM', method: 'Manual' },
+  // Recent Transactions List
+  const [recentTransactions] = useState<any[]>([
+    { id: 'tx-1', memberName: 'Patrick Oko', gender: 'm', type: 'DAILY - SUBSCRIPTION', amount: 5000, date: '8/27/2026' },
+    { id: 'tx-2', memberName: 'Patrick Oko', gender: 'm', type: 'REGISTRATION', amount: 15440, date: '8/27/2026' },
+    { id: 'tx-3', memberName: 'Joshua Egbekun', gender: 'm', type: 'DAILY - SUBSCRIPTION', amount: 5000, date: '8/27/2026' },
+    { id: 'tx-4', memberName: 'Joshua Egbekun', gender: 'm', type: 'REGISTRATION', amount: 15440, date: '8/27/2026' },
   ]);
 
   // Record Payment Modal State
@@ -59,33 +77,17 @@ export default function AdminDashboardPage() {
     memberId: '',
     payerName: '',
     pricingPlanUid: 'plan-2',
-    amount: '65000',
+    amount: '15440',
     durationMonths: '1',
     reference: '',
     notes: '',
   });
 
   const availablePlans = [
-    { uid: 'plan-1', name: 'Starter Monthly', price: 25000, subText: 'Standard Gym Access' },
-    { uid: 'plan-2', name: 'VIP Quarterly', price: 65000, subText: 'Gym + Trainer + Sauna' },
-    { uid: 'plan-3', name: 'Annual All-Access', price: 220000, subText: '365 Days Unlimited Access' },
+    { uid: 'plan-1', name: 'Daily Subscription', price: 5000, subText: '1 Day Access' },
+    { uid: 'plan-2', name: 'Member Registration', price: 15440, subText: 'New Member Onboarding' },
+    { uid: 'plan-3', name: 'VIP Monthly Pass', price: 65000, subText: 'Full Gym + Sauna Access' },
   ];
-
-  const handleSimulateCheckIn = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!checkInInput.trim()) return;
-
-    const newLog = {
-      id: Date.now(),
-      name: checkInInput,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      method: 'Manual Staff Gate',
-    };
-
-    setDeskLogs([newLog, ...deskLogs]);
-    setCheckInInput('');
-    setStats((prev: any) => ({ ...prev, check_ins_today: prev.check_ins_today + 1 }));
-  };
 
   const handleCancelSession = (uid: string) => {
     if (confirm('Are you sure you want to end this active session?')) {
@@ -104,16 +106,6 @@ export default function AdminDashboardPage() {
     if (confirm('⚠️ DANGER: Clear all check-in history logs? This cannot be undone.')) {
       alert('✅ Check-in history cleared.');
     }
-  };
-
-  const handleMarkAsRead = (id: string) => {
-    setFeedbackMessages((prev) =>
-      prev.map((msg) => (msg.id === id ? { ...msg, read: true } : msg))
-    );
-  };
-
-  const handleDeleteFeedback = (id: string) => {
-    setFeedbackMessages((prev) => prev.filter((msg) => msg.id !== id));
   };
 
   const handleRecordPayment = (e: React.FormEvent) => {
@@ -135,108 +127,134 @@ export default function AdminDashboardPage() {
     }, 1000);
   };
 
-  const unreadFeedbackCount = feedbackMessages.filter((m) => !m.read).length;
-
   return (
-    <div className="flex min-h-screen bg-[#0a0a0c] text-white font-sans">
+    <div className="flex min-h-screen bg-[#070709] text-white font-sans">
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-w-0">
         <Header title="Dashboard Overview" subtitle="Real-time gym performance, active sessions, and attendance metrics" />
 
         <main className="flex-1 p-6 md:p-8 space-y-6 max-w-7xl">
-          {/* Top Actions & Modal Trigger Bar */}
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between bg-[#0f0f13] border border-gray-800 p-4 rounded-2xl gap-4">
-            <div>
-              <h2 className="text-lg font-extrabold text-white">Overview Console</h2>
-              <p className="text-xs text-gray-400">Manage member entrance, live session timeouts, and revenue transactions.</p>
+
+          {/* Member Inbox Top Collapsible Banner */}
+          <div className="rounded-3xl bg-[#121217] border border-gray-800/80 p-5 shadow-xl space-y-4">
+            <div className="flex items-center justify-between cursor-pointer" onClick={() => setInboxOpen(!inboxOpen)}>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-orange-500/20 text-orange-400 border border-orange-500/30 flex items-center justify-center font-bold text-lg shadow-md">
+                  📬
+                </div>
+                <div>
+                  <h2 className="text-base font-extrabold text-white">Member Inbox</h2>
+                  <p className="text-xs text-gray-400">Suggestions, complaints & feedback</p>
+                </div>
+              </div>
+
+              <button className="text-gray-400 hover:text-white font-bold text-sm">
+                {inboxOpen ? '▲' : '▼'}
+              </button>
             </div>
 
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setFeedbackOpen(!feedbackOpen)}
-                className="px-3.5 py-2 rounded-xl bg-gray-900 border border-gray-800 hover:bg-gray-800 text-xs font-bold text-gray-300 flex items-center gap-2 transition"
-              >
-                📬 Member Feedback
-                {unreadFeedbackCount > 0 && (
-                  <span className="px-2 py-0.5 rounded-full bg-orange-500 text-black text-[10px] font-extrabold animate-pulse">
-                    {unreadFeedbackCount}
-                  </span>
-                )}
-              </button>
+            {inboxOpen && (
+              <div className="space-y-3 pt-1">
+                {inboxMessages.map((msg) => (
+                  <div key={msg.id} className="p-4 rounded-2xl bg-[#0a0a0c] border border-gray-800 flex items-center justify-between text-xs">
+                    <div className="flex items-start gap-3">
+                      <div className="w-9 h-9 rounded-full bg-gray-800 text-gray-300 font-bold flex items-center justify-center text-sm border border-gray-700">
+                        {msg.memberName.charAt(0)}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-white text-sm">
+                            {msg.memberName} <span className="text-purple-400 text-[10px]">({msg.gender})</span>
+                          </span>
+                          <span className="text-[10px] text-amber-500 font-mono">{msg.timestamp}</span>
+                        </div>
+                        <p className="font-extrabold text-white mt-1">{msg.subject}</p>
+                        <p className="text-gray-400 mt-0.5">{msg.message}</p>
+                      </div>
+                    </div>
 
-              <button
-                onClick={() => setShowPaymentModal(true)}
-                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 font-extrabold text-black text-xs transition shadow-lg shadow-orange-500/20"
-              >
-                + Record Gym Payment
-              </button>
-              <Link
-                href="/check-in"
-                className="px-4 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 font-bold text-white text-xs transition"
-              >
-                🚪 Open Entrance Kiosk
-              </Link>
-            </div>
+                    <div className="flex items-center gap-3">
+                      <span className="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 font-extrabold text-[10px] uppercase tracking-wider">
+                        {msg.type}
+                      </span>
+                      <button className="text-gray-400 hover:text-white transition">↶</button>
+                      <button className="text-gray-400 hover:text-amber-400 transition">⭐</button>
+                      <button className="text-gray-400 hover:text-red-400 transition">🗑️</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* 4 Stat KPI Cards Row */}
+          {/* 4 Top KPI Cards Row */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="p-5 rounded-2xl bg-[#0f0f13] border border-gray-800">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Total Members</span>
-              <div className="text-3xl font-black text-white mt-1">{stats.total_members}</div>
-              <span className="text-xs text-emerald-400 font-bold mt-1 block">↑ 12% this month</span>
+
+            {/* Card 1: Vibrant Orange Revenue Card */}
+            <div className="p-6 rounded-3xl bg-gradient-to-r from-[#fa6a2e] to-[#e84a0e] text-white shadow-xl shadow-orange-500/20 relative overflow-hidden">
+              <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-orange-100">
+                <span>💸 REVENUE (THIS MONTH)</span>
+              </div>
+              <div className="text-3xl font-black text-white mt-2 tracking-tight">
+                ₦{stats.revenue_month.toLocaleString()}
+              </div>
+              <div className="text-[11px] font-semibold text-orange-100 mt-2 flex items-center gap-1">
+                <span>vs. 📈 ₦{stats.revenue_last_month.toLocaleString()} (+{stats.revenue_growth}%) last month</span>
+              </div>
             </div>
 
-            <div className="p-5 rounded-2xl bg-[#0f0f13] border border-gray-800">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">New Members This Week</span>
-              <div className="text-3xl font-black text-orange-400 mt-1">{stats.new_members_week}</div>
-              <span className="text-xs text-gray-400 font-medium mt-1 block">90.4% renewal rate</span>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-[#0f0f13] border border-gray-800">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Check-ins Today</span>
-              <div className="text-3xl font-black text-blue-400 mt-1">{stats.check_ins_today}</div>
-              <span className="text-xs text-gray-400 font-medium mt-1 block">Peak: 08:00 - 10:00 AM</span>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-[#0f0f13] border border-gray-800">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Check-ins This Week</span>
-              <div className="text-3xl font-black text-emerald-400 mt-1">{stats.check_ins_week}</div>
-              <span className="text-xs text-gray-400 font-mono mt-1 block">Revenue: ₦{stats.revenue_today.toLocaleString()}</span>
-            </div>
-          </div>
-
-          {/* Financial Performance & Payment Split Widget */}
-          <div className="p-6 rounded-2xl bg-[#0f0f13] border border-gray-800 space-y-4">
-            <div className="flex items-center justify-between">
+            {/* Card 2: Total Members */}
+            <div className="p-6 rounded-3xl bg-[#121217] border border-gray-800/80 shadow-xl flex flex-col justify-between">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-orange-400">Gym Financial Performance</span>
-                <h3 className="text-xl font-extrabold text-white">Total Gross Revenue: ₦{stats.total_revenue_gross.toLocaleString()}</h3>
+                <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-gray-400">
+                  <span>👑 TOTAL MEMBERS</span>
+                </div>
+                <div className="text-3xl font-black text-white mt-2">{stats.total_members}</div>
               </div>
-
-              <div className="flex flex-wrap gap-2 text-xs font-bold">
-                <span className="px-3 py-1 rounded-xl bg-gray-900 border border-gray-800 text-gray-300">
-                  Bank Transfer: <span className="text-emerald-400 font-mono">₦25,000</span>
-                </span>
-                <span className="px-3 py-1 rounded-xl bg-gray-900 border border-gray-800 text-gray-300">
-                  POS Receipts: <span className="text-white font-mono">₦67,500</span>
-                </span>
-                <span className="px-3 py-1 rounded-xl bg-gray-900 border border-gray-800 text-gray-300">
-                  Paystack Online: <span className="text-orange-400 font-mono">₦220,000</span>
+              <div className="mt-3">
+                <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-extrabold">
+                  +{stats.new_members_week} new member this week
                 </span>
               </div>
             </div>
+
+            {/* Card 3: Active Members */}
+            <div className="p-6 rounded-3xl bg-[#121217] border border-gray-800/80 shadow-xl flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-gray-400">
+                  <span>✅ ACTIVE MEMBERS</span>
+                </div>
+                <div className="text-3xl font-black text-white mt-2">{stats.active_members}</div>
+              </div>
+              <div className="text-xs text-gray-400 font-medium mt-3">
+                out of <span className="text-blue-400 font-extrabold">{stats.total_members}</span> total members
+              </div>
+            </div>
+
+            {/* Card 4: Check-ins Today */}
+            <div className="p-6 rounded-3xl bg-[#121217] border border-gray-800/80 shadow-xl flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-gray-400">
+                  <span>📅 CHECK-INS TODAY</span>
+                </div>
+                <div className="text-3xl font-black text-white mt-2">{stats.check_ins_today}</div>
+              </div>
+              <div className="text-xs text-gray-400 font-medium mt-3">
+                <span className="text-amber-400 font-extrabold">{stats.check_ins_week}</span> total this week
+              </div>
+            </div>
+
           </div>
 
           {/* LIVE: Sessions Expiring Soon Widget */}
-          <div className="p-6 rounded-2xl bg-[#0f0f13] border border-gray-800 space-y-4">
+          <div className="p-6 rounded-3xl bg-[#121217] border border-gray-800/80 shadow-xl space-y-4">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-3 h-3 rounded-full bg-red-500 animate-ping" />
+                <div className="w-3 h-3 rounded-full bg-amber-500 animate-ping" />
                 <h3 className="text-lg font-extrabold text-white flex items-center gap-2">
                   Sessions Expiring Soon
-                  <span className="px-2.5 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] font-black uppercase">
+                  <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-black uppercase tracking-wider">
                     LIVE
                   </span>
                 </h3>
@@ -245,338 +263,178 @@ export default function AdminDashboardPage() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleCancelAllActive}
-                  className="px-3 py-1.5 rounded-xl bg-orange-500/10 text-orange-400 border border-orange-500/30 text-xs font-bold hover:bg-orange-500/20 transition"
+                  className="px-3.5 py-1.5 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/30 text-xs font-extrabold hover:bg-orange-500/20 transition"
                 >
                   End All Active
                 </button>
                 <button
                   onClick={handleClearHistory}
-                  className="px-3 py-1.5 rounded-xl bg-red-500/10 text-red-400 border border-red-500/30 text-xs font-bold hover:bg-red-500/20 transition"
+                  className="px-3.5 py-1.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/30 text-xs font-extrabold hover:bg-red-500/20 transition"
                 >
                   Clear History
                 </button>
                 <Link
                   href="/check-ins"
-                  className="px-3 py-1.5 rounded-xl bg-gray-800 text-gray-300 text-xs font-semibold hover:bg-gray-700 transition"
+                  className="px-3.5 py-1.5 rounded-full bg-gray-800 text-gray-300 text-xs font-extrabold hover:bg-gray-700 transition"
                 >
-                  View All →
+                  View All ↗
                 </Link>
               </div>
             </div>
 
             {/* Expiring Sessions Table */}
-            {expiringSessions.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-[#070709] border-b border-gray-800 text-gray-400 font-semibold uppercase tracking-wider">
-                    <tr>
-                      <th className="py-3 px-4">Member</th>
-                      <th className="py-3 px-4">Session</th>
-                      <th className="py-3 px-4">Duration</th>
-                      <th className="py-3 px-4 text-right">Time Left & Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-800/60 font-medium">
-                    {expiringSessions.map((session) => (
-                      <tr key={session.uid} className="hover:bg-gray-800/30 transition">
-                        <td className="py-3.5 px-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-orange-500/10 text-orange-400 border border-orange-500/30 flex items-center justify-center font-bold text-xs">
-                              {session.memberName.charAt(0)}
-                            </div>
-                            <div>
-                              <p className="font-bold text-white text-sm">{session.memberName}</p>
-                              <span className="text-[10px] text-gray-400 uppercase font-mono">{session.method}</span>
-                            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="border-b border-gray-800 text-gray-400 font-bold uppercase tracking-wider">
+                  <tr>
+                    <th className="py-3 px-4">MEMBER</th>
+                    <th className="py-3 px-4">SESSION</th>
+                    <th className="py-3 px-4">DURATION</th>
+                    <th className="py-3 px-4 text-right">TIME LEFT</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-800/60 font-medium">
+                  {expiringSessions.map((session) => (
+                    <tr key={session.uid} className="hover:bg-gray-800/30 transition">
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/30 flex items-center justify-center font-bold text-xs">
+                            {session.memberName.charAt(0)}
                           </div>
-                        </td>
-                        <td className="py-3.5 px-4">
-                          <span className="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-bold">
-                            {session.sessionType}
+                          <div>
+                            <p className="font-bold text-white text-sm">
+                              {session.memberName} <span className="text-purple-400 text-xs font-mono">({session.gender})</span>
+                            </p>
+                            <span className="text-[10px] text-gray-500 font-bold tracking-wider uppercase">{session.method}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span className="px-3 py-1 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30 text-[10px] font-extrabold">
+                          {session.sessionType}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 font-mono text-gray-300">
+                        {session.checkInTime} - {session.endTime}
+                      </td>
+                      <td className="py-3.5 px-4 text-right">
+                        <div className="flex items-center justify-end gap-3">
+                          <span className="px-3.5 py-1 rounded-full bg-red-500/20 text-red-400 border border-red-500/40 font-mono font-extrabold text-xs shadow-lg shadow-red-500/10 animate-pulse">
+                            {session.remainingMinutes}m Left
                           </span>
-                        </td>
-                        <td className="py-3.5 px-4 font-mono text-gray-300">
-                          {session.checkInTime} - {session.endTime}
-                        </td>
-                        <td className="py-3.5 px-4 text-right">
-                          <div className="flex items-center justify-end gap-3">
-                            <span className="px-3 py-1 rounded-full bg-red-500/20 text-red-400 border border-red-500/40 font-mono font-bold text-xs animate-pulse">
-                              {session.remainingMinutes}m left
-                            </span>
-                            <button
-                              onClick={() => handleCancelSession(session.uid)}
-                              className="w-7 h-7 rounded-lg bg-gray-800 hover:bg-red-500/30 text-gray-400 hover:text-red-400 flex items-center justify-center transition"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="p-8 text-center bg-[#070709] rounded-2xl border border-dashed border-gray-800 space-y-1">
-                <p className="text-sm font-bold text-white">All quiet right now</p>
-                <p className="text-xs text-gray-400">No member sessions expiring within 30 minutes.</p>
-              </div>
-            )}
+                          <button
+                            onClick={() => handleCancelSession(session.uid)}
+                            className="text-gray-400 hover:text-red-400 text-sm transition font-bold"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          {/* Activity Bar Chart & Progress Analytics Cards Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Activity Bar Chart */}
-            <div className="p-6 rounded-2xl bg-[#0f0f13] border border-gray-800 space-y-4">
+          {/* Bottom 3-Column Analytics Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            {/* Column 1: Smooth Orange Curved Activity Line Chart */}
+            <div className="p-6 rounded-3xl bg-[#121217] border border-gray-800/80 shadow-xl space-y-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-base font-extrabold text-white">Activity Overview</h3>
-                  <p className="text-xs text-gray-400">Member entrance volume trends over time.</p>
-                </div>
-                <select
-                  value={activityRange}
-                  onChange={(e) => setActivityRange(e.target.value)}
-                  className="px-3 py-1.5 rounded-xl bg-gray-900 border border-gray-800 text-white text-xs font-semibold outline-none"
-                >
-                  <option value="weekly">Weekly Range</option>
-                  <option value="monthly">Monthly Range</option>
-                  <option value="yearly">Yearly Range</option>
-                </select>
+                <h3 className="text-base font-extrabold text-white">Activity</h3>
+                <span className="px-3 py-1 rounded-xl bg-gray-900 border border-gray-800 text-xs font-bold text-gray-300">
+                  Weekly ▼
+                </span>
               </div>
 
-              {/* Chart Visual Graphic */}
-              <div className="h-44 flex items-end justify-between gap-3 pt-6 px-2">
-                {[
-                  { day: 'Mon', count: 24, height: '60%' },
-                  { day: 'Tue', count: 32, height: '80%' },
-                  { day: 'Wed', count: 45, height: '100%' },
-                  { day: 'Thu', count: 28, height: '70%' },
-                  { day: 'Fri', count: 38, height: '90%' },
-                  { day: 'Sat', count: 50, height: '100%' },
-                  { day: 'Sun', count: 18, height: '45%' },
-                ].map((bar, i) => (
-                  <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                    <span className="text-[10px] font-mono text-gray-400">{bar.count}</span>
-                    <div
-                      style={{ height: bar.height }}
-                      className="w-full rounded-t-lg bg-gradient-to-t from-orange-500 to-amber-500 hover:from-orange-600 transition"
+              {/* Area Line Chart Visualization */}
+              <div className="pt-4 space-y-2">
+                <div className="h-40 relative flex items-end justify-between px-2">
+                  <svg className="absolute inset-0 w-full h-full text-orange-500 overflow-visible" viewBox="0 0 300 120" preserveAspectRatio="none">
+                    <path
+                      fill="rgba(250, 106, 46, 0.15)"
+                      stroke="#fa6a2e"
+                      strokeWidth="3"
+                      d="M 0 20 Q 50 15, 100 25 T 200 80 T 300 110 L 300 120 L 0 120 Z"
                     />
-                    <span className="text-[10px] font-bold text-gray-400">{bar.day}</span>
-                  </div>
-                ))}
+                  </svg>
+                </div>
+
+                <div className="flex justify-between text-[11px] font-bold text-gray-400 pt-2 border-t border-gray-800">
+                  <span>Mon</span>
+                  <span>Tue</span>
+                  <span>Wed</span>
+                  <span>Thu</span>
+                  <span>Fri</span>
+                  <span>Sat</span>
+                  <span>Sun</span>
+                </div>
               </div>
             </div>
 
-            {/* Subscriptions Access Tier Counter Pills & Progress */}
-            <div className="p-6 rounded-2xl bg-[#0f0f13] border border-gray-800 space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-base font-extrabold text-white">Membership Access Tiers</h3>
-                  <p className="text-xs text-gray-400">Active members categorized by subscription tier.</p>
+            {/* Column 2: Member Status Donut Chart */}
+            <div className="p-6 rounded-3xl bg-[#121217] border border-gray-800/80 shadow-xl space-y-4 text-center">
+              <h3 className="text-base font-extrabold text-white text-left">Member Status</h3>
+
+              <div className="py-4 flex items-center justify-center">
+                <div className="relative w-40 h-40 rounded-full border-[16px] border-emerald-500 flex items-center justify-center shadow-2xl">
+                  <div className="text-center">
+                    <span className="text-2xl font-black text-white">1,124</span>
+                    <p className="text-[10px] font-bold text-emerald-400 uppercase">Active</p>
+                  </div>
                 </div>
-                <Link href="/subscription-types" className="text-xs font-extrabold text-orange-400 hover:underline">
-                  See all plans →
+              </div>
+
+              <div className="flex items-center justify-center gap-6 text-xs font-extrabold">
+                <span className="flex items-center gap-1.5 text-emerald-400">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Active Members
+                </span>
+                <span className="flex items-center gap-1.5 text-red-400">
+                  <span className="w-2.5 h-2.5 rounded-full bg-red-500" /> Expired/Inactive
+                </span>
+              </div>
+            </div>
+
+            {/* Column 3: Recent Transactions Widget */}
+            <div className="p-6 rounded-3xl bg-[#121217] border border-gray-800/80 shadow-xl space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-extrabold text-white">Recent Transactions</h3>
+                <Link href="/transactions" className="text-xs font-bold text-gray-400 hover:text-white">
+                  View all
                 </Link>
               </div>
 
-              <div className="space-y-3 pt-2">
-                <div className="p-3.5 rounded-xl bg-[#070709] border border-gray-800 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center justify-center font-bold text-xs">
-                      🥇
-                    </div>
-                    <div>
-                      <p className="font-extrabold text-white text-xs">Gold Tier (Monthly)</p>
-                      <p className="text-[10px] text-gray-400">Standard Gym Access</p>
-                    </div>
-                  </div>
-                  <span className="text-sm font-black text-orange-400 font-mono">28 Members</span>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-[#070709] border border-gray-800 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-gray-300/10 text-gray-300 border border-gray-400/30 flex items-center justify-center font-bold text-xs">
-                      💎
-                    </div>
-                    <div>
-                      <p className="font-extrabold text-white text-xs">Platinum Tier (VIP Quarterly)</p>
-                      <p className="text-[10px] text-gray-400">Gym + Trainer Consult + Sauna</p>
-                    </div>
-                  </div>
-                  <span className="text-sm font-black text-orange-400 font-mono">12 Members</span>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-[#070709] border border-gray-800 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-xs">
-                      👑
-                    </div>
-                    <div>
-                      <p className="font-extrabold text-white text-xs">Diamond Tier (Annual All-Access)</p>
-                      <p className="text-[10px] text-gray-400">365 Days Unlimited Access</p>
-                    </div>
-                  </div>
-                  <span className="text-sm font-black text-orange-400 font-mono">5 Members</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Member Feedback Reception Feed Widget (Collapsible) */}
-          {feedbackOpen && (
-            <div className="p-6 rounded-2xl bg-[#0f0f13] border border-gray-800 space-y-4 animate-fadeIn">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-base font-extrabold text-white flex items-center gap-2">
-                    📬 Reception & Member Feedback Feed
-                    <span className="px-2 py-0.5 rounded bg-gray-800 text-orange-400 text-[10px] font-bold">
-                      {feedbackMessages.length} Messages
-                    </span>
-                  </h3>
-                  <p className="text-xs text-gray-400">Live reception desk complaints, suggestions, and member acknowledgements.</p>
-                </div>
-
-                <button
-                  onClick={() => setFeedbackOpen(false)}
-                  className="text-xs text-gray-400 hover:text-white"
-                >
-                  Hide Feed ✕
-                </button>
-              </div>
-
               <div className="space-y-3">
-                {feedbackMessages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`p-4 rounded-2xl border transition flex flex-col md:flex-row items-start md:items-center justify-between gap-3 ${
-                      !msg.read ? 'bg-orange-500/5 border-orange-500/30' : 'bg-[#070709] border-gray-800'
-                    }`}
-                  >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-white text-sm">{msg.memberName}</span>
-                        <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                            msg.type === 'COMPLAINT'
-                              ? 'bg-red-500/20 text-red-400'
-                              : msg.type === 'SUGGESTION'
-                              ? 'bg-amber-500/20 text-amber-400'
-                              : 'bg-emerald-500/20 text-emerald-400'
-                          }`}
-                        >
-                          {msg.type}
-                        </span>
-                        <span className="text-[10px] text-gray-500 font-mono">{msg.dateSent}</span>
+                {recentTransactions.map((tx) => (
+                  <div key={tx.id} className="p-3.5 rounded-2xl bg-[#0a0a0c] border border-gray-800 flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30 flex items-center justify-center font-bold text-sm">
+                        📄
                       </div>
-                      <p className="text-xs font-semibold text-gray-200 mt-1">{msg.subject}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">{msg.message}</p>
+                      <div>
+                        <p className="font-extrabold text-white">
+                          {tx.memberName} <span className="text-purple-400 text-[10px]">({tx.gender})</span>
+                        </p>
+                        <p className="text-[10px] text-gray-400 uppercase font-mono">{tx.type}</p>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      {!msg.read && (
-                        <button
-                          onClick={() => handleMarkAsRead(msg.id)}
-                          className="px-3 py-1 rounded-xl bg-gray-800 hover:bg-gray-700 text-xs font-bold text-white transition"
-                        >
-                          ✓ Mark Read
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleDeleteFeedback(msg.id)}
-                        className="p-1.5 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs transition"
-                      >
-                        🗑️
-                      </button>
+                    <div className="text-right flex items-center gap-2">
+                      <div>
+                        <p className="font-black text-emerald-400 font-mono">₦{tx.amount.toLocaleString()}</p>
+                        <p className="text-[10px] text-gray-500 font-mono">{tx.date}</p>
+                      </div>
+                      <span className="text-gray-500 hover:text-white cursor-pointer text-sm font-bold">⋮</span>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-          )}
 
-          {/* Front Desk Live Desk & Leaderboard Split Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Front Desk Desk Quick Scanner / Entry Form */}
-            <div className="lg:col-span-1 p-6 rounded-2xl bg-[#0f0f13] border border-gray-800 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-base font-extrabold text-white">Front Desk Quick Check-in</h3>
-                <span className="text-[10px] font-mono font-bold text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded">
-                  Desk API
-                </span>
-              </div>
-
-              <form onSubmit={handleSimulateCheckIn} className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Enter Member Name / ID..."
-                  value={checkInInput}
-                  onChange={(e) => setCheckInInput(e.target.value)}
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-[#070709] border border-gray-800 text-white text-xs font-medium focus:border-orange-500 outline-none"
-                />
-                <button
-                  type="submit"
-                  className="px-4 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 font-extrabold text-black text-xs transition"
-                >
-                  Check In
-                </button>
-              </form>
-
-              <div className="space-y-2 pt-2">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
-                  Recent Reception Logs
-                </span>
-                {deskLogs.map((log) => (
-                  <div key={log.id} className="p-3 rounded-xl bg-[#070709] border border-gray-800/80 flex items-center justify-between text-xs">
-                    <div>
-                      <p className="font-bold text-white">{log.name}</p>
-                      <p className="text-[10px] text-gray-500">{log.time} • {log.method}</p>
-                    </div>
-                    <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[10px] font-bold">
-                      Active
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Live Campaign Leaderboard Standings */}
-            <div className="lg:col-span-2 p-6 rounded-2xl bg-[#0f0f13] border border-gray-800 space-y-4">
-              <div className="flex items-center justify-between pb-2 border-b border-gray-800">
-                <div>
-                  <h3 className="text-base font-extrabold text-white">🏆 Live Campaign Leaderboard</h3>
-                  <p className="text-xs text-gray-400">Current Campaign: <span className="text-orange-400 font-bold">September 2 Remember Challenge</span></p>
-                </div>
-                <span className="text-[10px] font-bold bg-orange-500/10 text-orange-400 border border-orange-500/30 px-3 py-1 rounded-full">
-                  10 PTS / Check-in
-                </span>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-[#070709] border-b border-gray-800 text-gray-400 font-semibold uppercase tracking-wider">
-                    <tr>
-                      <th className="py-3 px-4">Rank</th>
-                      <th className="py-3 px-4">Member Name</th>
-                      <th className="py-3 px-4">Check-ins</th>
-                      <th className="py-3 px-4">Points</th>
-                      <th className="py-3 px-4 text-right">Badge</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-800/60 font-medium">
-                    {leaderboard.map((item) => (
-                      <tr key={item.rank} className="hover:bg-gray-800/30 transition">
-                        <td className="py-3.5 px-4 font-mono font-bold text-orange-400">#{item.rank}</td>
-                        <td className="py-3.5 px-4 font-bold text-white">{item.name}</td>
-                        <td className="py-3.5 px-4 font-mono text-gray-300">{item.checkIns} Sessions</td>
-                        <td className="py-3.5 px-4 font-mono font-extrabold text-emerald-400">{item.points} PTS</td>
-                        <td className="py-3.5 px-4 text-right font-bold text-gray-300">{item.badge || '--'}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
           </div>
+
         </main>
       </div>
 
@@ -607,9 +465,8 @@ export default function AdminDashboardPage() {
                     className="w-full px-4 py-2.5 rounded-xl bg-[#070709] border border-gray-800 text-white text-xs font-semibold focus:border-orange-500 outline-none"
                   >
                     <option value="SUBSCRIPTION_RENEWAL">Subscription Renewal</option>
-                    <option value="DAY_PASS">Day Pass (NGN 2,500)</option>
-                    <option value="PERSONAL_TRAINING">Personal Training Session</option>
-                    <option value="SUPPLEMENTS">Supplements / Drinks</option>
+                    <option value="DAY_PASS">Day Pass (NGN 5,000)</option>
+                    <option value="REGISTRATION">Member Registration (NGN 15,440)</option>
                   </select>
                 </div>
 
