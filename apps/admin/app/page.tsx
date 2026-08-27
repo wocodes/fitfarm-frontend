@@ -12,12 +12,24 @@ export default function AdminDashboardPage() {
     check_ins_today: 28,
     check_ins_week: 185,
     revenue_today: 148500,
+    total_revenue_gross: 312500,
   });
 
   // Active Sessions Expiring Soon
   const [expiringSessions, setExpiringSessions] = useState<any[]>([
     { uid: 'sess-1', memberName: 'Kelechi Oshoname', gender: 'male', memberUid: 'fc-m-001', method: 'FINGERPRINT', sessionType: 'MORNING', checkInTime: '08:15 AM', endTime: '10:15 AM', remainingMinutes: 15 },
     { uid: 'sess-2', memberName: 'Gabriel Omokpoga', gender: 'male', memberUid: 'fc-m-002', method: 'QR_CODE', sessionType: 'MORNING', checkInTime: '09:00 AM', endTime: '11:00 AM', remainingMinutes: 28 },
+  ]);
+
+  // Activity Chart Range Filter
+  const [activityRange, setActivityRange] = useState('weekly');
+
+  // Member Feedback & Receptionist Messages
+  const [feedbackOpen, setFeedbackOpen] = useState(true);
+  const [feedbackMessages, setFeedbackMessages] = useState<any[]>([
+    { id: '1', memberName: 'Kelechi O.', type: 'COMPLAINT', subject: 'Locker 14 Hinge Issue', message: 'The locker door hinge on unit 14 needs oiling.', dateSent: '10 mins ago', read: false },
+    { id: '2', memberName: 'Gabriel O.', type: 'SUGGESTION', subject: 'More Kettlebells', message: 'Please add 24kg kettlebells to the functional area.', dateSent: '1 hour ago', read: false },
+    { id: '3', memberName: 'David A.', type: 'ACKNOWLEDGEMENT', subject: 'Great Personal Trainer', message: 'Coach Kelechi was excellent during morning session today!', dateSent: 'Yesterday', read: true },
   ]);
 
   // Leaderboard State
@@ -94,6 +106,16 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleMarkAsRead = (id: string) => {
+    setFeedbackMessages((prev) =>
+      prev.map((msg) => (msg.id === id ? { ...msg, read: true } : msg))
+    );
+  };
+
+  const handleDeleteFeedback = (id: string) => {
+    setFeedbackMessages((prev) => prev.filter((msg) => msg.id !== id));
+  };
+
   const handleRecordPayment = (e: React.FormEvent) => {
     e.preventDefault();
     setPaymentLoading(true);
@@ -113,6 +135,8 @@ export default function AdminDashboardPage() {
     }, 1000);
   };
 
+  const unreadFeedbackCount = feedbackMessages.filter((m) => !m.read).length;
+
   return (
     <div className="flex min-h-screen bg-[#0a0a0c] text-white font-sans">
       <Sidebar />
@@ -122,13 +146,25 @@ export default function AdminDashboardPage() {
 
         <main className="flex-1 p-6 md:p-8 space-y-6 max-w-7xl">
           {/* Top Actions & Modal Trigger Bar */}
-          <div className="flex items-center justify-between bg-[#0f0f13] border border-gray-800 p-4 rounded-2xl">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between bg-[#0f0f13] border border-gray-800 p-4 rounded-2xl gap-4">
             <div>
               <h2 className="text-lg font-extrabold text-white">Overview Console</h2>
               <p className="text-xs text-gray-400">Manage member entrance, live session timeouts, and revenue transactions.</p>
             </div>
 
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => setFeedbackOpen(!feedbackOpen)}
+                className="px-3.5 py-2 rounded-xl bg-gray-900 border border-gray-800 hover:bg-gray-800 text-xs font-bold text-gray-300 flex items-center gap-2 transition"
+              >
+                📬 Member Feedback
+                {unreadFeedbackCount > 0 && (
+                  <span className="px-2 py-0.5 rounded-full bg-orange-500 text-black text-[10px] font-extrabold animate-pulse">
+                    {unreadFeedbackCount}
+                  </span>
+                )}
+              </button>
+
               <button
                 onClick={() => setShowPaymentModal(true)}
                 className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 font-extrabold text-black text-xs transition shadow-lg shadow-orange-500/20"
@@ -168,6 +204,28 @@ export default function AdminDashboardPage() {
               <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Check-ins This Week</span>
               <div className="text-3xl font-black text-emerald-400 mt-1">{stats.check_ins_week}</div>
               <span className="text-xs text-gray-400 font-mono mt-1 block">Revenue: ₦{stats.revenue_today.toLocaleString()}</span>
+            </div>
+          </div>
+
+          {/* Financial Performance & Payment Split Widget */}
+          <div className="p-6 rounded-2xl bg-[#0f0f13] border border-gray-800 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-orange-400">Gym Financial Performance</span>
+                <h3 className="text-xl font-extrabold text-white">Total Gross Revenue: ₦{stats.total_revenue_gross.toLocaleString()}</h3>
+              </div>
+
+              <div className="flex flex-wrap gap-2 text-xs font-bold">
+                <span className="px-3 py-1 rounded-xl bg-gray-900 border border-gray-800 text-gray-300">
+                  Bank Transfer: <span className="text-emerald-400 font-mono">₦25,000</span>
+                </span>
+                <span className="px-3 py-1 rounded-xl bg-gray-900 border border-gray-800 text-gray-300">
+                  POS Receipts: <span className="text-white font-mono">₦67,500</span>
+                </span>
+                <span className="px-3 py-1 rounded-xl bg-gray-900 border border-gray-800 text-gray-300">
+                  Paystack Online: <span className="text-orange-400 font-mono">₦220,000</span>
+                </span>
+              </div>
             </div>
           </div>
 
@@ -265,6 +323,176 @@ export default function AdminDashboardPage() {
               </div>
             )}
           </div>
+
+          {/* Activity Bar Chart & Progress Analytics Cards Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Activity Bar Chart */}
+            <div className="p-6 rounded-2xl bg-[#0f0f13] border border-gray-800 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-extrabold text-white">Activity Overview</h3>
+                  <p className="text-xs text-gray-400">Member entrance volume trends over time.</p>
+                </div>
+                <select
+                  value={activityRange}
+                  onChange={(e) => setActivityRange(e.target.value)}
+                  className="px-3 py-1.5 rounded-xl bg-gray-900 border border-gray-800 text-white text-xs font-semibold outline-none"
+                >
+                  <option value="weekly">Weekly Range</option>
+                  <option value="monthly">Monthly Range</option>
+                  <option value="yearly">Yearly Range</option>
+                </select>
+              </div>
+
+              {/* Chart Visual Graphic */}
+              <div className="h-44 flex items-end justify-between gap-3 pt-6 px-2">
+                {[
+                  { day: 'Mon', count: 24, height: '60%' },
+                  { day: 'Tue', count: 32, height: '80%' },
+                  { day: 'Wed', count: 45, height: '100%' },
+                  { day: 'Thu', count: 28, height: '70%' },
+                  { day: 'Fri', count: 38, height: '90%' },
+                  { day: 'Sat', count: 50, height: '100%' },
+                  { day: 'Sun', count: 18, height: '45%' },
+                ].map((bar, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                    <span className="text-[10px] font-mono text-gray-400">{bar.count}</span>
+                    <div
+                      style={{ height: bar.height }}
+                      className="w-full rounded-t-lg bg-gradient-to-t from-orange-500 to-amber-500 hover:from-orange-600 transition"
+                    />
+                    <span className="text-[10px] font-bold text-gray-400">{bar.day}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Subscriptions Access Tier Counter Pills & Progress */}
+            <div className="p-6 rounded-2xl bg-[#0f0f13] border border-gray-800 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-extrabold text-white">Membership Access Tiers</h3>
+                  <p className="text-xs text-gray-400">Active members categorized by subscription tier.</p>
+                </div>
+                <Link href="/subscription-types" className="text-xs font-extrabold text-orange-400 hover:underline">
+                  See all plans →
+                </Link>
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <div className="p-3.5 rounded-xl bg-[#070709] border border-gray-800 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center justify-center font-bold text-xs">
+                      🥇
+                    </div>
+                    <div>
+                      <p className="font-extrabold text-white text-xs">Gold Tier (Monthly)</p>
+                      <p className="text-[10px] text-gray-400">Standard Gym Access</p>
+                    </div>
+                  </div>
+                  <span className="text-sm font-black text-orange-400 font-mono">28 Members</span>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-[#070709] border border-gray-800 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-gray-300/10 text-gray-300 border border-gray-400/30 flex items-center justify-center font-bold text-xs">
+                      💎
+                    </div>
+                    <div>
+                      <p className="font-extrabold text-white text-xs">Platinum Tier (VIP Quarterly)</p>
+                      <p className="text-[10px] text-gray-400">Gym + Trainer Consult + Sauna</p>
+                    </div>
+                  </div>
+                  <span className="text-sm font-black text-orange-400 font-mono">12 Members</span>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-[#070709] border border-gray-800 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-xs">
+                      👑
+                    </div>
+                    <div>
+                      <p className="font-extrabold text-white text-xs">Diamond Tier (Annual All-Access)</p>
+                      <p className="text-[10px] text-gray-400">365 Days Unlimited Access</p>
+                    </div>
+                  </div>
+                  <span className="text-sm font-black text-orange-400 font-mono">5 Members</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Member Feedback Reception Feed Widget (Collapsible) */}
+          {feedbackOpen && (
+            <div className="p-6 rounded-2xl bg-[#0f0f13] border border-gray-800 space-y-4 animate-fadeIn">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-extrabold text-white flex items-center gap-2">
+                    📬 Reception & Member Feedback Feed
+                    <span className="px-2 py-0.5 rounded bg-gray-800 text-orange-400 text-[10px] font-bold">
+                      {feedbackMessages.length} Messages
+                    </span>
+                  </h3>
+                  <p className="text-xs text-gray-400">Live reception desk complaints, suggestions, and member acknowledgements.</p>
+                </div>
+
+                <button
+                  onClick={() => setFeedbackOpen(false)}
+                  className="text-xs text-gray-400 hover:text-white"
+                >
+                  Hide Feed ✕
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {feedbackMessages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`p-4 rounded-2xl border transition flex flex-col md:flex-row items-start md:items-center justify-between gap-3 ${
+                      !msg.read ? 'bg-orange-500/5 border-orange-500/30' : 'bg-[#070709] border-gray-800'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-white text-sm">{msg.memberName}</span>
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            msg.type === 'COMPLAINT'
+                              ? 'bg-red-500/20 text-red-400'
+                              : msg.type === 'SUGGESTION'
+                              ? 'bg-amber-500/20 text-amber-400'
+                              : 'bg-emerald-500/20 text-emerald-400'
+                          }`}
+                        >
+                          {msg.type}
+                        </span>
+                        <span className="text-[10px] text-gray-500 font-mono">{msg.dateSent}</span>
+                      </div>
+                      <p className="text-xs font-semibold text-gray-200 mt-1">{msg.subject}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{msg.message}</p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {!msg.read && (
+                        <button
+                          onClick={() => handleMarkAsRead(msg.id)}
+                          className="px-3 py-1 rounded-xl bg-gray-800 hover:bg-gray-700 text-xs font-bold text-white transition"
+                        >
+                          ✓ Mark Read
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDeleteFeedback(msg.id)}
+                        className="p-1.5 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs transition"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Front Desk Live Desk & Leaderboard Split Row */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
