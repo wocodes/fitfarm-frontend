@@ -1,184 +1,317 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import Sidebar from '../components/Sidebar';
+import Header from '../components/Header';
+import { apiFetch } from '../lib/apiClient';
+
+interface LeaderboardItem {
+  rank: number;
+  memberId: number;
+  memberUid: string;
+  fullName: string;
+  checkInCount: number;
+  points: number;
+  email: string;
+}
 
 export default function CampaignSettingsPage() {
-  const [campaignName, setCampaignName] = useState('September 2 Remember Challenge');
-  const [startDate, setStartDate] = useState('2026-09-01');
-  const [endDate, setEndDate] = useState('2026-09-30');
-  const [pointsPerCheckIn, setPointsPerCheckIn] = useState(10);
-  const [isActive, setIsActive] = useState(true);
-  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [campaignTitle, setCampaignTitle] = useState('September 2 Remember Challenge');
+  const [pointsPerCheckIn, setPointsPerCheckIn] = useState<number>(10);
+  const [status, setStatus] = useState<string>('ACTIVE');
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+  
+  const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [saving, setSaving] = useState<boolean>(false);
+  const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
-  const leaderboardStandings = [
-    { rank: 1, memberId: 1, memberUid: 'fc-m-001', fullName: 'Kelechi O.', checkInCount: 18, points: 180, email: 'kelechi@gmail.com' },
-    { rank: 2, memberId: 2, memberUid: 'fc-m-002', fullName: 'Gabriel O.', checkInCount: 15, points: 150, email: 'gabriel@gmail.com' },
-    { rank: 3, memberId: 3, memberUid: 'fc-m-003', fullName: 'David A.', checkInCount: 12, points: 120, email: 'david@gmail.com' },
-  ];
+  const loadLeaderboard = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await apiFetch('/campaigns/active/leaderboard');
+      if (res.success && res.data) {
+        const camp = res.data.campaign;
+        if (camp) {
+          setCampaignTitle(camp.campaignTitle || camp.name || 'September 2 Remember Challenge');
+          setPointsPerCheckIn(camp.pointsPerCheckIn || 10);
+          setStatus(camp.status || 'ACTIVE');
+          if (camp.startDate) setStartDate(new Date(camp.startDate).toISOString().slice(0, 10));
+          if (camp.endDate) setEndDate(new Date(camp.endDate).toISOString().slice(0, 10));
+        }
 
-  const handleSaveCampaign = (e: React.FormEvent) => {
+        if (Array.isArray(res.data.top10)) {
+          setLeaderboard(res.data.top10);
+        }
+      }
+    } catch (err: any) {
+      console.error('Failed to load campaign leaderboard:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadLeaderboard();
+  }, [loadLeaderboard]);
+
+  const handleSaveCampaign = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 3000);
+    setSaving(true);
+    setSaveSuccess(false);
+    setErrorMessage('');
+
+    try {
+      const res = await apiFetch('/campaigns', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: campaignTitle,
+          name: campaignTitle,
+          pointsPerCheckIn,
+          points_per_checkin: pointsPerCheckIn,
+          status,
+          is_active: status === 'ACTIVE',
+          startDate: startDate ? `${startDate}T00:00:00Z` : null,
+          endDate: endDate ? `${endDate}T23:59:59Z` : null,
+        }),
+      });
+
+      if (res.success) {
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 4000);
+        loadLeaderboard();
+      } else {
+        setErrorMessage(res.message || 'Failed to update campaign settings.');
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || 'An error occurred while saving.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-[#0f0f11] text-white flex flex-col font-sans">
-      {/* Top Header */}
-      <header className="sticky top-0 z-50 bg-[#18181b]/90 backdrop-blur-md border-b border-gray-800 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center font-bold text-black text-lg">
-            FC
-          </Link>
-          <div>
-            <h1 className="font-bold text-white leading-tight text-base">Campaign & Leaderboard Settings</h1>
-            <span className="text-xs text-gray-400">PolanFit Arena • Gym Admin Center</span>
-          </div>
-        </div>
+    <div className="flex min-h-screen bg-[#060608] text-white font-sans">
+      <Sidebar />
 
-        <Link href="/" className="px-3.5 py-1.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-xs font-semibold text-white transition">
-          ← Dashboard
-        </Link>
-      </header>
+      <div className="flex-1 flex flex-col min-w-0">
+        <Header
+          title="Promotional Campaigns & Leaderboard"
+          subtitle="Configure gym-wide challenge events, points rules, and view live member standings"
+        />
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-6xl w-full mx-auto p-6 md:p-8 space-y-8">
-        {/* Campaign Settings Form */}
-        <div className="p-6 md:p-8 rounded-3xl bg-[#18181b] border border-gray-800 space-y-6 shadow-2xl">
-          <div className="flex items-center justify-between pb-4 border-b border-gray-800">
+        <main className="flex-1 p-6 md:p-10 space-y-8 max-w-7xl mx-auto w-full">
+          {/* Top Quick Actions Bar */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-2xl bg-[#0d0d12] border border-gray-800">
             <div>
-              <h2 className="text-xl font-bold text-white">Active Promotional Campaign</h2>
-              <p className="text-xs text-gray-400">Set start and end date bounds for leaderboard check-in counting.</p>
+              <h2 className="text-base font-extrabold text-white">Promotional Email Campaigns</h2>
+              <p className="text-xs text-gray-400 mt-0.5">
+                Broadcast marketing email blasts, discount vouchers, and announcement newsletters to gym members.
+              </p>
             </div>
 
-            {saveSuccess && (
-              <span className="text-xs font-bold text-green-400 bg-green-500/20 px-3 py-1.5 rounded-xl">
-                ✓ Campaign settings saved!
-              </span>
-            )}
-          </div>
-
-          <form onSubmit={handleSaveCampaign} className="space-y-4">
-            <div>
-              <label className="block text-xs font-medium text-gray-400 uppercase mb-1">Campaign Title</label>
-              <input
-                type="text"
-                value={campaignName}
-                onChange={(e) => setCampaignName(e.target.value)}
-                className="w-full px-4 py-3 bg-[#0f0f11] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-orange-500 transition"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-gray-400 uppercase mb-1">Start Date Selector</label>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full px-4 py-3 bg-[#0f0f11] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-orange-500 transition"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-400 uppercase mb-1">End Date Selector</label>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full px-4 py-3 bg-[#0f0f11] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-orange-500 transition"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-400 uppercase mb-1">Points per Check-in</label>
-                <input
-                  type="number"
-                  value={pointsPerCheckIn}
-                  onChange={(e) => setPointsPerCheckIn(Number(e.target.value))}
-                  className="w-full px-4 py-3 bg-[#0f0f11] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:border-orange-500 transition"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 pt-2">
-              <input
-                type="checkbox"
-                id="activeToggle"
-                checked={isActive}
-                onChange={(e) => setIsActive(e.target.checked)}
-                className="w-4 h-4 rounded bg-[#0f0f11] border-gray-700 text-orange-500 focus:ring-0 cursor-pointer"
-              />
-              <label htmlFor="activeToggle" className="text-xs text-white font-medium cursor-pointer">
-                Campaign is active (Check-ins during date bounds award points)
-              </label>
-            </div>
-
-            <button
-              type="submit"
-              className="px-6 py-3 bg-orange-500 hover:bg-orange-600 font-bold text-black rounded-xl text-xs shadow-lg shadow-orange-500/20 transition"
+            <Link
+              href="/campaigns/email-blast"
+              className="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-xs tracking-wide shadow-lg shadow-orange-500/20 transition flex items-center gap-2"
             >
-              Save Campaign Settings
-            </button>
-          </form>
-        </div>
+              <span>📧 Launch Email Blast</span>
+              <span className="text-orange-200">→</span>
+            </Link>
+          </div>
 
-        {/* Live Leaderboard Standings Table */}
-        <div className="p-6 md:p-8 rounded-3xl bg-[#18181b] border border-gray-800 space-y-4 shadow-2xl">
-          <div className="flex items-center justify-between pb-2 border-b border-gray-800">
-            <div>
-              <h2 className="text-lg font-bold text-white">Live Leaderboard Rankings</h2>
-              <p className="text-xs text-gray-400">Restricted to check-ins between <span className="text-orange-400 font-mono">{startDate}</span> and <span className="text-orange-400 font-mono">{endDate}</span></p>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Col: Campaign Configuration Form */}
+            <div className="lg:col-span-1 p-6 rounded-3xl bg-[#0d0d12] border border-gray-800 space-y-6 shadow-xl h-fit">
+              <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+                <div>
+                  <h3 className="text-lg font-bold text-white">Campaign Rules</h3>
+                  <p className="text-xs text-gray-400">Configure active challenge settings</p>
+                </div>
+                <span
+                  className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${
+                    status === 'ACTIVE'
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                      : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/40'
+                  }`}
+                >
+                  {status}
+                </span>
+              </div>
+
+              {saveSuccess && (
+                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
+                  ✓ Campaign settings saved successfully!
+                </div>
+              )}
+
+              {errorMessage && (
+                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold">
+                  {errorMessage}
+                </div>
+              )}
+
+              <form onSubmit={handleSaveCampaign} className="space-y-4 text-xs">
+                <div>
+                  <label className="block text-gray-400 font-semibold mb-1 uppercase tracking-wider text-[10px]">
+                    Campaign Title
+                  </label>
+                  <input
+                    type="text"
+                    value={campaignTitle}
+                    onChange={(e) => setCampaignTitle(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#060608] border border-gray-800 text-white font-medium outline-none focus:border-orange-500 transition"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-gray-400 font-semibold mb-1 uppercase tracking-wider text-[10px]">
+                      Start Date
+                    </label>
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-[#060608] border border-gray-800 text-white outline-none focus:border-orange-500 transition"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-400 font-semibold mb-1 uppercase tracking-wider text-[10px]">
+                      End Date
+                    </label>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-[#060608] border border-gray-800 text-white outline-none focus:border-orange-500 transition"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-gray-400 font-semibold mb-1 uppercase tracking-wider text-[10px]">
+                    Points Awarded per Check-in
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={pointsPerCheckIn}
+                    onChange={(e) => setPointsPerCheckIn(Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#060608] border border-gray-800 text-white font-medium outline-none focus:border-orange-500 transition"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-400 font-semibold mb-1 uppercase tracking-wider text-[10px]">
+                    Campaign Status
+                  </label>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#060608] border border-gray-800 text-white font-medium outline-none focus:border-orange-500 transition"
+                  >
+                    <option value="ACTIVE">ACTIVE (Counting Check-ins)</option>
+                    <option value="PAUSED">PAUSED (Hold Standings)</option>
+                    <option value="ENDED">ENDED (Finalized)</option>
+                  </select>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="w-full py-3 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-bold text-xs tracking-wider uppercase transition shadow-md shadow-orange-500/20"
+                >
+                  {saving ? 'Saving...' : '💾 Save Campaign Settings'}
+                </button>
+              </form>
             </div>
 
-            <span className="text-xs font-bold text-orange-400 bg-orange-500/10 border border-orange-500/30 px-3 py-1 rounded-full">
-              {pointsPerCheckIn} Points / Check-in
-            </span>
-          </div>
+            {/* Right Col: Live Standings Leaderboard Table */}
+            <div className="lg:col-span-2 p-6 rounded-3xl bg-[#0d0d12] border border-gray-800 space-y-6 shadow-xl">
+              <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+                <div>
+                  <h3 className="text-lg font-bold text-white">🏆 Live Leaderboard Top 10</h3>
+                  <p className="text-xs text-gray-400">Ranked by total check-in count during campaign window</p>
+                </div>
+                <button
+                  onClick={loadLeaderboard}
+                  className="px-3 py-1.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-xs text-gray-300 font-semibold"
+                >
+                  🔄 Refresh
+                </button>
+              </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="text-xs font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-800">
-                  <th className="py-3 px-4">Rank</th>
-                  <th className="py-3 px-4">Member Display Name</th>
-                  <th className="py-3 px-4">Verified Check-ins</th>
-                  <th className="py-3 px-4">Awarded Points</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-800/60">
-                {leaderboardStandings.map((item) => (
-                  <tr key={item.rank} className="hover:bg-gray-800/30 transition">
-                    <td className="py-3.5 px-4 font-extrabold text-orange-400">
-                      {item.rank === 1 ? '🥇 #1' : item.rank === 2 ? '🥈 #2' : item.rank === 3 ? '🥉 #3' : `#${item.rank}`}
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <Link
-                        href={`/members/profile?uid=${item.memberUid}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-bold text-white hover:text-orange-400 transition inline-flex items-center gap-1.5"
-                        title="View Member Profile in new tab"
-                      >
-                        <span>{item.fullName}</span>
-                        <span className="text-xs text-gray-500 font-normal">↗</span>
-                      </Link>
-                      {item.email && <div className="text-xs text-gray-500">{item.email}</div>}
-                    </td>
-                    <td className="py-3.5 px-4 font-semibold text-gray-300">{item.checkInCount} check-ins</td>
-                    <td className="py-3.5 px-4 font-bold text-green-400">{item.points} pts</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+              {loading ? (
+                <div className="py-16 text-center text-xs text-gray-400">Loading standings...</div>
+              ) : leaderboard.length === 0 ? (
+                <div className="py-16 text-center space-y-2">
+                  <p className="text-sm font-bold text-gray-400">No member check-ins recorded yet</p>
+                  <p className="text-xs text-gray-500">Check-ins logged during campaign dates will appear here.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="border-b border-gray-800 text-gray-400 uppercase tracking-wider text-[10px]">
+                        <th className="py-3 px-4 font-bold">Rank</th>
+                        <th className="py-3 px-4 font-bold">Member Name</th>
+                        <th className="py-3 px-4 font-bold">Check-ins</th>
+                        <th className="py-3 px-4 font-bold">Points Earned</th>
+                        <th className="py-3 px-4 font-bold text-right">Quick Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-800/60 font-medium">
+                      {leaderboard.map((item) => (
+                        <tr key={item.rank} className="hover:bg-white/[0.02] transition">
+                          <td className="py-3.5 px-4 font-black text-sm">
+                            {item.rank === 1 ? (
+                              <span className="text-amber-400">🥇 #1</span>
+                            ) : item.rank === 2 ? (
+                              <span className="text-gray-300">🥈 #2</span>
+                            ) : item.rank === 3 ? (
+                              <span className="text-amber-600">🥉 #3</span>
+                            ) : (
+                              <span className="text-gray-500">#{item.rank}</span>
+                            )}
+                          </td>
+                          <td className="py-3.5 px-4 font-bold text-white">
+                            <div>{item.fullName}</div>
+                            {item.email && <div className="text-[10px] text-gray-400 font-normal">{item.email}</div>}
+                          </td>
+                          <td className="py-3.5 px-4 font-mono font-bold text-orange-400">
+                            {item.checkInCount} visits
+                          </td>
+                          <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">
+                            {item.points} pts
+                          </td>
+                          <td className="py-3.5 px-4 text-right">
+                            {item.email ? (
+                              <Link
+                                href={`/campaigns/email-blast?to=${encodeURIComponent(item.email)}&subject=${encodeURIComponent(`Congratulations ${item.fullName} on Rank #${item.rank}!`)}`}
+                                className="px-3 py-1 rounded-lg bg-orange-500/20 text-orange-400 hover:bg-orange-500 hover:text-white border border-orange-500/40 text-[10px] font-bold transition inline-block"
+                              >
+                                ✉️ Email Reward
+                              </Link>
+                            ) : (
+                              <span className="text-gray-600 text-[10px]">No email</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

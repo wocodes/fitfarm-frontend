@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import AuthInitializer from "./components/AuthInitializer";
 
 export const metadata: Metadata = {
   title: "FitCloud Admin Center",
@@ -14,6 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased dark">
       <body className="min-h-full flex flex-col bg-[#0f0f11] text-white">
+        <AuthInitializer />
         {children}
       </body>
     </html>

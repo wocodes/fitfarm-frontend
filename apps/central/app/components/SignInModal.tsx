@@ -24,14 +24,41 @@ export default function SignInModal({ isOpen, onClose, onSwitchToRegister }: Sig
     setLoading(true);
 
     try {
-      // Simulate/perform sign-in authentication
-      if (email.includes('superadmin') || email.includes('admin@fitcloud')) {
-        router.push('/super-admin');
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
+      const res = await fetch(`${apiBase}/central/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const json = await res.json();
+      if (json.success && json.data) {
+        const { token, user } = json.data;
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('fitcloud_token', token);
+          localStorage.setItem('polanfit_token', token);
+          if (user?.tenant?.slug) {
+            localStorage.setItem('fitcloud_tenant_slug', user.tenant.slug);
+          }
+        }
+
+        if (user?.tenant || user?.tenant_id) {
+          const adminAppUrl = process.env.NEXT_PUBLIC_ADMIN_APP_URL || 'http://localhost:3001';
+          const tenantSlug = user?.tenant?.slug || 'polanfit-fitness';
+          window.location.href = `${adminAppUrl}?token=${encodeURIComponent(token)}&tenant=${encodeURIComponent(tenantSlug)}`;
+        } else if (user?.role === 'super_admin' || user?.role === 'ROLE_SUPER_ADMIN' || email.includes('superadmin')) {
+          router.push('/super-admin');
+        } else {
+          router.push('/setup');
+        }
       } else {
-        router.push('/setup');
+        setError(json.message || 'Invalid email address or password.');
       }
     } catch (err: any) {
-      setError(err.message || 'Invalid email or password.');
+      setError(err.message || 'Invalid email address or password.');
     } finally {
       setLoading(false);
     }

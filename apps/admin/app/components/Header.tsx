@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { handleLogout } from '../lib/apiClient';
 
 interface HeaderProps {
   title: string;
@@ -27,7 +28,7 @@ export default function Header({ title, subtitle }: HeaderProps) {
         {subtitle && <p className="text-xs text-gray-400 font-medium">{subtitle}</p>}
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {/* Active Gym Tenant Badge */}
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-orange-500/10 border border-orange-500/30 text-xs text-orange-400 font-bold">
           <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
@@ -41,6 +42,16 @@ export default function Header({ title, subtitle }: HeaderProps) {
         >
           🚪 Open Entrance Kiosk
         </a>
+
+        {/* Sign Out Button */}
+        <button
+          onClick={handleLogout}
+          className="px-3.5 py-2 rounded-xl text-xs font-semibold text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/30 transition-all cursor-pointer flex items-center gap-1.5"
+          title="Sign Out of Admin Portal"
+        >
+          <span>🚪</span>
+          <span>Sign Out</span>
+        </button>
       </div>
     </header>
   );

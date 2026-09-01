@@ -1,11 +1,41 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { handleLogout } from '../lib/apiClient';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [userName, setUserName] = useState('Super Admin');
+  const [userRole, setUserRole] = useState('Gym Owner (Active)');
+  const [userInitials, setUserInitials] = useState('SA');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem('fitcloud_user');
+      if (storedUser) {
+        try {
+          const user = JSON.parse(storedUser);
+          if (user.name) {
+            setUserName(user.name);
+            const initials = user.name
+              .split(' ')
+              .map((n: string) => n[0])
+              .join('')
+              .toUpperCase()
+              .slice(0, 2);
+            setUserInitials(initials || 'SA');
+          }
+          if (user.role) {
+            setUserRole(user.role.replace('ROLE_', '').replace('_', ' '));
+          }
+        } catch (e) {
+          // Ignore JSON parse errors
+        }
+      }
+    }
+  }, []);
 
   const navItems = [
     { label: 'Overview', href: '/', icon: '📊' },
@@ -15,10 +45,15 @@ export default function Sidebar() {
     { label: 'Renewals', href: '/renewals', icon: '🔄' },
     { label: 'Check-in Kiosk', href: '/check-in', icon: '🚪' },
     { label: 'Check-in Logs', href: '/check-ins', icon: '📜' },
+    { label: 'QR Generator', href: '/admins/qr-generator', icon: '📱' },
+    { label: 'Campaigns & Leaderboard', href: '/campaigns', icon: '🏆' },
+    { label: 'Email Blast Broadcast', href: '/campaigns/email-blast', icon: '📧' },
     { label: 'Staff Attendance', href: '/staff-attendance', icon: '⏰' },
     { label: 'Transactions', href: '/transactions', icon: '💰' },
     { label: 'Accounts & Audits', href: '/accounts', icon: '📑' },
-    { label: 'Staff Users', href: '/admins', icon: '🛡️' },
+    { label: 'Manage Admins', href: '/admins', icon: '🛡️' },
+    { label: 'Contact & Socials', href: '/contact', icon: '🌐' },
+    { label: 'Legal & Policies', href: '/legal', icon: '⚖️' },
     { label: 'Gym Settings', href: '/settings', icon: '⚙️' },
   ];
 
@@ -63,17 +98,25 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      {/* Footer Info */}
-      <div className="p-4 border-t border-gray-800/80">
+      {/* Footer Info & Sign Out */}
+      <div className="p-4 border-t border-gray-800/80 space-y-2">
         <div className="p-3 rounded-xl bg-gray-900/60 border border-gray-800 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold text-xs">
-            GO
+          <div className="w-8 h-8 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold text-xs flex-shrink-0">
+            {userInitials}
           </div>
-          <div className="truncate">
-            <p className="text-xs font-bold text-white truncate">Gabriel O.</p>
-            <p className="text-[10px] text-emerald-400 font-mono">Gym Owner (Active)</p>
+          <div className="truncate flex-1">
+            <p className="text-xs font-bold text-white truncate">{userName}</p>
+            <p className="text-[10px] text-emerald-400 font-mono truncate">{userRole}</p>
           </div>
         </div>
+
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/30 transition-all cursor-pointer"
+        >
+          <span>🚪</span>
+          <span>Sign Out</span>
+        </button>
       </div>
     </aside>
   );

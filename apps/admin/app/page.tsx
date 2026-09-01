@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
+import { FcMoneyTransfer, FcConferenceCall, FcApproval, FcCalendar } from 'react-icons/fc';
+import { apiFetch } from './lib/apiClient';
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<any>({
@@ -107,28 +109,18 @@ export default function AdminDashboardPage() {
 
   const fetchLiveDashboardStats = async () => {
     try {
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
-      const token = typeof window !== 'undefined' ? localStorage.getItem('fitcloud_token') || '3|cDaxretquECERz0nU4SlJuGny6Dkq4qOgBOACy9060ac0f7e' : '';
-
-      const res = await fetch(`${apiBase}/admin/dashboard/stats`, {
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      const json = await res.json();
-      if (json.status === 'success' && json.data) {
+      const json = await apiFetch('/admin/dashboard/stats');
+      if ((json.status === 'success' || json.success) && json.data) {
         const d = json.data;
         setStats({
-          revenue_month: d.totalRevenueThisMonth || 17423724,
-          revenue_last_month: d.totalRevenueLastMonth || 15252024,
-          revenue_growth: d.revenuePercentageChange || 14.2,
-          total_members: d.totalMembers || 786,
-          new_members_week: d.newMembersThisWeek || 32,
-          active_members: d.activeMembersCount || 1124,
-          check_ins_today: d.checkInsToday || 85,
-          check_ins_week: d.checkInsThisWeek || 623,
+          revenue_month: d.totalRevenueThisMonth || d.revenue_month || 17423724,
+          revenue_last_month: d.totalRevenueLastMonth || d.revenue_last_month || 15252024,
+          revenue_growth: d.revenuePercentageChange || d.revenue_growth || 14.2,
+          total_members: d.totalMembers || d.total_members || 754,
+          new_members_week: d.newMembersThisWeek || d.new_members_week || 32,
+          active_members: d.activeMembersCount || d.active_members || 754,
+          check_ins_today: d.checkInsToday || d.check_ins_today || 85,
+          check_ins_week: d.checkInsThisWeek || d.check_ins_week || 623,
         });
 
         if (d.expiringSoon && d.expiringSoon.length > 0) {
@@ -273,56 +265,88 @@ export default function AdminDashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 
             {/* Card 1: Vibrant Orange Revenue Card */}
-            <div className="p-6 rounded-3xl bg-gradient-to-r from-[#fa6a2e] to-[#e84a0e] text-white shadow-xl shadow-orange-500/20 relative overflow-hidden">
-              <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-orange-100">
-                <span>💸 REVENUE (THIS MONTH)</span>
+            <div
+              className="p-6 rounded-3xl text-white shadow-xl shadow-orange-500/20 relative overflow-hidden border border-orange-500/30"
+              style={{
+                backgroundImage: 'url("/images/dashboard/shap-partern.png"), linear-gradient(135deg, #fa6a2e 0%, #e84a0e 100%)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }}
+            >
+              <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-white/90">
+                <FcMoneyTransfer size={32} className="me-2 shrink-0 drop-shadow-md" />
+                <span>REVENUE (THIS MONTH)</span>
               </div>
-              <div className="text-3xl font-black text-white mt-2 tracking-tight">
+              <div className="text-3xl font-black text-white mt-3 tracking-tight">
                 ₦{stats.revenue_month.toLocaleString()}
               </div>
-              <div className="text-[11px] font-semibold text-orange-100 mt-2 flex items-center gap-1">
-                <span>vs. 📈 ₦{stats.revenue_last_month.toLocaleString()} (+{stats.revenue_growth}%) last month</span>
+              <div className="mt-3">
+                <span className="text-xs font-semibold text-white/80">vs. ↗ ₦{stats.revenue_last_month.toLocaleString()} (+{stats.revenue_growth}%) last month</span>
               </div>
             </div>
 
             {/* Card 2: Total Members */}
-            <div className="p-6 rounded-3xl bg-[#121217] border border-gray-800/80 shadow-xl flex flex-col justify-between">
+            <div
+              className="p-6 rounded-3xl text-white shadow-xl border border-gray-800/80 flex flex-col justify-between relative overflow-hidden"
+              style={{
+                backgroundImage: 'url("/images/dashboard/shap-partern.png"), linear-gradient(135deg, #242426 0%, #1a1a1c 100%)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }}
+            >
               <div>
                 <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-gray-400">
-                  <span>👑 TOTAL MEMBERS</span>
+                  <FcConferenceCall size={32} className="me-2 shrink-0 drop-shadow-md" />
+                  <span>TOTAL MEMBERS</span>
                 </div>
-                <div className="text-3xl font-black text-white mt-2">{stats.total_members}</div>
+                <div className="text-3xl font-black text-white mt-3">{stats.total_members}</div>
               </div>
               <div className="mt-3">
-                <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-extrabold">
-                  +{stats.new_members_week} new member this week
+                <span className="text-xs font-semibold text-gray-400">
+                  <span className="text-emerald-400 font-bold">+{stats.new_members_week}</span> new member this week
                 </span>
               </div>
             </div>
 
             {/* Card 3: Active Members */}
-            <div className="p-6 rounded-3xl bg-[#121217] border border-gray-800/80 shadow-xl flex flex-col justify-between">
+            <div
+              className="p-6 rounded-3xl text-white shadow-xl border border-gray-800/80 flex flex-col justify-between relative overflow-hidden"
+              style={{
+                backgroundImage: 'url("/images/dashboard/shap-partern.png"), linear-gradient(135deg, #242426 0%, #1a1a1c 100%)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }}
+            >
               <div>
                 <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-gray-400">
-                  <span>✅ ACTIVE MEMBERS</span>
+                  <FcApproval size={32} className="me-2 shrink-0 drop-shadow-md" />
+                  <span>ACTIVE MEMBERS</span>
                 </div>
-                <div className="text-3xl font-black text-white mt-2">{stats.active_members}</div>
+                <div className="text-3xl font-black text-white mt-3">{stats.active_members}</div>
               </div>
-              <div className="text-xs text-gray-400 font-medium mt-3">
-                out of <span className="text-blue-400 font-extrabold">{stats.total_members}</span> total members
+              <div className="text-xs text-gray-400 font-semibold mt-3">
+                out of <span className="text-cyan-400 font-bold">{stats.total_members}</span> total members
               </div>
             </div>
 
             {/* Card 4: Check-ins Today */}
-            <div className="p-6 rounded-3xl bg-[#121217] border border-gray-800/80 shadow-xl flex flex-col justify-between">
+            <div
+              className="p-6 rounded-3xl text-white shadow-xl border border-gray-800/80 flex flex-col justify-between relative overflow-hidden"
+              style={{
+                backgroundImage: 'url("/images/dashboard/shap-partern.png"), linear-gradient(135deg, #242426 0%, #1a1a1c 100%)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }}
+            >
               <div>
                 <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-gray-400">
-                  <span>📅 CHECK-INS TODAY</span>
+                  <FcCalendar size={32} className="me-2 shrink-0 drop-shadow-md" />
+                  <span>CHECK-INS TODAY</span>
                 </div>
-                <div className="text-3xl font-black text-white mt-2">{stats.check_ins_today}</div>
+                <div className="text-3xl font-black text-white mt-3">{stats.check_ins_today}</div>
               </div>
-              <div className="text-xs text-gray-400 font-medium mt-3">
-                <span className="text-amber-400 font-extrabold">{stats.check_ins_week}</span> total this week
+              <div className="text-xs text-gray-400 font-semibold mt-3">
+                <span className="text-amber-400 font-bold">{stats.check_ins_week}</span> total this week
               </div>
             </div>
 
@@ -678,11 +702,10 @@ export default function AdminDashboardPage() {
                             amount: plan.price.toString(),
                           })
                         }
-                        className={`p-3.5 rounded-2xl border cursor-pointer transition ${
-                          isSelected
-                            ? 'bg-orange-500/10 border-orange-500 text-white shadow-lg'
-                            : 'bg-[#070709] border-gray-800 hover:border-gray-700 text-gray-300'
-                        }`}
+                        className={`p-3.5 rounded-2xl border cursor-pointer transition ${isSelected
+                          ? 'bg-orange-500/10 border-orange-500 text-white shadow-lg'
+                          : 'bg-[#070709] border-gray-800 hover:border-gray-700 text-gray-300'
+                          }`}
                       >
                         <p className="font-extrabold text-xs text-white">{plan.name}</p>
                         <p className="text-sm font-black text-orange-400 mt-1">₦{plan.price.toLocaleString()}</p>

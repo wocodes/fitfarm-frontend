@@ -21,9 +21,9 @@ export default function IntegratedTenantDashboardSetupPage() {
   const [primaryColor, setPrimaryColor] = useState('#fa6a2e');
   const [accentColor, setAccentColor] = useState('#1e293b');
 
-  const [adminName, setAdminName] = useState('Gabriel O.');
-  const [adminEmail, setAdminEmail] = useState('admin@polanfit.com');
-  const [adminPassword, setAdminPassword] = useState('Password123!');
+  const [adminName, setAdminName] = useState('');
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -51,6 +51,26 @@ export default function IntegratedTenantDashboardSetupPage() {
         } catch (e) {
           // Ignore parse errors
         }
+      }
+
+      // Check if logged in user already has an active tenant provisioned
+      const token = localStorage.getItem('fitcloud_token') || localStorage.getItem('polanfit_token');
+      if (token) {
+        const apiBase = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
+        fetch(`${apiBase}/central/auth/profile`, {
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        })
+          .then((res) => res.json())
+          .then((json) => {
+            if (json.success && json.data && (json.data.tenant || json.data.tenant_id)) {
+              const adminAppUrl = process.env.NEXT_PUBLIC_ADMIN_APP_URL || 'http://localhost:3001';
+              window.location.href = adminAppUrl;
+            }
+          })
+          .catch(() => {});
       }
     }
   }, []);
