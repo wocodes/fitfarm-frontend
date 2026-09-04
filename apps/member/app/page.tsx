@@ -2,7 +2,11 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import HeroSlider from './components/HeroSlider';
+import GymPulseBar from './components/GymPulseBar';
+import HowItWorksSection from './components/HowItWorksSection';
+import AmenitiesGrid from './components/AmenitiesGrid';
 import MembershipPlansSection from './components/MembershipPlansSection';
+import FaqLocationSection from './components/FaqLocationSection';
 import DigitalPassModal from './components/DigitalPassModal';
 import MemberDashboardModal from './components/MemberDashboardModal';
 import PlanPurchaseModal from './components/PlanPurchaseModal';
@@ -285,7 +289,7 @@ export default function MemberPortalPage() {
         </header>
       </div>
 
-      {/* Hero Section with Dark Background Slider & Overlay */}
+      {/* Hero Section with Brightened Dark Background Slider & Overlay */}
       <HeroSlider
         tenantName={tenantName}
         campaignTitle={leaderboardCampaign?.title || 'Active Fitness Challenge'}
@@ -295,14 +299,26 @@ export default function MemberPortalPage() {
         onOpenRegister={() => setShowRegisterModal(true)}
       />
 
-      {/* Main Section: Compact & Categorized Membership Plans */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-16">
+      {/* Live Gym Operating Hours & Capacity Status */}
+      <GymPulseBar tenantName={tenantName} />
+
+      {/* How Turnstile Gate Access Works */}
+      <HowItWorksSection />
+
+      {/* Elite Amenities & Infrastructure Grid */}
+      <AmenitiesGrid />
+
+      {/* Compact & Categorized Membership Plans */}
+      <main className="w-full max-w-6xl mx-auto px-6 py-12">
         <MembershipPlansSection
           plans={pricingPlans}
           currencySymbol={currencySymbol}
           onSelectPlan={handlePlanSelect}
         />
       </main>
+
+      {/* FAQs & Front Desk Support */}
+      <FaqLocationSection tenantName={tenantName} />
 
       {/* Footer */}
       <footer className="py-8 px-6 border-t border-gray-800/80 text-center text-xs text-gray-500 space-y-1">
