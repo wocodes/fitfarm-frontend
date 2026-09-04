@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import AuthInitializer from "./components/AuthInitializer";
 import TopProgressBar from "./components/TopProgressBar";
+import ThemeInitializer from "./components/ThemeInitializer";
 
 export const metadata: Metadata = {
   title: "FitCloud Admin Center",
@@ -17,6 +18,7 @@ export default function RootLayout({
     <html lang="en" className="h-full antialiased dark">
       <body className="min-h-full flex flex-col bg-[#0f0f11] text-white">
         <TopProgressBar />
+        <ThemeInitializer />
         <AuthInitializer />
         {children}
       </body>

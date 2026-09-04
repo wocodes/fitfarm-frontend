@@ -224,3 +224,24 @@ export async function apiFetch<T = any>(endpoint: string, options: ApiFetchOptio
 
   return await fetchPromise;
 }
+
+const apiClient = {
+  get: <T = any>(endpoint: string, options?: ApiFetchOptions) =>
+    apiFetch<T>(endpoint, { ...options, method: 'GET' }),
+  post: <T = any>(endpoint: string, body?: any, options?: ApiFetchOptions) =>
+    apiFetch<T>(endpoint, {
+      ...options,
+      method: 'POST',
+      body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
+    }),
+  put: <T = any>(endpoint: string, body?: any, options?: ApiFetchOptions) =>
+    apiFetch<T>(endpoint, {
+      ...options,
+      method: 'PUT',
+      body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
+    }),
+  delete: <T = any>(endpoint: string, options?: ApiFetchOptions) =>
+    apiFetch<T>(endpoint, { ...options, method: 'DELETE' }),
+};
+
+export default apiClient;
