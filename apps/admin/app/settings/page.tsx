@@ -4,9 +4,17 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { apiFetch } from '../lib/apiClient';
+import {
+  getTerminalToken,
+  getTerminalMeta,
+  saveTerminalToken,
+  clearTerminalRegistration,
+  getDeviceFingerprint,
+  TerminalMeta,
+} from '../lib/terminalManager';
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<'profile' | 'branding' | 'hardware' | 'rules' | 'backups'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'branding' | 'hardware' | 'rules' | 'terminals' | 'backups'>('profile');
 
   // Gym Profile State
   const [gymName, setGymName] = useState('PolanFit Fitness');
@@ -45,6 +53,18 @@ export default function SettingsPage() {
   const [backups, setBackups] = useState<any[]>([]);
   const [creatingBackup, setCreatingBackup] = useState(false);
   const [backupSuccessMsg, setBackupSuccessMsg] = useState('');
+
+  // Front-Desk Terminals State
+  const [enforceTerminalLock, setEnforceTerminalLock] = useState(false);
+  const [terminalsList, setTerminalsList] = useState<any[]>([]);
+  const [loadingTerminals, setLoadingTerminals] = useState(false);
+  const [currentTerminalMeta, setCurrentTerminalMeta] = useState<TerminalMeta | null>(null);
+  const [isCurrentDeviceEnrolled, setIsCurrentDeviceEnrolled] = useState(false);
+  const [showEnrollModal, setShowEnrollModal] = useState(false);
+  const [newTerminalName, setNewTerminalName] = useState('Front Desk Computer 1');
+  const [enrollingTerminal, setEnrollingTerminal] = useState(false);
+  const [terminalActionMsg, setTerminalActionMsg] = useState('');
+  const [togglingLock, setTogglingLock] = useState(false);
 
   const fetchBackups = async () => {
     try {
@@ -102,6 +122,8 @@ export default function SettingsPage() {
   useEffect(() => {
     fetchSettings();
     fetchBackups();
+    fetchTerminals();
+    checkCurrentDeviceStatus();
   }, []);
 
   const handleSaveSettings = async (e: React.FormEvent) => {
@@ -195,6 +217,111 @@ export default function SettingsPage() {
     }
   };
 
+  const fetchTerminals = async () => {
+    setLoadingTerminals(true);
+    try {
+      const res = await apiFetch('/admin/terminals');
+      if (res.success && res.data) {
+        setEnforceTerminalLock(Boolean(res.data.enforceTerminalLock));
+        setTerminalsList(res.data.terminals || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch terminals:', err);
+    } finally {
+      setLoadingTerminals(false);
+    }
+  };
+
+  const checkCurrentDeviceStatus = () => {
+    const meta = getTerminalMeta();
+    const token = getTerminalToken();
+    setCurrentTerminalMeta(meta);
+    setIsCurrentDeviceEnrolled(Boolean(token));
+  };
+
+  const handleToggleLock = async (enforce: boolean) => {
+    setTogglingLock(true);
+    try {
+      const res = await apiFetch('/admin/terminals/toggle-lock', {
+        method: 'POST',
+        body: JSON.stringify({ enforce }),
+      });
+      if (res.success && res.data) {
+        setEnforceTerminalLock(res.data.enforceTerminalLock);
+        setTerminalActionMsg(
+          enforce
+            ? '🛡️ Front-Desk Terminal Lock is now ENFORCED. Staff check-ins are restricted to registered desk devices.'
+            : '🔓 Front-Desk Terminal Lock is now DISABLED. Staff can check in members from any device.'
+        );
+        setTimeout(() => setTerminalActionMsg(''), 5000);
+      }
+    } catch (err: any) {
+      alert(err.message || 'Failed to toggle terminal lock');
+    } finally {
+      setTogglingLock(false);
+    }
+  };
+
+  const handleEnrollCurrentBrowser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTerminalName.trim()) return;
+
+    setEnrollingTerminal(true);
+    try {
+      const fingerprint = getDeviceFingerprint();
+      const res = await apiFetch('/admin/terminals/enroll', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: newTerminalName.trim(),
+          device_fingerprint: fingerprint,
+        }),
+      });
+
+      if (res.success && res.data && res.data.terminal_token) {
+        saveTerminalToken(res.data.terminal_token, res.data.terminal.name, fingerprint);
+        checkCurrentDeviceStatus();
+        fetchTerminals();
+        setShowEnrollModal(false);
+        setTerminalActionMsg(`🎉 This browser is now enrolled as "${res.data.terminal.name}"!`);
+        setTimeout(() => setTerminalActionMsg(''), 5000);
+      } else {
+        alert(res.message || 'Failed to enroll terminal');
+      }
+    } catch (err: any) {
+      alert(err.message || 'Failed to enroll terminal');
+    } finally {
+      setEnrollingTerminal(false);
+    }
+  };
+
+  const handleRevokeTerminal = async (id: number | string, name: string) => {
+    if (!confirm(`Are you sure you want to revoke authorization for "${name}"?\nStaff on this device will no longer be able to perform front-desk operations.`)) return;
+    try {
+      const res = await apiFetch(`/admin/terminals/${id}`, {
+        method: 'DELETE',
+      });
+      if (res.success) {
+        fetchTerminals();
+        if (currentTerminalMeta?.name === name) {
+          clearTerminalRegistration();
+          checkCurrentDeviceStatus();
+        }
+        setTerminalActionMsg(`✅ Terminal "${name}" authorization revoked.`);
+        setTimeout(() => setTerminalActionMsg(''), 5000);
+      }
+    } catch (err: any) {
+      alert(err.message || 'Failed to revoke terminal');
+    }
+  };
+
+  const handleUnlinkCurrentBrowser = () => {
+    if (!confirm('Remove terminal authorization token from this local browser?')) return;
+    clearTerminalRegistration();
+    checkCurrentDeviceStatus();
+    setTerminalActionMsg('ℹ️ This browser is no longer registered as a front-desk terminal.');
+    setTimeout(() => setTerminalActionMsg(''), 4000);
+  };
+
   const currencySymbol = currency === 'NGN' ? '₦' : currency === 'GBP' ? '£' : currency === 'EUR' ? '€' : '$';
 
   return (
@@ -216,6 +343,15 @@ export default function SettingsPage() {
                 <span>{saveSuccessMsg}</span>
               </span>
               <button onClick={() => setSaveSuccessMsg('')} className="text-emerald-400 hover:text-white font-mono">✕</button>
+            </div>
+          )}
+
+          {terminalActionMsg && (
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/30 text-orange-400 text-xs font-extrabold flex items-center justify-between shadow-lg shadow-orange-500/10 animate-fadeIn">
+              <span className="flex items-center gap-2">
+                <span>{terminalActionMsg}</span>
+              </span>
+              <button onClick={() => setTerminalActionMsg('')} className="text-orange-400 hover:text-white font-mono">✕</button>
             </div>
           )}
 
@@ -267,6 +403,23 @@ export default function SettingsPage() {
             >
               <span>⚙️</span>
               <span>Rules & Automation</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('terminals')}
+              className={`px-4 py-2.5 rounded-xl font-extrabold text-xs transition flex items-center gap-2 whitespace-nowrap ${
+                activeTab === 'terminals'
+                  ? 'bg-orange-500 text-black shadow-lg shadow-orange-500/20'
+                  : 'bg-[#0f0f13] text-gray-400 hover:text-white border border-gray-800'
+              }`}
+            >
+              <span>🖥️</span>
+              <span>Front-Desk Terminals</span>
+              {enforceTerminalLock && (
+                <span className="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 text-[9px] font-mono font-bold uppercase tracking-wider border border-emerald-500/30">
+                  LOCKED
+                </span>
+              )}
             </button>
 
             <button
@@ -635,6 +788,215 @@ export default function SettingsPage() {
               </div>
             )}
 
+            {/* TAB: FRONT-DESK TERMINALS & ACCESS SECURITY */}
+            {activeTab === 'terminals' && (
+              <div className="p-6 rounded-2xl bg-[#0f0f13] border border-gray-800 space-y-6">
+                {/* Header Section */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-800/80 pb-4">
+                  <div>
+                    <h2 className="text-lg font-extrabold text-white flex items-center gap-2">
+                      <span>🖥️ Front-Desk Terminals & Access Security</span>
+                      {enforceTerminalLock ? (
+                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] uppercase font-bold tracking-wider">
+                          ● Terminal Lock Enforced
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 text-[10px] uppercase font-bold tracking-wider">
+                          ○ Remote Access Open
+                        </span>
+                      )}
+                    </h2>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Prevent check-in fraud and ghost attendance by restricting staff logins and check-in processing to authorized front-desk devices.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNewTerminalName(`Front Desk (${getDeviceFingerprint().split(' ')[0]} PC)`);
+                      setShowEnrollModal(true);
+                    }}
+                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 font-extrabold text-black text-xs transition shadow-lg shadow-orange-500/20 flex items-center gap-2 self-start sm:self-auto shrink-0"
+                  >
+                    <span>➕ Authorize This Browser</span>
+                  </button>
+                </div>
+
+                {/* Master Enforcement Switch */}
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-[#13131a] to-[#0d0d12] border border-gray-800/80 space-y-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">🛡️</span>
+                        <h3 className="font-extrabold text-sm text-white">Enforce Registered Desk Terminal for Staff</h3>
+                      </div>
+                      <p className="text-xs text-gray-400 max-w-2xl">
+                        When enabled, staff and desk personnel can <strong className="text-gray-200">only</strong> sign in and log check-ins from authorized gym terminals. <strong className="text-orange-400">Gym owners have unrestricted remote access from any laptop or mobile phone.</strong>
+                      </p>
+                    </div>
+
+                    <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                      <input
+                        type="checkbox"
+                        checked={enforceTerminalLock}
+                        disabled={togglingLock}
+                        onChange={(e) => handleToggleLock(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-12 h-6 bg-gray-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                    </label>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 text-[11px] border-t border-gray-800/60">
+                    <div className="flex items-start gap-2 text-gray-400">
+                      <span className="text-emerald-400 font-bold">✔</span>
+                      <span><strong className="text-gray-300">Staff Time & Attendance:</strong> Staff clock-ins and member check-ins are restricted to physical gym desk terminals.</span>
+                    </div>
+                    <div className="flex items-start gap-2 text-gray-400">
+                      <span className="text-orange-400 font-bold">👑</span>
+                      <span><strong className="text-gray-300">Owner Remote Access:</strong> Gym owners bypass device restrictions and can monitor telemetry from anywhere.</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Current Browser Status Card */}
+                <div className={`p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                  isCurrentDeviceEnrolled
+                    ? 'bg-emerald-500/5 border-emerald-500/30'
+                    : 'bg-gray-900/40 border-gray-800'
+                }`}>
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 ${
+                      isCurrentDeviceEnrolled ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-800 text-gray-400'
+                    }`}>
+                      {isCurrentDeviceEnrolled ? '✅' : '💻'}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-extrabold text-xs text-white">
+                          {isCurrentDeviceEnrolled
+                            ? `This browser is AUTHORIZED as "${currentTerminalMeta?.name || 'Front Desk Terminal'}"`
+                            : 'This browser is NOT currently enrolled as a Front-Desk Terminal'}
+                        </p>
+                        {isCurrentDeviceEnrolled && (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                            ACTIVE ENROLLMENT
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-gray-400 font-mono mt-0.5">
+                        {isCurrentDeviceEnrolled
+                          ? `Fingerprint: ${currentTerminalMeta?.deviceFingerprint || getDeviceFingerprint()}`
+                          : `Local Fingerprint: ${getDeviceFingerprint()}`}
+                      </p>
+                    </div>
+                  </div>
+
+                  {isCurrentDeviceEnrolled ? (
+                    <button
+                      type="button"
+                      onClick={handleUnlinkCurrentBrowser}
+                      className="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs font-semibold text-gray-300 transition shrink-0"
+                    >
+                      Unlink this Browser
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNewTerminalName(`Front Desk (${getDeviceFingerprint().split(' ')[0]} PC)`);
+                        setShowEnrollModal(true);
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 text-xs font-bold text-orange-400 border border-orange-500/30 transition shrink-0"
+                    >
+                      Enroll Current Browser
+                    </button>
+                  )}
+                </div>
+
+                {/* Terminals Table */}
+                <div className="pt-2">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-xs font-bold text-gray-300 uppercase tracking-wider">
+                      Authorized Front-Desk Terminals ({terminalsList.length})
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={fetchTerminals}
+                      disabled={loadingTerminals}
+                      className="text-xs text-orange-400 hover:text-orange-300 transition flex items-center gap-1"
+                    >
+                      <span>🔄</span>
+                      <span>Refresh</span>
+                    </button>
+                  </div>
+
+                  <div className="overflow-x-auto rounded-xl border border-gray-800/80">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-[#070709] border-b border-gray-800 text-gray-400 font-semibold uppercase">
+                        <tr>
+                          <th className="py-2.5 px-3">Terminal Name</th>
+                          <th className="py-2.5 px-3">Device / Browser</th>
+                          <th className="py-2.5 px-3">Last Active IP</th>
+                          <th className="py-2.5 px-3">Last Seen</th>
+                          <th className="py-2.5 px-3">Status</th>
+                          <th className="py-2.5 px-3 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-800/60 font-medium">
+                        {terminalsList.length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="py-8 text-center text-gray-500 italic">
+                              No front-desk terminals authorized yet. Click "Authorize This Browser" above to register your desk computer.
+                            </td>
+                          </tr>
+                        ) : (
+                          terminalsList.map((t) => (
+                            <tr key={t.id || t.uuid} className="hover:bg-gray-800/20 transition">
+                              <td className="py-3 px-3">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-base">💻</span>
+                                  <span className="font-extrabold text-white text-xs">{t.name}</span>
+                                </div>
+                              </td>
+                              <td className="py-3 px-3 text-gray-400 text-[11px] font-mono max-w-xs truncate">
+                                {t.device_fingerprint || 'Desktop Browser'}
+                              </td>
+                              <td className="py-3 px-3 text-gray-300 font-mono text-[11px]">
+                                {t.last_ip_address || '—'}
+                              </td>
+                              <td className="py-3 px-3 text-gray-400 text-[11px]">
+                                {t.last_seen_at ? new Date(t.last_seen_at).toLocaleString() : 'Never'}
+                              </td>
+                              <td className="py-3 px-3">
+                                <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${
+                                  t.status === 'active'
+                                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                    : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                                }`}>
+                                  ● {t.status}
+                                </span>
+                              </td>
+                              <td className="py-3 px-3 text-right">
+                                <button
+                                  type="button"
+                                  onClick={() => handleRevokeTerminal(t.uuid || t.id, t.name)}
+                                  className="px-2.5 py-1 rounded bg-red-500/10 hover:bg-red-500/20 text-xs font-bold text-red-400 border border-red-500/20 transition"
+                                >
+                                  Revoke
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* TAB 5: SYSTEM BACKUPS */}
             {activeTab === 'backups' && (
               <div className="p-6 rounded-2xl bg-[#0f0f13] border border-gray-800 space-y-5">
@@ -759,7 +1121,7 @@ export default function SettingsPage() {
             )}
 
             {/* Bottom Save Action Bar */}
-            {activeTab !== 'backups' && (
+            {activeTab !== 'backups' && activeTab !== 'terminals' && (
               <div className="flex justify-end pt-4 border-t border-gray-800/80">
                 <button
                   type="submit"
@@ -772,6 +1134,70 @@ export default function SettingsPage() {
           </form>
         </main>
       </div>
+
+      {/* Authorize Terminal Modal */}
+      {showEnrollModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+          <div className="relative w-full max-w-md bg-[#121217] border border-gray-800 rounded-3xl p-6 md:p-8 shadow-2xl text-white">
+            <button
+              onClick={() => setShowEnrollModal(false)}
+              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-gray-800/60 hover:bg-gray-700 flex items-center justify-center text-gray-400 hover:text-white transition"
+            >
+              ✕
+            </button>
+
+            <div className="mb-6 text-center">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-orange-500/20 text-orange-500 font-bold text-xl mb-3 border border-orange-500/30 shadow-lg shadow-orange-500/10">
+                🖥️
+              </div>
+              <h3 className="text-xl font-extrabold text-white">Authorize Front-Desk Terminal</h3>
+              <p className="text-xs text-gray-400 mt-1">
+                Enrolling this browser authorizes it as an approved front-desk terminal for staff member check-ins and duty clock-ins.
+              </p>
+            </div>
+
+            <form onSubmit={handleEnrollCurrentBrowser} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5">
+                  Terminal Name / Desk Identifier
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newTerminalName}
+                  onChange={(e) => setNewTerminalName(e.target.value)}
+                  placeholder="e.g. Front Desk iMac #1"
+                  className="w-full px-4 py-3 bg-[#070709] border border-gray-800 rounded-xl text-white font-medium text-xs focus:outline-none focus:border-orange-500 transition"
+                />
+                <p className="text-[10px] text-gray-500 mt-1">
+                  Device info: {getDeviceFingerprint()}
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-300 text-xs">
+                <span className="font-bold">🔒 Secure Device Binding:</span> A unique cryptographic device token will be stored in this browser to verify staff check-in activity.
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEnrollModal(false)}
+                  className="flex-1 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 font-bold text-xs text-gray-300 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={enrollingTerminal}
+                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 font-extrabold text-black text-xs transition shadow-lg shadow-orange-500/20 disabled:opacity-50"
+                >
+                  {enrollingTerminal ? 'Authorizing...' : 'Authorize Terminal'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

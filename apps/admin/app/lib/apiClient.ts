@@ -1,5 +1,7 @@
 'use client';
 
+import { getTerminalToken } from './terminalManager';
+
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 export const CENTRAL_URL = process.env.NEXT_PUBLIC_CENTRAL_URL || 'http://localhost:3000';
 
@@ -164,6 +166,11 @@ export async function apiFetch<T = any>(endpoint: string, options: ApiFetchOptio
     defaultHeaders['X-Tenant-Slug'] = tenantSlug;
   }
 
+  const terminalToken = getTerminalToken();
+  if (terminalToken) {
+    defaultHeaders['X-Terminal-Token'] = terminalToken;
+  }
+
   const mergedHeaders = {
     ...defaultHeaders,
     ...(options.headers as Record<string, string> || {}),
@@ -190,6 +197,8 @@ export async function apiFetch<T = any>(endpoint: string, options: ApiFetchOptio
         const error: any = new Error(errorData.message || `HTTP ${res.status}`);
         error.status = res.status;
         error.data = errorData;
+        error.errorCode = errorData.error_code;
+        error.isTerminalBlocked = errorData.error_code === 'UNAUTHORIZED_TERMINAL_DEVICE';
         throw error;
       }
 

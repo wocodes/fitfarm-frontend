@@ -25,12 +25,18 @@ export default function SignInModal({ isOpen, onClose, onSwitchToRegister }: Sig
 
     try {
       const apiBase = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
+      const terminalToken = typeof window !== 'undefined' ? localStorage.getItem('fitcloud_terminal_token') : null;
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
+      if (terminalToken) {
+        headers['X-Terminal-Token'] = terminalToken;
+      }
+
       const res = await fetch(`${apiBase}/central/auth/login`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+        headers,
         body: JSON.stringify({ email, password }),
       });
 
@@ -55,7 +61,11 @@ export default function SignInModal({ isOpen, onClose, onSwitchToRegister }: Sig
           router.push('/setup');
         }
       } else {
-        setError(json.message || 'Invalid email address or password.');
+        if (json.error_code === 'UNAUTHORIZED_TERMINAL_DEVICE') {
+          setError('🛑 Front-Desk Terminal Restricted: Staff can only log in from an authorized gym terminal. Please ask the gym owner to authorize this device.');
+        } else {
+          setError(json.message || 'Invalid email address or password.');
+        }
       }
     } catch (err: any) {
       setError(err.message || 'Invalid email address or password.');
