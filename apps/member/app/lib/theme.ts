@@ -13,6 +13,59 @@ export interface ThemeSettings {
 const THEME_KEY = 'fitcloud_theme_settings';
 const BROADCAST_CHANNEL = 'fitcloud_theme_sync';
 
+// Supported Google Fonts and their import URLs
+export const FONT_OPTIONS = [
+  {
+    name: 'Inter',
+    category: 'Universal Precision',
+    desc: 'Crisp, modern, and versatile',
+    sample: 'PEAK FITNESS & METRICS',
+    googleFont: 'Inter:wght@400;600;700;800;900',
+  },
+  {
+    name: 'Outfit',
+    category: 'Geometric Athletic',
+    desc: 'Bold, punchy, energetic curves',
+    sample: 'EXPLOSIVE SPEED & AGILITY',
+    googleFont: 'Outfit:wght@400;600;700;800;900',
+  },
+  {
+    name: 'Plus Jakarta Sans',
+    category: 'Sleek SaaS & Tech',
+    desc: 'Ultra-modern athletic intelligence',
+    sample: 'PRECISION TRACKING 24/7',
+    googleFont: 'Plus+Jakarta+Sans:wght@400;600;700;800',
+  },
+  {
+    name: 'Montserrat',
+    category: 'Classic Powerhouse',
+    desc: 'Impactful, structured, high-energy',
+    sample: 'OLYMPIC IRON & LIFTING',
+    googleFont: 'Montserrat:wght@400;600;700;800;900',
+  },
+  {
+    name: 'Oswald',
+    category: 'Condensed Heavy Strength',
+    desc: 'Tall, aggressive, hardcore barbell',
+    sample: 'MAX EFFORT HYPERTROPHY',
+    googleFont: 'Oswald:wght@500;600;700',
+  },
+  {
+    name: 'Syne',
+    category: 'Boutique & Combat Studio',
+    desc: 'Avant-garde, stylized fitness club',
+    sample: 'ELITE MOVEMENT & FLOW',
+    googleFont: 'Syne:wght@600;700;800',
+  },
+  {
+    name: 'Cinzel',
+    category: 'Luxury Wellness & Spa',
+    desc: 'Refined serif for VIP health resorts',
+    sample: 'EXCLUSIVE RECOVERY & SUITE',
+    googleFont: 'Cinzel:wght@600;700;800',
+  },
+];
+
 function hexToRgb(hex: string): string {
   let c = hex.replace('#', '');
   if (c.length === 3) c = c.split('').map((x) => x + x).join('');
@@ -21,12 +74,32 @@ function hexToRgb(hex: string): string {
   return `${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}`;
 }
 
+export function loadFontFamily(fontName: string) {
+  if (typeof window === 'undefined') return;
+
+  const fontConfig = FONT_OPTIONS.find((f) => f.name.toLowerCase() === fontName.toLowerCase());
+  if (!fontConfig) return;
+
+  const fontId = `fitcloud-font-${fontName.toLowerCase().replace(/\s+/g, '-')}`;
+  if (!document.getElementById(fontId)) {
+    const link = document.createElement('link');
+    link.id = fontId;
+    link.rel = 'stylesheet';
+    link.href = `https://fonts.googleapis.com/css2?family=${fontConfig.googleFont}&display=swap`;
+    document.head.appendChild(link);
+  }
+}
+
 export function applyTheme(theme?: Partial<ThemeSettings> | null) {
   if (typeof window === 'undefined') return;
 
   const primary = theme?.primary_color || '#fa6a2e';
   const accent = theme?.accent_color || '#1e293b';
+  const fontFamily = theme?.font_family || 'Inter';
   const rgb = hexToRgb(primary);
+
+  // Load font if needed
+  loadFontFamily(fontFamily);
 
   let styleEl = document.getElementById('fitcloud-dynamic-theme') as HTMLStyleElement;
   if (!styleEl) {
@@ -40,6 +113,11 @@ export function applyTheme(theme?: Partial<ThemeSettings> | null) {
       --brand-primary: ${primary} !important;
       --brand-primary-rgb: ${rgb} !important;
       --brand-accent: ${accent} !important;
+      --brand-font: '${fontFamily}', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    }
+    
+    body, button, input, select, textarea {
+      font-family: var(--brand-font);
     }
     
     /* Dynamic Primary Color Overrides */
@@ -103,7 +181,10 @@ export function broadcastThemeChange(theme: ThemeSettings) {
 export function initThemeSync(onUpdate?: (theme: ThemeSettings) => void) {
   if (typeof window === 'undefined') return () => {};
 
-  // 1. Check local storage
+  // 1. Preload default fonts
+  FONT_OPTIONS.forEach((f) => loadFontFamily(f.name));
+
+  // 2. Check local storage
   const stored = localStorage.getItem(THEME_KEY);
   if (stored) {
     try {
@@ -113,7 +194,7 @@ export function initThemeSync(onUpdate?: (theme: ThemeSettings) => void) {
     } catch {}
   }
 
-  // 2. Listen for BroadcastChannel
+  // 3. Listen for BroadcastChannel
   let channel: BroadcastChannel | null = null;
   try {
     channel = new BroadcastChannel(BROADCAST_CHANNEL);
@@ -125,7 +206,7 @@ export function initThemeSync(onUpdate?: (theme: ThemeSettings) => void) {
     };
   } catch {}
 
-  // 3. Listen for window storage events across tabs
+  // 4. Listen for window storage events across tabs
   const handleStorage = (e: StorageEvent) => {
     if (e.key === THEME_KEY && e.newValue) {
       try {

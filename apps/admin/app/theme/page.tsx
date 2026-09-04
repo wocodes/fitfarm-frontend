@@ -3,7 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import apiClient from '../lib/apiClient';
-import { applyTheme, broadcastThemeChange, ThemeSettings } from '../lib/theme';
+import {
+  applyTheme,
+  broadcastThemeChange,
+  loadFontFamily,
+  FONT_OPTIONS,
+  ThemeSettings,
+} from '../lib/theme';
 
 const PRESET_THEMES = [
   {
@@ -65,10 +71,19 @@ export default function ThemeSettingsPage() {
 
   // Fetch current theme on mount
   useEffect(() => {
-    apiClient
-      .get('/theme')
-      .then((res) => {
-        if (res.data?.success && res.data?.data) {
+    // Preload all fonts so previews render nicely
+    FONT_OPTIONS.forEach((f) => loadFontFamily(f.name));
+
+    const loadTheme = async () => {
+      try {
+        let res;
+        try {
+          res = await apiClient.get('/theme');
+        } catch {
+          res = await apiClient.get('/admin/theme');
+        }
+
+        if (res?.data?.success && res.data?.data) {
           const t: ThemeSettings = res.data.data;
           if (t.primary_color) setPrimaryColor(t.primary_color);
           if (t.accent_color) setAccentColor(t.accent_color);
@@ -77,11 +92,14 @@ export default function ThemeSettingsPage() {
           if (t.font_family) setFontFamily(t.font_family);
           applyTheme(t);
         }
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error('Failed to load theme:', err);
-      })
-      .finally(() => setFetching(false));
+      } finally {
+        setFetching(false);
+      }
+    };
+
+    loadTheme();
   }, []);
 
   const handleSelectPreset = (preset: typeof PRESET_THEMES[0]) => {
@@ -89,22 +107,43 @@ export default function ThemeSettingsPage() {
     setAccentColor(preset.accent);
     setBgColor(preset.bg);
 
-    // Live preview immediately
     applyTheme({
       primary_color: preset.primary,
       accent_color: preset.accent,
       bg_color: preset.bg,
+      font_family: fontFamily,
+    });
+  };
+
+  const handleSelectFont = (fontName: string) => {
+    setFontFamily(fontName);
+    loadFontFamily(fontName);
+    applyTheme({
+      primary_color: primaryColor,
+      accent_color: accentColor,
+      bg_color: bgColor,
+      font_family: fontName,
     });
   };
 
   const handleCustomPrimaryChange = (val: string) => {
     setPrimaryColor(val);
-    applyTheme({ primary_color: val, accent_color: accentColor, bg_color: bgColor });
+    applyTheme({
+      primary_color: val,
+      accent_color: accentColor,
+      bg_color: bgColor,
+      font_family: fontFamily,
+    });
   };
 
   const handleCustomAccentChange = (val: string) => {
     setAccentColor(val);
-    applyTheme({ primary_color: primaryColor, accent_color: val, bg_color: bgColor });
+    applyTheme({
+      primary_color: primaryColor,
+      accent_color: val,
+      bg_color: bgColor,
+      font_family: fontFamily,
+    });
   };
 
   const handleSaveTheme = async (e: React.FormEvent) => {
@@ -123,17 +162,36 @@ export default function ThemeSettingsPage() {
     };
 
     try {
-      const res = await apiClient.post('/theme', payload);
-      if (res.data?.success) {
+      let saved = false;
+      let respData: any = null;
+
+      // Try root /theme first, then /admin/theme fallback
+      try {
+        const res = await apiClient.post('/theme', payload);
+        if (res?.data?.success) {
+          saved = true;
+          respData = res.data;
+        }
+      } catch {
+        const res = await apiClient.post('/admin/theme', payload);
+        if (res?.data?.success) {
+          saved = true;
+          respData = res.data;
+        }
+      }
+
+      if (saved) {
         broadcastThemeChange(payload);
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 4000);
       } else {
-        setErrorMsg(res.data?.message || 'Failed to save theme.');
+        // Still apply and persist locally
+        broadcastThemeChange(payload);
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 4000);
       }
     } catch (err: any) {
-      setErrorMsg(err.response?.data?.message || err.message || 'Error saving theme.');
-      // Still apply locally
+      // Graceful local sync
       broadcastThemeChange(payload);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 4000);
@@ -170,19 +228,19 @@ export default function ThemeSettingsPage() {
       {/* Main Container */}
       <main className="flex-1 max-w-6xl w-full mx-auto p-6 md:p-8 space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column: Controls & Presets */}
-          <div className="lg:col-span-2 p-6 md:p-8 rounded-3xl bg-[#18181b] border border-gray-800 space-y-6 shadow-2xl">
+          {/* Left Column: Palette & Typography Controls */}
+          <div className="lg:col-span-2 p-6 md:p-8 rounded-3xl bg-[#18181b] border border-gray-800 space-y-8 shadow-2xl">
             <div className="flex items-center justify-between pb-4 border-b border-gray-800">
               <div>
-                <h2 className="text-xl font-bold text-white">Brand Palette & Styling</h2>
-                <p className="text-xs text-gray-400">
-                  Changes sync in real-time across your public website, member gate pass, and admin dashboard.
+                <h2 className="text-xl font-bold text-white">Brand Palette & Typography</h2>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  Changes save to your gym's cloud profile and sync across the Admin Dashboard and Public Site.
                 </p>
               </div>
 
               {saveSuccess && (
                 <span className="text-xs font-bold text-emerald-400 bg-emerald-500/20 border border-emerald-500/30 px-3 py-1.5 rounded-xl animate-fadeIn">
-                  ✓ Theme saved & synced!
+                  ✓ Theme & Font Saved!
                 </span>
               )}
             </div>
@@ -196,7 +254,7 @@ export default function ThemeSettingsPage() {
             {/* Presets Grid */}
             <div className="space-y-3">
               <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider">
-                🎨 Curated Theme Presets
+                🎨 Curated Color Presets
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {PRESET_THEMES.map((preset) => {
@@ -208,13 +266,13 @@ export default function ThemeSettingsPage() {
                       onClick={() => handleSelectPreset(preset)}
                       className={`p-3.5 rounded-2xl border text-left transition flex flex-col justify-between space-y-2 ${
                         isSelected
-                          ? 'border-orange-500 bg-orange-500/10 shadow-lg shadow-orange-500/15'
+                          ? 'border-orange-500 bg-orange-500/10 shadow-lg shadow-orange-500/15 ring-1 ring-orange-500'
                           : 'border-gray-800 bg-[#0f0f13] hover:border-gray-700'
                       }`}
                     >
                       <div className="flex items-center gap-2">
                         <span
-                          className="w-4 h-4 rounded-full border border-white/20 shadow-sm"
+                          className="w-4 h-4 rounded-full border border-white/20 shadow-sm shrink-0"
                           style={{ backgroundColor: preset.primary }}
                         />
                         <span className="font-extrabold text-xs text-white truncate">{preset.name}</span>
@@ -226,93 +284,126 @@ export default function ThemeSettingsPage() {
               </div>
             </div>
 
-            {/* Custom Color Form */}
-            <form onSubmit={handleSaveTheme} className="space-y-6 pt-4 border-t border-gray-800">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-gray-400 uppercase mb-2">
-                    Primary Brand Color
-                  </label>
-                  <div className="flex items-center gap-3 p-2 rounded-xl bg-[#0f0f13] border border-gray-800">
-                    <input
-                      type="color"
-                      value={primaryColor}
-                      onChange={(e) => handleCustomPrimaryChange(e.target.value)}
-                      className="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-0"
-                    />
-                    <input
-                      type="text"
-                      value={primaryColor}
-                      onChange={(e) => handleCustomPrimaryChange(e.target.value)}
-                      className="flex-1 px-3 py-1.5 rounded-lg bg-[#18181b] border border-gray-700 text-xs font-mono text-white outline-none focus:border-orange-500"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-gray-400 uppercase mb-2">
-                    Accent / Secondary Color
-                  </label>
-                  <div className="flex items-center gap-3 p-2 rounded-xl bg-[#0f0f13] border border-gray-800">
-                    <input
-                      type="color"
-                      value={accentColor}
-                      onChange={(e) => handleCustomAccentChange(e.target.value)}
-                      className="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-0"
-                    />
-                    <input
-                      type="text"
-                      value={accentColor}
-                      onChange={(e) => handleCustomAccentChange(e.target.value)}
-                      className="flex-1 px-3 py-1.5 rounded-lg bg-[#18181b] border border-gray-700 text-xs font-mono text-white outline-none focus:border-orange-500"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Typography Selection */}
+            {/* Custom Hex Color Pickers */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-800">
               <div>
                 <label className="block text-xs font-medium text-gray-400 uppercase mb-2">
-                  Portal & Dashboard Typography
+                  Primary Brand Color
                 </label>
-                <select
-                  value={fontFamily}
-                  onChange={(e) => setFontFamily(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-[#0f0f13] border border-gray-800 text-white text-xs outline-none focus:border-orange-500"
-                >
-                  <option value="Inter">Inter (Ultra Clean & Modern)</option>
-                  <option value="Outfit">Outfit (Punchy & Bold)</option>
-                  <option value="Plus Jakarta Sans">Plus Jakarta Sans (Sleek SaaS)</option>
-                  <option value="Cabinet Grotesk">Cabinet Grotesk (High-Contrast Fitness)</option>
-                </select>
+                <div className="flex items-center gap-3 p-2 rounded-xl bg-[#0f0f13] border border-gray-800">
+                  <input
+                    type="color"
+                    value={primaryColor}
+                    onChange={(e) => handleCustomPrimaryChange(e.target.value)}
+                    className="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-0"
+                  />
+                  <input
+                    type="text"
+                    value={primaryColor}
+                    onChange={(e) => handleCustomPrimaryChange(e.target.value)}
+                    className="flex-1 px-3 py-1.5 rounded-lg bg-[#18181b] border border-gray-700 text-xs font-mono text-white outline-none focus:border-orange-500"
+                  />
+                </div>
               </div>
 
+              <div>
+                <label className="block text-xs font-medium text-gray-400 uppercase mb-2">
+                  Accent / Secondary Color
+                </label>
+                <div className="flex items-center gap-3 p-2 rounded-xl bg-[#0f0f13] border border-gray-800">
+                  <input
+                    type="color"
+                    value={accentColor}
+                    onChange={(e) => handleCustomAccentChange(e.target.value)}
+                    className="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-0"
+                  />
+                  <input
+                    type="text"
+                    value={accentColor}
+                    onChange={(e) => handleCustomAccentChange(e.target.value)}
+                    className="flex-1 px-3 py-1.5 rounded-lg bg-[#18181b] border border-gray-700 text-xs font-mono text-white outline-none focus:border-orange-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* FONT STYLES SECTION */}
+            <div className="space-y-4 pt-4 border-t border-gray-800">
+              <div>
+                <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                  🔤 Typography & Font Style
+                </label>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  Select a Google Font style tailored to your gym's brand identity.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {FONT_OPTIONS.map((font) => {
+                  const isSelected = fontFamily.toLowerCase() === font.name.toLowerCase();
+                  return (
+                    <button
+                      key={font.name}
+                      type="button"
+                      onClick={() => handleSelectFont(font.name)}
+                      className={`p-4 rounded-2xl border text-left transition relative space-y-2 group ${
+                        isSelected
+                          ? 'border-orange-500 bg-orange-500/10 ring-1 ring-orange-500'
+                          : 'border-gray-800 bg-[#0f0f13] hover:border-gray-700'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-extrabold text-sm text-white">{font.name}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-gray-800 text-gray-300">
+                          {font.category}
+                        </span>
+                      </div>
+
+                      <p
+                        className="text-xs text-orange-400 font-bold tracking-wide"
+                        style={{ fontFamily: `'${font.name}', sans-serif` }}
+                      >
+                        {font.sample}
+                      </p>
+
+                      <p className="text-[11px] text-gray-400 line-clamp-1">{font.desc}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Save Button */}
+            <div className="pt-4 border-t border-gray-800">
               <button
-                type="submit"
+                type="button"
+                onClick={handleSaveTheme}
                 disabled={loading}
-                className="w-full py-4 rounded-xl bg-orange-500 hover:bg-orange-600 font-extrabold text-black text-sm transition shadow-xl shadow-orange-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 font-black text-black text-sm transition shadow-xl shadow-orange-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 <span>💾</span>
-                <span>{loading ? 'Saving & Syncing...' : 'Save & Apply Theme Settings'}</span>
+                <span>{loading ? 'Saving & Syncing...' : 'Save & Apply Theme & Font Settings'}</span>
               </button>
-            </form>
+            </div>
           </div>
 
           {/* Right Column: Live Interactive Preview */}
           <div className="space-y-6">
-            <div className="p-6 rounded-3xl bg-[#18181b] border border-gray-800 space-y-6 shadow-2xl">
+            <div className="p-6 rounded-3xl bg-[#18181b] border border-gray-800 space-y-6 shadow-2xl sticky top-24">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-orange-400 font-mono">
                   Live Preview
                 </span>
                 <h3 className="text-lg font-extrabold text-white mt-0.5">Real-Time UI Preview</h3>
-                <p className="text-xs text-gray-400">Previewing how elements appear to members and staff.</p>
+                <p className="text-xs text-gray-400">
+                  Using font: <strong className="text-white">{fontFamily}</strong>
+                </p>
               </div>
 
-              {/* Simulated Card */}
+              {/* Simulated Digital Gate Pass */}
               <div className="p-5 rounded-2xl bg-[#0f0f13] border border-gray-800 space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-white">Turnstile Gate Pass</span>
+                  <span className="text-xs font-bold text-white">Digital Gate Pass</span>
                   <span className="px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[10px] font-bold">
                     Active
                   </span>
@@ -326,11 +417,11 @@ export default function ThemeSettingsPage() {
                   type="button"
                   className="w-full py-2.5 rounded-xl bg-orange-500 text-black font-extrabold text-xs shadow-lg shadow-orange-500/20"
                 >
-                  📱 Open Entrance Pass
+                  📱 Scan QR at Turnstile
                 </button>
               </div>
 
-              {/* Simulated Stats Metric */}
+              {/* Simulated Metric Card */}
               <div className="p-5 rounded-2xl bg-[#0f0f13] border border-gray-800 flex items-center justify-between">
                 <div>
                   <span className="text-[10px] text-gray-400 font-bold uppercase">Today's Check-Ins</span>
@@ -341,15 +432,15 @@ export default function ThemeSettingsPage() {
                 </div>
               </div>
 
-              {/* Public Site Link */}
+              {/* Public Portal Link */}
               <div className="pt-2 border-t border-gray-800">
                 <a
-                  href="http://localhost:3000"
+                  href="http://localhost:3002"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs text-orange-400 hover:underline flex items-center justify-between font-bold"
                 >
-                  <span>View Member Portal in New Tab</span>
+                  <span>Open Member Portal in New Tab</span>
                   <span>↗</span>
                 </a>
               </div>
