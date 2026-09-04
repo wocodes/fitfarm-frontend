@@ -8,81 +8,43 @@ import { FcMoneyTransfer, FcConferenceCall, FcApproval, FcCalendar } from 'react
 import { apiFetch } from './lib/apiClient';
 
 export default function AdminDashboardPage() {
+  const [loadingStats, setLoadingStats] = useState<boolean>(true);
   const [stats, setStats] = useState<any>({
-    revenue_month: 17423724,
-    revenue_last_month: 15252024,
-    revenue_growth: 14.2,
-    total_members: 786,
-    new_members_week: 32,
-    active_members: 1124,
-    check_ins_today: 85,
-    check_ins_week: 623,
+    revenue_month: 0,
+    revenue_last_month: 0,
+    revenue_growth: 0,
+    total_members: 0,
+    new_members_week: 0,
+    active_members: 0,
+    check_ins_today: 0,
+    check_ins_week: 0,
   });
 
   // Active Sessions Expiring Soon
-  const [expiringSessions, setExpiringSessions] = useState<any[]>([
-    {
-      uid: 'sess-1',
-      memberName: 'Omonafe Ezekiel',
-      gender: 'm',
-      memberUid: 'fc-m-001',
-      method: 'BIOMETRIC SCAN',
-      sessionType: 'MORNING',
-      checkInTime: '01:21 PM',
-      endTime: '03:21 PM',
-      remainingMinutes: 11,
-    },
-    {
-      uid: 'sess-2',
-      memberName: 'Grace Roland',
-      gender: 'f',
-      memberUid: 'fc-m-002',
-      method: 'BIOMETRIC SCAN',
-      sessionType: 'MORNING',
-      checkInTime: '01:33 PM',
-      endTime: '03:33 PM',
-      remainingMinutes: 23,
-    },
-  ]);
+  const [expiringSessions, setExpiringSessions] = useState<any[]>([]);
 
   // Recent Transactions List
-  const [recentTransactions, setRecentTransactions] = useState<any[]>([
-    { id: 'tx-1', memberName: 'Patrick Oko', gender: 'm', type: 'DAILY - SUBSCRIPTION', amount: 5000, date: '8/27/2026' },
-    { id: 'tx-2', memberName: 'Patrick Oko', gender: 'm', type: 'REGISTRATION', amount: 15440, date: '8/27/2026' },
-    { id: 'tx-3', memberName: 'Joshua Egbekun', gender: 'm', type: 'DAILY - SUBSCRIPTION', amount: 5000, date: '8/27/2026' },
-    { id: 'tx-4', memberName: 'Joshua Egbekun', gender: 'm', type: 'REGISTRATION', amount: 15440, date: '8/27/2026' },
-  ]);
+  const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
 
   // Leaderboard State
-  const [leaderboard, setLeaderboard] = useState<any[]>([
-    { rank: 1, name: 'Kelechi O.', checkIns: 18, points: 180, badge: '🏆 Champion' },
-    { rank: 2, name: 'Gabriel O.', checkIns: 15, points: 150, badge: '🥈 2nd Place' },
-    { rank: 3, name: 'David A.', checkIns: 12, points: 120, badge: '🥉 3rd Place' },
-    { rank: 4, name: 'Sarah P.', checkIns: 9, points: 90, badge: null },
-  ]);
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
 
   // Member Inbox State
-  const [inboxOpen, setInboxOpen] = useState(true);
-  const [inboxMessages, setInboxMessages] = useState<any[]>([
-    {
-      id: '1',
-      memberName: 'Test Test',
-      gender: 'm',
-      timestamp: '6/24/2026, 7:05:07 AM',
-      type: 'SUGGESTION',
-      subject: 'Test test',
-      message: 'Test test',
-      starred: false,
-    },
-  ]);
+  const [inboxOpen, setInboxOpen] = useState(false);
+  const [inboxMessages, setInboxMessages] = useState<any[]>([]);
 
   // Front Desk Check-in Input
   const [checkInInput, setCheckInInput] = useState('');
-  const [deskLogs, setDeskLogs] = useState<any[]>([
-    { id: 1, name: 'Gabriel O.', time: '10:45 AM', method: 'Fingerprint' },
-    { id: 2, name: 'Kelechi O.', time: '09:30 AM', method: 'QR Code' },
-    { id: 3, name: 'David A.', time: '08:15 AM', method: 'Manual' },
-  ]);
+  const [deskLogs, setDeskLogs] = useState<any[]>([]);
+
+  // Activity Chart & Donut States
+  const [activityRange, setActivityRange] = useState<'weekly' | 'monthly' | 'yearly'>('weekly');
+  const [activityChartData, setActivityChartData] = useState<{ labels: string[]; data: number[] }>({
+    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    data: [0, 0, 0, 0, 0, 0, 0],
+  });
+  const [hoveredPointIndex, setHoveredPointIndex] = useState<number | null>(null);
+  const [donutHoveredSegment, setDonutHoveredSegment] = useState<'active' | 'expired' | null>(null);
 
   // Record Payment Modal State
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -107,44 +69,62 @@ export default function AdminDashboardPage() {
     { uid: 'plan-3', name: 'VIP Monthly Pass', price: 65000, subText: 'Full Gym + Sauna Access' },
   ];
 
-  const fetchLiveDashboardStats = async () => {
+  const fetchLiveDashboardStats = async (range: string = activityRange) => {
     try {
-      const json = await apiFetch('/admin/dashboard/stats');
+      const json = await apiFetch(`/admin/dashboard/stats?range=${range}`);
       if ((json.status === 'success' || json.success) && json.data) {
         const d = json.data;
+        const totalMembers = Number(d.totalMembers ?? d.total_members ?? 0);
+        const activeMembers = Number(d.activeMembersCount ?? d.active_members ?? 0);
+        const expiredMembers = Number(d.expiredMembersCount ?? d.expired_members ?? Math.max(0, totalMembers - activeMembers));
+
         setStats({
-          revenue_month: d.totalRevenueThisMonth || d.revenue_month || 17423724,
-          revenue_last_month: d.totalRevenueLastMonth || d.revenue_last_month || 15252024,
-          revenue_growth: d.revenuePercentageChange || d.revenue_growth || 14.2,
-          total_members: d.totalMembers || d.total_members || 754,
-          new_members_week: d.newMembersThisWeek || d.new_members_week || 32,
-          active_members: d.activeMembersCount || d.active_members || 754,
-          check_ins_today: d.checkInsToday || d.check_ins_today || 85,
-          check_ins_week: d.checkInsThisWeek || d.check_ins_week || 623,
+          revenue_month: Number(d.totalRevenueThisMonth ?? d.revenue_month ?? 0),
+          revenue_last_month: Number(d.totalRevenueLastMonth ?? d.revenue_last_month ?? 0),
+          revenue_growth: Number(d.revenuePercentageChange ?? d.revenue_growth ?? 0),
+          total_members: totalMembers,
+          new_members_week: Number(d.newMembersThisWeek ?? d.new_members_week ?? 0),
+          active_members: activeMembers,
+          expired_members: expiredMembers,
+          check_ins_today: Number(d.checkInsToday ?? d.check_ins_today ?? 0),
+          check_ins_week: Number(d.checkInsThisWeek ?? d.check_ins_week ?? 0),
         });
 
-        if (d.expiringSoon && d.expiringSoon.length > 0) {
+        if (d.activityChartData && Array.isArray(d.activityChartData.labels) && Array.isArray(d.activityChartData.data)) {
+          setActivityChartData({
+            labels: d.activityChartData.labels,
+            data: d.activityChartData.data.map((v: any) => Number(v) || 0),
+          });
+        }
+
+        if (Array.isArray(d.expiringSoon)) {
           setExpiringSessions(d.expiringSoon);
         }
 
-        if (d.recentTransactions && d.recentTransactions.length > 0) {
+        if (Array.isArray(d.recentTransactions)) {
           setRecentTransactions(d.recentTransactions);
         }
 
-        if (d.leaderboard && d.leaderboard.length > 0) {
+        if (Array.isArray(d.leaderboard)) {
           setLeaderboard(d.leaderboard);
+        }
+
+        if (Array.isArray(d.messages)) {
+          setInboxMessages(d.messages);
         }
       }
     } catch (err) {
       console.error('Failed to fetch live dashboard stats:', err);
+    } finally {
+      setLoadingStats(false);
     }
   };
 
   useEffect(() => {
-    fetchLiveDashboardStats();
-    const interval = setInterval(fetchLiveDashboardStats, 60000);
+    fetchLiveDashboardStats(activityRange);
+    const interval = setInterval(() => fetchLiveDashboardStats(activityRange), 60000);
     return () => clearInterval(interval);
-  }, []);
+  }, [activityRange]);
 
   const handleSimulateCheckIn = (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,7 +139,24 @@ export default function AdminDashboardPage() {
 
     setDeskLogs([newLog, ...deskLogs]);
     setCheckInInput('');
-    setStats((prev: any) => ({ ...prev, check_ins_today: prev.check_ins_today + 1 }));
+    setStats((prev: any) => ({
+      ...prev,
+      check_ins_today: (prev.check_ins_today || 0) + 1,
+      check_ins_week: (prev.check_ins_week || 0) + 1,
+    }));
+    // Real-time update to the activity telemetry curve
+    setActivityChartData((prev) => {
+      const nextData = [...prev.data];
+      if (nextData.length > 0) {
+        const todayIdx = (new Date().getDay() + 6) % 7;
+        if (activityRange === 'weekly' && todayIdx < nextData.length) {
+          nextData[todayIdx] = (nextData[todayIdx] || 0) + 1;
+        } else {
+          nextData[nextData.length - 1] = (nextData[nextData.length - 1] || 0) + 1;
+        }
+      }
+      return { ...prev, data: nextData };
+    });
   };
 
   const handleCancelSession = (uid: string) => {
@@ -200,6 +197,65 @@ export default function AdminDashboardPage() {
     }, 1000);
   };
 
+  // Activity Chart Calculations
+  const chartLabels = activityChartData.labels.length > 0 ? activityChartData.labels : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const chartData = activityChartData.data.length > 0 ? activityChartData.data : [0, 0, 0, 0, 0, 0, 0];
+  const maxCheckIns = Math.max(...chartData, 5); // baseline minimum scale of 5 for aesthetics
+  const totalPeriodCheckIns = chartData.reduce((a, b) => a + b, 0);
+
+  // SVG dimensions
+  const svgW = 500;
+  const svgH = 170;
+  const padL = 36;
+  const padR = 20;
+  const padT = 20;
+  const padB = 30;
+  const plotW = svgW - padL - padR;
+  const plotH = svgH - padT - padB;
+
+  const points = chartData.map((val, idx) => {
+    const x = padL + (idx / Math.max(chartData.length - 1, 1)) * plotW;
+    const y = padT + (1 - val / maxCheckIns) * plotH;
+    return { x, y, val, label: chartLabels[idx] };
+  });
+
+  const generateSmoothPath = (pts: { x: number; y: number }[]) => {
+    if (pts.length === 0) return '';
+    if (pts.length === 1) return `M ${pts[0].x} ${pts[0].y}`;
+    let d = `M ${pts[0].x} ${pts[0].y}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = i > 0 ? pts[i - 1] : pts[i];
+      const p1 = pts[i];
+      const p2 = pts[i + 1];
+      const p3 = i !== pts.length - 2 ? pts[i + 2] : p2;
+
+      const cp1x = p1.x + (p2.x - p0.x) / 6;
+      const cp1y = p1.y + (p2.y - p0.y) / 6;
+      const cp2x = p2.x - (p3.x - p1.x) / 6;
+      const cp2y = p2.y - (p3.y - p1.y) / 6;
+
+      d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+    }
+    return d;
+  };
+
+  const linePath = generateSmoothPath(points);
+  const areaPath = points.length > 0
+    ? `${linePath} L ${points[points.length - 1].x} ${padT + plotH} L ${points[0].x} ${padT + plotH} Z`
+    : '';
+
+  // Member Status Donut Calculations
+  const totalM = Number(stats.total_members) || 0;
+  const activeM = Number(stats.active_members) || 0;
+  const expiredM = Number(stats.expired_members) || Math.max(0, totalM - activeM);
+  const activePct = totalM > 0 ? Math.min(100, Math.round((activeM / totalM) * 100)) : 0;
+  const expiredPct = totalM > 0 ? Math.max(0, 100 - activePct) : 0;
+
+  const donutR = 56;
+  const donutC = 2 * Math.PI * donutR; // ~351.858
+  const activeDash = (activePct / 100) * donutC;
+  const expiredDash = (expiredPct / 100) * donutC;
+
   return (
     <div className="flex min-h-screen bg-[#070709] text-white font-sans">
       <Sidebar />
@@ -209,85 +265,100 @@ export default function AdminDashboardPage() {
 
         <main className="flex-1 p-6 md:p-8 space-y-6 max-w-7xl">
 
-          {/* Member Inbox Top Collapsible Banner */}
-          <div className="rounded-3xl bg-[#121217] border border-gray-800/80 p-5 shadow-xl space-y-4">
-            <div className="flex items-center justify-between cursor-pointer" onClick={() => setInboxOpen(!inboxOpen)}>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-orange-500/20 text-orange-400 border border-orange-500/30 flex items-center justify-center font-bold text-lg shadow-md">
-                  📬
-                </div>
-                <div>
-                  <h2 className="text-base font-extrabold text-white">Member Inbox</h2>
-                  <p className="text-xs text-gray-400">Suggestions, complaints & feedback</p>
-                </div>
-              </div>
-
-              <button className="text-gray-400 hover:text-white font-bold text-sm">
-                {inboxOpen ? '▲' : '▼'}
-              </button>
-            </div>
-
-            {inboxOpen && (
-              <div className="space-y-3 pt-1">
-                {inboxMessages.map((msg) => (
-                  <div key={msg.id} className="p-4 rounded-2xl bg-[#0a0a0c] border border-gray-800 flex items-center justify-between text-xs">
-                    <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-full bg-gray-800 text-gray-300 font-bold flex items-center justify-center text-sm border border-gray-700">
-                        {msg.memberName.charAt(0)}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-white text-sm">
-                            {msg.memberName} <span className="text-purple-400 text-[10px]">({msg.gender})</span>
-                          </span>
-                          <span className="text-[10px] text-amber-500 font-mono">{msg.timestamp}</span>
-                        </div>
-                        <p className="font-extrabold text-white mt-1">{msg.subject}</p>
-                        <p className="text-gray-400 mt-0.5">{msg.message}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <span className="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 font-extrabold text-[10px] uppercase tracking-wider">
-                        {msg.type}
-                      </span>
-                      <button className="text-gray-400 hover:text-white transition">↶</button>
-                      <button className="text-gray-400 hover:text-amber-400 transition">⭐</button>
-                      <button className="text-gray-400 hover:text-red-400 transition">🗑️</button>
-                    </div>
+          {/* Member Inbox Top Collapsible Banner (Only shown if active messages exist) */}
+          {inboxMessages.length > 0 && (
+            <div className="rounded-3xl bg-[#121217] border border-gray-800/80 p-5 shadow-xl space-y-4">
+              <div className="flex items-center justify-between cursor-pointer" onClick={() => setInboxOpen(!inboxOpen)}>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-orange-500/20 text-orange-400 border border-orange-500/30 flex items-center justify-center font-bold text-lg shadow-md">
+                    📬
                   </div>
-                ))}
+                  <div>
+                    <h2 className="text-base font-extrabold text-white">Member Inbox</h2>
+                    <p className="text-xs text-gray-400">Suggestions, complaints & feedback ({inboxMessages.length})</p>
+                  </div>
+                </div>
+
+                <button className="text-gray-400 hover:text-white font-bold text-sm">
+                  {inboxOpen ? '▲' : '▼'}
+                </button>
               </div>
-            )}
-          </div>
+
+              {inboxOpen && (
+                <div className="space-y-3 pt-1">
+                  {inboxMessages.map((msg) => (
+                    <div key={msg.id} className="p-4 rounded-2xl bg-[#0a0a0c] border border-gray-800 flex items-center justify-between text-xs">
+                      <div className="flex items-start gap-3">
+                        <div className="w-9 h-9 rounded-full bg-gray-800 text-gray-300 font-bold flex items-center justify-center text-sm border border-gray-700">
+                          {msg.memberName ? msg.memberName.charAt(0) : 'M'}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-white text-sm">
+                              {msg.memberName} <span className="text-purple-400 text-[10px]">({msg.gender || 'm'})</span>
+                            </span>
+                            <span className="text-[10px] text-amber-500 font-mono">{msg.timestamp}</span>
+                          </div>
+                          <p className="font-extrabold text-white mt-1">{msg.subject}</p>
+                          <p className="text-gray-400 mt-0.5">{msg.message}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <span className="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 font-extrabold text-[10px] uppercase tracking-wider">
+                          {msg.type}
+                        </span>
+                        <button className="text-gray-400 hover:text-white transition">↶</button>
+                        <button className="text-gray-400 hover:text-amber-400 transition">⭐</button>
+                        <button className="text-gray-400 hover:text-red-400 transition">🗑️</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* 4 Top KPI Cards Row */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 
             {/* Card 1: Vibrant Orange Revenue Card */}
             <div
-              className="p-6 rounded-3xl text-white shadow-xl shadow-orange-500/20 relative overflow-hidden border border-orange-500/30"
+              className="p-6 rounded-3xl text-white shadow-xl shadow-orange-500/20 relative overflow-hidden border border-orange-500/30 min-h-[148px] flex flex-col justify-between"
               style={{
                 backgroundImage: 'url("/images/dashboard/shap-partern.png"), linear-gradient(135deg, #fa6a2e 0%, #e84a0e 100%)',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}
             >
-              <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-white/90">
-                <FcMoneyTransfer size={32} className="me-2 shrink-0 drop-shadow-md" />
-                <span>REVENUE (THIS MONTH)</span>
-              </div>
-              <div className="text-3xl font-black text-white mt-3 tracking-tight">
-                ₦{stats.revenue_month.toLocaleString()}
-              </div>
-              <div className="mt-3">
-                <span className="text-xs font-semibold text-white/80">vs. ↗ ₦{stats.revenue_last_month.toLocaleString()} (+{stats.revenue_growth}%) last month</span>
+              <div>
+                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-white/90">
+                  <FcMoneyTransfer size={32} className="me-2 shrink-0 drop-shadow-md" />
+                  <span>REVENUE (THIS MONTH)</span>
+                </div>
+                {loadingStats ? (
+                  <div className="mt-3 space-y-2 animate-pulse">
+                    <div className="h-8 w-44 bg-white/30 rounded-xl" />
+                    <div className="h-4 w-52 bg-white/20 rounded-lg" />
+                  </div>
+                ) : (
+                  <>
+                    <div className="text-3xl font-black text-white mt-3 tracking-tight">
+                      ₦{Number(stats.revenue_month ?? 0).toLocaleString()}
+                    </div>
+                    <div className="mt-3">
+                      <span className="text-xs font-semibold text-white/80">
+                        vs. ↗ ₦{Number(stats.revenue_last_month ?? 0).toLocaleString()} ({Number(stats.revenue_growth ?? 0) >= 0 ? '+' : ''}{Number(stats.revenue_growth ?? 0).toFixed(1)}%) last month
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
             {/* Card 2: Total Members */}
             <div
-              className="p-6 rounded-3xl text-white shadow-xl border border-gray-800/80 flex flex-col justify-between relative overflow-hidden"
+              className="p-6 rounded-3xl text-white shadow-xl border border-gray-800/80 flex flex-col justify-between relative overflow-hidden min-h-[148px]"
               style={{
                 backgroundImage: 'url("/images/dashboard/shap-partern.png"), linear-gradient(135deg, #242426 0%, #1a1a1c 100%)',
                 backgroundSize: 'cover',
@@ -299,18 +370,27 @@ export default function AdminDashboardPage() {
                   <FcConferenceCall size={32} className="me-2 shrink-0 drop-shadow-md" />
                   <span>TOTAL MEMBERS</span>
                 </div>
-                <div className="text-3xl font-black text-white mt-3">{stats.total_members}</div>
-              </div>
-              <div className="mt-3">
-                <span className="text-xs font-semibold text-gray-400">
-                  <span className="text-emerald-400 font-bold">+{stats.new_members_week}</span> new member this week
-                </span>
+                {loadingStats ? (
+                  <div className="mt-3 space-y-2 animate-pulse">
+                    <div className="h-8 w-24 bg-gray-800 rounded-xl" />
+                    <div className="h-4 w-40 bg-gray-800/70 rounded-lg" />
+                  </div>
+                ) : (
+                  <>
+                    <div className="text-3xl font-black text-white mt-3">{stats.total_members ?? 0}</div>
+                    <div className="mt-3">
+                      <span className="text-xs font-semibold text-gray-400">
+                        <span className="text-emerald-400 font-bold">+{stats.new_members_week ?? 0}</span> new member this week
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
             {/* Card 3: Active Members */}
             <div
-              className="p-6 rounded-3xl text-white shadow-xl border border-gray-800/80 flex flex-col justify-between relative overflow-hidden"
+              className="p-6 rounded-3xl text-white shadow-xl border border-gray-800/80 flex flex-col justify-between relative overflow-hidden min-h-[148px]"
               style={{
                 backgroundImage: 'url("/images/dashboard/shap-partern.png"), linear-gradient(135deg, #242426 0%, #1a1a1c 100%)',
                 backgroundSize: 'cover',
@@ -322,16 +402,25 @@ export default function AdminDashboardPage() {
                   <FcApproval size={32} className="me-2 shrink-0 drop-shadow-md" />
                   <span>ACTIVE MEMBERS</span>
                 </div>
-                <div className="text-3xl font-black text-white mt-3">{stats.active_members}</div>
-              </div>
-              <div className="text-xs text-gray-400 font-semibold mt-3">
-                out of <span className="text-cyan-400 font-bold">{stats.total_members}</span> total members
+                {loadingStats ? (
+                  <div className="mt-3 space-y-2 animate-pulse">
+                    <div className="h-8 w-24 bg-gray-800 rounded-xl" />
+                    <div className="h-4 w-44 bg-gray-800/70 rounded-lg" />
+                  </div>
+                ) : (
+                  <>
+                    <div className="text-3xl font-black text-white mt-3">{stats.active_members ?? 0}</div>
+                    <div className="text-xs text-gray-400 font-semibold mt-3">
+                      out of <span className="text-cyan-400 font-bold">{stats.total_members ?? 0}</span> total members
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
             {/* Card 4: Check-ins Today */}
             <div
-              className="p-6 rounded-3xl text-white shadow-xl border border-gray-800/80 flex flex-col justify-between relative overflow-hidden"
+              className="p-6 rounded-3xl text-white shadow-xl border border-gray-800/80 flex flex-col justify-between relative overflow-hidden min-h-[148px]"
               style={{
                 backgroundImage: 'url("/images/dashboard/shap-partern.png"), linear-gradient(135deg, #242426 0%, #1a1a1c 100%)',
                 backgroundSize: 'cover',
@@ -343,10 +432,19 @@ export default function AdminDashboardPage() {
                   <FcCalendar size={32} className="me-2 shrink-0 drop-shadow-md" />
                   <span>CHECK-INS TODAY</span>
                 </div>
-                <div className="text-3xl font-black text-white mt-3">{stats.check_ins_today}</div>
-              </div>
-              <div className="text-xs text-gray-400 font-semibold mt-3">
-                <span className="text-amber-400 font-bold">{stats.check_ins_week}</span> total this week
+                {loadingStats ? (
+                  <div className="mt-3 space-y-2 animate-pulse">
+                    <div className="h-8 w-24 bg-gray-800 rounded-xl" />
+                    <div className="h-4 w-36 bg-gray-800/70 rounded-lg" />
+                  </div>
+                ) : (
+                  <>
+                    <div className="text-3xl font-black text-white mt-3">{stats.check_ins_today ?? 0}</div>
+                    <div className="text-xs text-gray-400 font-semibold mt-3">
+                      <span className="text-amber-400 font-bold">{stats.check_ins_week ?? 0}</span> total this week
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
@@ -399,44 +497,78 @@ export default function AdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-800/60 font-medium">
-                  {expiringSessions.map((session) => (
-                    <tr key={session.uid} className="hover:bg-gray-800/30 transition">
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/30 flex items-center justify-center font-bold text-xs">
-                            {session.memberName.charAt(0)}
+                  {loadingStats ? (
+                    [1, 2, 3].map((n) => (
+                      <tr key={n} className="animate-pulse">
+                        <td className="py-3.5 px-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-full bg-gray-800" />
+                            <div className="space-y-1.5">
+                              <div className="h-3.5 w-32 bg-gray-800 rounded" />
+                              <div className="h-2.5 w-20 bg-gray-800/60 rounded" />
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-bold text-white text-sm">
-                              {session.memberName} <span className="text-purple-400 text-xs font-mono">({session.gender})</span>
-                            </p>
-                            <span className="text-[10px] text-gray-500 font-bold tracking-wider uppercase">{session.method}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <span className="px-3 py-1 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30 text-[10px] font-extrabold">
-                          {session.sessionType}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4 font-mono text-gray-300">
-                        {session.checkInTime} - {session.endTime}
-                      </td>
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-3">
-                          <span className="px-3.5 py-1 rounded-full bg-red-500/20 text-red-400 border border-red-500/40 font-mono font-extrabold text-xs shadow-lg shadow-red-500/10 animate-pulse">
-                            {session.remainingMinutes}m Left
-                          </span>
-                          <button
-                            onClick={() => handleCancelSession(session.uid)}
-                            className="text-gray-400 hover:text-red-400 text-sm transition font-bold"
-                          >
-                            ✕
-                          </button>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="h-5 w-16 bg-gray-800 rounded-full" />
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="h-3.5 w-28 bg-gray-800 rounded" />
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <div className="h-6 w-20 bg-gray-800 rounded-full ml-auto" />
+                        </td>
+                      </tr>
+                    ))
+                  ) : expiringSessions.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="py-8 text-center text-gray-500">
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <span className="text-2xl">⚡</span>
+                          <span className="text-xs font-semibold">No active sessions expiring soon</span>
                         </div>
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    expiringSessions.map((session) => (
+                      <tr key={session.uid} className="hover:bg-gray-800/30 transition">
+                        <td className="py-3.5 px-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/30 flex items-center justify-center font-bold text-xs">
+                              {session.memberName.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="font-bold text-white text-sm">
+                                {session.memberName} <span className="text-purple-400 text-xs font-mono">({session.gender})</span>
+                              </p>
+                              <span className="text-[10px] text-gray-500 font-bold tracking-wider uppercase">{session.method}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span className="px-3 py-1 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30 text-[10px] font-extrabold">
+                            {session.sessionType}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 font-mono text-gray-300">
+                          {session.checkInTime} - {session.endTime}
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <div className="flex items-center justify-end gap-3">
+                            <span className="px-3.5 py-1 rounded-full bg-red-500/20 text-red-400 border border-red-500/40 font-mono font-extrabold text-xs shadow-lg shadow-red-500/10 animate-pulse">
+                              {session.remainingMinutes}m Left
+                            </span>
+                            <button
+                              onClick={() => handleCancelSession(session.uid)}
+                              className="text-gray-400 hover:text-red-400 text-sm transition font-bold"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -445,60 +577,392 @@ export default function AdminDashboardPage() {
           {/* Bottom 3-Column Analytics Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            {/* Column 1: Smooth Orange Curved Activity Line Chart */}
-            <div className="p-6 rounded-3xl bg-[#121217] border border-gray-800/80 shadow-xl space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-base font-extrabold text-white">Activity</h3>
-                <span className="px-3 py-1 rounded-xl bg-gray-900 border border-gray-800 text-xs font-bold text-gray-300">
-                  Weekly ▼
-                </span>
+            {/* Column 1: Live Interactive Activity Area Chart */}
+            <div className="p-6 rounded-3xl bg-[#121217] border border-gray-800/80 shadow-xl space-y-4 flex flex-col justify-between relative overflow-hidden">
+              {/* Header with Title, Period Total Subtitle, and Range Selector */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse shadow-md shadow-orange-500/50 shrink-0" />
+                    <h3 className="text-base font-extrabold text-white tracking-tight">Activity</h3>
+                  </div>
+                  <p className="text-[11px] text-gray-400 mt-0.5 whitespace-nowrap">
+                    <span className="text-orange-400 font-extrabold">{Number(totalPeriodCheckIns).toLocaleString()}</span>{' '}
+                    {totalPeriodCheckIns === 1 ? 'check-in' : 'check-ins'}{' '}
+                    <span className="text-gray-500">({activityRange === 'weekly' ? 'this week' : activityRange === 'monthly' ? 'this month' : 'this year'})</span>
+                  </p>
+                </div>
+
+                {/* Range Filter Pills */}
+                <div className="flex items-center gap-0.5 p-1 rounded-xl bg-[#0a0a0c] border border-gray-800 text-[11px] font-bold shrink-0">
+                  {(['weekly', 'monthly', 'yearly'] as const).map((r) => (
+                    <button
+                      key={r}
+                      onClick={() => setActivityRange(r)}
+                      className={`px-2.5 py-1 rounded-lg transition-all capitalize text-[11px] ${
+                        activityRange === r
+                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-black font-black shadow-md shadow-orange-500/20'
+                          : 'text-gray-400 hover:text-white font-medium'
+                      }`}
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              {/* Area Line Chart Visualization */}
-              <div className="pt-4 space-y-2">
-                <div className="h-40 relative flex items-end justify-between px-2">
-                  <svg className="absolute inset-0 w-full h-full text-orange-500 overflow-visible" viewBox="0 0 300 120" preserveAspectRatio="none">
-                    <path
-                      fill="rgba(250, 106, 46, 0.15)"
-                      stroke="#fa6a2e"
-                      strokeWidth="3"
-                      d="M 0 20 Q 50 15, 100 25 T 200 80 T 300 110 L 300 120 L 0 120 Z"
-                    />
-                  </svg>
-                </div>
+              {/* Chart Visualization Container */}
+              <div className="pt-2 relative">
+                {loadingStats ? (
+                  <div className="h-44 w-full bg-gray-800/30 rounded-2xl animate-pulse flex items-center justify-center">
+                    <span className="text-xs text-gray-500 font-semibold">Loading activity telemetry...</span>
+                  </div>
+                ) : (
+                  <div className="relative">
+                    {/* Floating Tooltip when hovering a point */}
+                    {hoveredPointIndex !== null && points[hoveredPointIndex] && (
+                      <div
+                        className="absolute z-20 pointer-events-none px-3 py-1.5 rounded-xl bg-[#1e1e26] border border-orange-500/40 text-xs shadow-2xl backdrop-blur-md -translate-x-1/2 -translate-y-full transition-all duration-150"
+                        style={{
+                          left: `${(points[hoveredPointIndex].x / svgW) * 100}%`,
+                          top: `${(points[hoveredPointIndex].y / svgH) * 100 - 8}%`,
+                        }}
+                      >
+                        <div className="font-extrabold text-white text-[11px]">
+                          {points[hoveredPointIndex].label}
+                        </div>
+                        <div className="text-[12px] font-black text-orange-400">
+                          {points[hoveredPointIndex].val} <span className="text-[10px] text-gray-300 font-normal">Check-ins</span>
+                        </div>
+                      </div>
+                    )}
 
-                <div className="flex justify-between text-[11px] font-bold text-gray-400 pt-2 border-t border-gray-800">
-                  <span>Mon</span>
-                  <span>Tue</span>
-                  <span>Wed</span>
-                  <span>Thu</span>
-                  <span>Fri</span>
-                  <span>Sat</span>
-                  <span>Sun</span>
-                </div>
+                    <svg
+                      className="w-full h-44 overflow-visible"
+                      viewBox={`0 0 ${svgW} ${svgH}`}
+                      preserveAspectRatio="none"
+                    >
+                      <defs>
+                        {/* Luminous Neon Orange Gradient Fill */}
+                        <linearGradient id="activityGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#fa6a2e" stopOpacity="0.4" />
+                          <stop offset="60%" stopColor="#fa6a2e" stopOpacity="0.08" />
+                          <stop offset="100%" stopColor="#fa6a2e" stopOpacity="0.0" />
+                        </linearGradient>
+
+                        {/* Glow Filter */}
+                        <filter id="orangeGlow" x="-20%" y="-20%" width="140%" height="140%">
+                          <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#fa6a2e" floodOpacity="0.4" />
+                        </filter>
+                      </defs>
+
+                      {/* Horizontal Grid Guidelines & Y-Axis Labels */}
+                      {[0, 0.5, 1].map((ratio, i) => {
+                        const yPos = padT + ratio * plotH;
+                        const labelVal = Math.round(maxCheckIns * (1 - ratio));
+                        return (
+                          <g key={i}>
+                            <line
+                              x1={padL}
+                              y1={yPos}
+                              x2={svgW - padR}
+                              y2={yPos}
+                              stroke="rgba(255, 255, 255, 0.07)"
+                              strokeDasharray="4 4"
+                              strokeWidth="1"
+                            />
+                            <text
+                              x={padL - 8}
+                              y={yPos + 3.5}
+                              textAnchor="end"
+                              fill="#6b7280"
+                              fontSize="9"
+                              fontWeight="bold"
+                              fontFamily="monospace"
+                            >
+                              {labelVal}
+                            </text>
+                          </g>
+                        );
+                      })}
+
+                      {/* Vertical Crosshair Line on Hover */}
+                      {hoveredPointIndex !== null && points[hoveredPointIndex] && (
+                        <line
+                          x1={points[hoveredPointIndex].x}
+                          y1={padT}
+                          x2={points[hoveredPointIndex].x}
+                          y2={padT + plotH}
+                          stroke="#fa6a2e"
+                          strokeDasharray="3 3"
+                          strokeWidth="1.5"
+                          opacity="0.8"
+                        />
+                      )}
+
+                      {/* Gradient Fill Path */}
+                      {areaPath && <path d={areaPath} fill="url(#activityGradient)" />}
+
+                      {/* Smooth Glowing Trend Line */}
+                      {linePath && (
+                        <path
+                          d={linePath}
+                          fill="none"
+                          stroke="#fa6a2e"
+                          strokeWidth="3.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          filter="url(#orangeGlow)"
+                        />
+                      )}
+
+                      {/* Interactive Point Nodes */}
+                      {points.map((pt, i) => {
+                        const isHovered = hoveredPointIndex === i;
+                        return (
+                          <g
+                            key={i}
+                            className="cursor-pointer transition-all"
+                            onMouseEnter={() => setHoveredPointIndex(i)}
+                            onMouseLeave={() => setHoveredPointIndex(null)}
+                          >
+                            {/* Invisible touch/hover target */}
+                            <circle cx={pt.x} cy={pt.y} r="14" fill="transparent" />
+
+                            {/* Halo ripple on hover */}
+                            {isHovered && (
+                              <circle
+                                cx={pt.x}
+                                cy={pt.y}
+                                r="10"
+                                fill="none"
+                                stroke="rgba(250, 106, 46, 0.5)"
+                                strokeWidth="3"
+                                className="animate-ping origin-center"
+                              />
+                            )}
+
+                            {/* Center Point Circle */}
+                            <circle
+                              cx={pt.x}
+                              cy={pt.y}
+                              r={isHovered ? 5.5 : 3.5}
+                              fill={isHovered ? '#fa6a2e' : '#0a0a0c'}
+                              stroke="#fa6a2e"
+                              strokeWidth={isHovered ? 2.5 : 2}
+                              className="transition-all duration-150"
+                            />
+                          </g>
+                        );
+                      })}
+                    </svg>
+
+                    {/* X-Axis Labels Row */}
+                    <div className="flex justify-between text-[10px] font-bold text-gray-400 pt-1 border-t border-gray-800/80 px-1">
+                      {chartLabels.map((lbl, idx) => {
+                        // For monthly with many labels, only display periodically
+                        if (activityRange === 'monthly' && idx % 4 !== 0 && idx !== chartLabels.length - 1) {
+                          return null;
+                        }
+                        const isHovered = hoveredPointIndex === idx;
+                        return (
+                          <span
+                            key={idx}
+                            onMouseEnter={() => setHoveredPointIndex(idx)}
+                            onMouseLeave={() => setHoveredPointIndex(null)}
+                            className={`cursor-pointer transition ${
+                              isHovered ? 'text-orange-400 font-black scale-110' : 'hover:text-white'
+                            }`}
+                          >
+                            {lbl}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Column 2: Member Status Donut Chart */}
-            <div className="p-6 rounded-3xl bg-[#121217] border border-gray-800/80 shadow-xl space-y-4 text-center">
-              <h3 className="text-base font-extrabold text-white text-left">Member Status</h3>
+            {/* Column 2: Live Dual-Arc Member Status Donut Chart */}
+            <div className="p-6 rounded-3xl bg-[#121217] border border-gray-800/80 shadow-xl space-y-4 text-center flex flex-col justify-between relative overflow-hidden">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-extrabold text-white text-left">Member Status</h3>
+                  <p className="text-[11px] text-gray-400 text-left">
+                    {totalM.toLocaleString()} Registered {totalM === 1 ? 'Member' : 'Members'}
+                  </p>
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-black tracking-wider uppercase">
+                  {activePct}% Active
+                </span>
+              </div>
 
-              <div className="py-4 flex items-center justify-center">
-                <div className="relative w-40 h-40 rounded-full border-[16px] border-emerald-500 flex items-center justify-center shadow-2xl">
-                  <div className="text-center">
-                    <span className="text-2xl font-black text-white">{stats.active_members}</span>
-                    <p className="text-[10px] font-bold text-emerald-400 uppercase">Active</p>
+              {/* Dynamic SVG Donut Visualization */}
+              <div className="py-2 flex items-center justify-center relative">
+                <div className="relative w-44 h-44 flex items-center justify-center">
+                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 140 140">
+                    <defs>
+                      {/* Emerald Glow & Gradient */}
+                      <linearGradient id="emeraldNeonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#10b981" />
+                        <stop offset="100%" stopColor="#059669" />
+                      </linearGradient>
+
+                      {/* Red/Coral Gradient */}
+                      <linearGradient id="roseNeonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#ef4444" />
+                        <stop offset="100%" stopColor="#b91c1c" />
+                      </linearGradient>
+
+                      <filter id="activeGlow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#10b981" floodOpacity="0.5" />
+                      </filter>
+                    </defs>
+
+                    {/* Background Track Ring */}
+                    <circle
+                      cx="70"
+                      cy="70"
+                      r={donutR}
+                      fill="none"
+                      stroke="#1e1e24"
+                      strokeWidth="14"
+                    />
+
+                    {/* Active Members Arc */}
+                    {activePct > 0 && (
+                      <circle
+                        cx="70"
+                        cy="70"
+                        r={donutR}
+                        fill="none"
+                        stroke="url(#emeraldNeonGrad)"
+                        strokeWidth={donutHoveredSegment === 'active' ? 18 : 14}
+                        strokeDasharray={`${activeDash} ${donutC}`}
+                        strokeDashoffset="0"
+                        strokeLinecap="round"
+                        filter={donutHoveredSegment === 'active' ? 'url(#activeGlow)' : undefined}
+                        className="transition-all duration-500 cursor-pointer"
+                        onMouseEnter={() => setDonutHoveredSegment('active')}
+                        onMouseLeave={() => setDonutHoveredSegment(null)}
+                      />
+                    )}
+
+                    {/* Expired / Inactive Members Arc */}
+                    {expiredPct > 0 && (
+                      <circle
+                        cx="70"
+                        cy="70"
+                        r={donutR}
+                        fill="none"
+                        stroke="url(#roseNeonGrad)"
+                        strokeWidth={donutHoveredSegment === 'expired' ? 18 : 14}
+                        strokeDasharray={`${expiredDash} ${donutC}`}
+                        strokeDashoffset={-activeDash}
+                        strokeLinecap="round"
+                        className="transition-all duration-500 cursor-pointer"
+                        onMouseEnter={() => setDonutHoveredSegment('expired')}
+                        onMouseLeave={() => setDonutHoveredSegment(null)}
+                      />
+                    )}
+                  </svg>
+
+                  {/* Donut Center Hub Info */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+                    {loadingStats ? (
+                      <div className="h-8 w-16 bg-gray-800 rounded-lg animate-pulse" />
+                    ) : donutHoveredSegment === 'active' ? (
+                      <div className="animate-fadeIn">
+                        <span className="text-2xl font-black text-emerald-400 leading-none">
+                          {activeM.toLocaleString()}
+                        </span>
+                        <p className="text-[9px] font-extrabold text-emerald-300 uppercase tracking-wider mt-1">
+                          Active
+                        </p>
+                      </div>
+                    ) : donutHoveredSegment === 'expired' ? (
+                      <div className="animate-fadeIn">
+                        <span className="text-2xl font-black text-red-400 leading-none">
+                          {expiredM.toLocaleString()}
+                        </span>
+                        <p className="text-[9px] font-extrabold text-red-300 uppercase tracking-wider mt-1">
+                          Expired
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="animate-fadeIn">
+                        <span className="text-3xl font-black text-white leading-none tracking-tight">
+                          {activePct}%
+                        </span>
+                        <p className="text-[9px] font-extrabold text-gray-400 uppercase tracking-wider mt-1">
+                          Active Ratio
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-center gap-6 text-xs font-extrabold">
-                <span className="flex items-center gap-1.5 text-emerald-400">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Active Members
-                </span>
-                <span className="flex items-center gap-1.5 text-red-400">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-500" /> Expired/Inactive
-                </span>
+              {/* Interactive Legend & Metric Breakdown */}
+              <div className="space-y-2.5 pt-1">
+                <div className="grid grid-cols-2 gap-2">
+                  <div
+                    onMouseEnter={() => setDonutHoveredSegment('active')}
+                    onMouseLeave={() => setDonutHoveredSegment(null)}
+                    className={`p-2.5 rounded-2xl border transition cursor-pointer text-left ${
+                      donutHoveredSegment === 'active'
+                        ? 'bg-emerald-500/15 border-emerald-500/50 shadow-lg shadow-emerald-500/10'
+                        : 'bg-[#0a0a0c] border-gray-800 hover:border-gray-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 uppercase">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" /> Active
+                    </div>
+                    <div className="text-base font-extrabold text-white mt-0.5">
+                      {activeM.toLocaleString()}
+                    </div>
+                    <div className="text-[10px] text-gray-400">{activePct}% of members</div>
+                  </div>
+
+                  <div
+                    onMouseEnter={() => setDonutHoveredSegment('expired')}
+                    onMouseLeave={() => setDonutHoveredSegment(null)}
+                    className={`p-2.5 rounded-2xl border transition cursor-pointer text-left ${
+                      donutHoveredSegment === 'expired'
+                        ? 'bg-red-500/15 border-red-500/50 shadow-lg shadow-red-500/10'
+                        : 'bg-[#0a0a0c] border-gray-800 hover:border-gray-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-red-400 uppercase">
+                      <span className="w-2 h-2 rounded-full bg-red-500" /> Expired
+                    </div>
+                    <div className="text-base font-extrabold text-white mt-0.5">
+                      {expiredM.toLocaleString()}
+                    </div>
+                    <div className="text-[10px] text-gray-400">{expiredPct}% of members</div>
+                  </div>
+                </div>
+
+                {/* Micro Retention Bar */}
+                <div className="space-y-1">
+                  <div className="h-1.5 w-full bg-[#1e1e24] rounded-full overflow-hidden flex">
+                    <div
+                      style={{ width: `${activePct}%` }}
+                      className="bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500"
+                    />
+                    <div
+                      style={{ width: `${expiredPct}%` }}
+                      className="bg-gradient-to-r from-red-500 to-rose-600 transition-all duration-500"
+                    />
+                  </div>
+                  <div className="flex justify-between text-[9px] font-bold text-gray-500 uppercase tracking-wider">
+                    <span>Gym Retention Health</span>
+                    <span className={activePct >= 70 ? 'text-emerald-400' : activePct >= 50 ? 'text-amber-400' : 'text-red-400'}>
+                      {activePct >= 70 ? 'Optimal' : activePct >= 50 ? 'Moderate' : 'Low Active'}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -512,29 +976,51 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="space-y-3">
-                {recentTransactions.map((tx) => (
-                  <div key={tx.id} className="p-3.5 rounded-2xl bg-[#0a0a0c] border border-gray-800 flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30 flex items-center justify-center font-bold text-sm">
-                        📄
+                {loadingStats ? (
+                  [1, 2, 3].map((n) => (
+                    <div key={n} className="p-3.5 rounded-2xl bg-[#0a0a0c] border border-gray-800 flex items-center justify-between animate-pulse">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-gray-800" />
+                        <div className="space-y-1.5">
+                          <div className="h-3 w-28 bg-gray-800 rounded" />
+                          <div className="h-2.5 w-16 bg-gray-800/60 rounded" />
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-extrabold text-white">
-                          {tx.memberName} <span className="text-purple-400 text-[10px]">({tx.gender})</span>
-                        </p>
-                        <p className="text-[10px] text-gray-400 uppercase font-mono">{tx.type}</p>
+                      <div className="space-y-1.5 text-right">
+                        <div className="h-3 w-16 bg-gray-800 rounded ml-auto" />
+                        <div className="h-2 w-12 bg-gray-800/60 rounded ml-auto" />
                       </div>
                     </div>
-
-                    <div className="text-right flex items-center gap-2">
-                      <div>
-                        <p className="font-black text-emerald-400 font-mono">₦{tx.amount.toLocaleString()}</p>
-                        <p className="text-[10px] text-gray-500 font-mono">{tx.date}</p>
-                      </div>
-                      <span className="text-gray-500 hover:text-white cursor-pointer text-sm font-bold">⋮</span>
-                    </div>
+                  ))
+                ) : recentTransactions.length === 0 ? (
+                  <div className="py-8 text-center text-gray-500 text-xs font-medium">
+                    No recent transactions found
                   </div>
-                ))}
+                ) : (
+                  recentTransactions.map((tx) => (
+                    <div key={tx.id} className="p-3.5 rounded-2xl bg-[#0a0a0c] border border-gray-800 flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30 flex items-center justify-center font-bold text-sm">
+                          📄
+                        </div>
+                        <div>
+                          <p className="font-extrabold text-white">
+                            {tx.memberName} <span className="text-purple-400 text-[10px]">({tx.gender || 'm'})</span>
+                          </p>
+                          <p className="text-[10px] text-gray-400 uppercase font-mono">{tx.type}</p>
+                        </div>
+                      </div>
+
+                      <div className="text-right flex items-center gap-2">
+                        <div>
+                          <p className="font-black text-emerald-400 font-mono">₦{Number(tx.amount || 0).toLocaleString()}</p>
+                          <p className="text-[10px] text-gray-500 font-mono">{tx.date}</p>
+                        </div>
+                        <span className="text-gray-500 hover:text-white cursor-pointer text-sm font-bold">⋮</span>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
@@ -571,17 +1057,23 @@ export default function AdminDashboardPage() {
                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
                   Recent Reception Logs
                 </span>
-                {deskLogs.map((log) => (
-                  <div key={log.id} className="p-3 rounded-xl bg-[#0a0a0c] border border-gray-800/80 flex items-center justify-between text-xs">
-                    <div>
-                      <p className="font-bold text-white">{log.name}</p>
-                      <p className="text-[10px] text-gray-500">{log.time} • {log.method}</p>
-                    </div>
-                    <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[10px] font-bold">
-                      Active
-                    </span>
+                {deskLogs.length === 0 ? (
+                  <div className="py-6 text-center text-gray-500 text-xs">
+                    No desk check-ins recorded yet
                   </div>
-                ))}
+                ) : (
+                  deskLogs.map((log) => (
+                    <div key={log.id} className="p-3 rounded-xl bg-[#0a0a0c] border border-gray-800/80 flex items-center justify-between text-xs">
+                      <div>
+                        <p className="font-bold text-white">{log.name}</p>
+                        <p className="text-[10px] text-gray-500">{log.time} • {log.method}</p>
+                      </div>
+                      <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[10px] font-bold">
+                        Active
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
@@ -609,15 +1101,33 @@ export default function AdminDashboardPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-800/60 font-medium">
-                    {leaderboard.map((item) => (
-                      <tr key={item.rank} className="hover:bg-gray-800/30 transition">
-                        <td className="py-3.5 px-4 font-mono font-bold text-orange-400">#{item.rank}</td>
-                        <td className="py-3.5 px-4 font-bold text-white">{item.name}</td>
-                        <td className="py-3.5 px-4 font-mono text-gray-300">{item.checkIns} Sessions</td>
-                        <td className="py-3.5 px-4 font-mono font-extrabold text-emerald-400">{item.points} PTS</td>
-                        <td className="py-3.5 px-4 text-right font-bold text-gray-300">{item.badge || '--'}</td>
+                    {loadingStats ? (
+                      [1, 2, 3].map((n) => (
+                        <tr key={n} className="animate-pulse">
+                          <td className="py-3.5 px-4"><div className="h-3.5 w-8 bg-gray-800 rounded" /></td>
+                          <td className="py-3.5 px-4"><div className="h-3.5 w-28 bg-gray-800 rounded" /></td>
+                          <td className="py-3.5 px-4"><div className="h-3.5 w-20 bg-gray-800 rounded" /></td>
+                          <td className="py-3.5 px-4"><div className="h-3.5 w-16 bg-gray-800 rounded" /></td>
+                          <td className="py-3.5 px-4 text-right"><div className="h-3.5 w-20 bg-gray-800 rounded ml-auto" /></td>
+                        </tr>
+                      ))
+                    ) : leaderboard.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="py-8 text-center text-gray-500 font-medium">
+                          No campaign leaderboard entries recorded yet.
+                        </td>
                       </tr>
-                    ))}
+                    ) : (
+                      leaderboard.map((item) => (
+                        <tr key={item.rank} className="hover:bg-gray-800/30 transition">
+                          <td className="py-3.5 px-4 font-mono font-bold text-orange-400">#{item.rank}</td>
+                          <td className="py-3.5 px-4 font-bold text-white">{item.name}</td>
+                          <td className="py-3.5 px-4 font-mono text-gray-300">{item.checkIns} Sessions</td>
+                          <td className="py-3.5 px-4 font-mono font-extrabold text-emerald-400">{item.points} PTS</td>
+                          <td className="py-3.5 px-4 text-right font-bold text-gray-300">{item.badge || '--'}</td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
