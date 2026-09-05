@@ -298,86 +298,108 @@ export default function MemberPortalPage() {
         </header>
       </div>
 
-      {/* Hero Section with Brightened Dark Background Slider & Overlay */}
-      <HeroSlider
-        tenantName={tenantName}
-        campaignTitle={leaderboardCampaign?.title || 'Active Fitness Challenge'}
-        isAuthenticated={isAuthenticated}
-        slides={cmsContent?.hero?.slides}
-        onOpenPass={() => setShowPassModal(true)}
-        onOpenRenew={() => setShowPlanModal(true)}
-        onOpenRegister={() => setShowRegisterModal(true)}
-      />
+      {/* SECTION VISIBILITY WRAPPERS */}
 
-      {/* Live Gym Operating Hours & Capacity Status */}
-      <GymPulseBar tenantName={tenantName} />
-
-      {/* How Turnstile Gate Access Works */}
-      <HowItWorksSection />
-
-      {/* Elite Amenities & Infrastructure Grid */}
-      <AmenitiesGrid items={cmsContent?.amenities?.items} />
-
-      {/* Weekly Class Timetable & Group Sessions */}
-      <ClassScheduleSection
-        tenantName={tenantName}
-        schedule={cmsContent?.classes}
-        onSelectClass={(clsName) => {
-          if (!isAuthenticated) {
-            setNotificationMsg(`✨ Selected ${clsName}. Sign in or create a pass to reserve your spot.`);
-            setShowLoginModal(true);
-          } else {
-            setNotificationMsg(`🎉 Spot reserved for ${clsName}! See you at the studio.`);
-            setTimeout(() => setNotificationMsg(''), 5000);
-          }
-        }}
-      />
-
-      {/* Interactive Body Mass Index (BMI) Telemetry Calculator */}
-      <BmiCalculatorSection
-        tenantName={tenantName}
-        onExplorePlans={() => {
-          const plansEl = document.getElementById('plans');
-          if (plansEl) plansEl.scrollIntoView({ behavior: 'smooth' });
-        }}
-      />
-
-      {/* Elite Certified Trainers & Master Coaches */}
-      <TrainersShowcaseSection
-        tenantName={tenantName}
-        trainers={cmsContent?.trainers?.items}
-        onBookTrainer={(trainerName) => {
-          if (!isAuthenticated) {
-            setNotificationMsg(`💬 Booking 1-on-1 consultation with Coach ${trainerName}. Create an account to complete.`);
-            setShowRegisterModal(true);
-          } else {
-            const msg = encodeURIComponent(`Hello ${tenantName}, I would like to schedule a 1-on-1 personal training consultation with coach ${trainerName}.`);
-            window.open(`https://wa.me/?text=${msg}`, '_blank');
-          }
-        }}
-      />
-
-      {/* Compact & Categorized Membership Plans */}
-      <main className="w-full max-w-6xl mx-auto px-6 py-12" id="plans">
-        <MembershipPlansSection
-          plans={pricingPlans}
-          currencySymbol={currencySymbol}
-          onSelectPlan={handlePlanSelect}
+      {/* 1. Hero Section with Brightened Dark Background Slider & Overlay */}
+      {(cmsContent?.section_visibility?.hero !== false) && (
+        <HeroSlider
+          tenantName={tenantName}
+          campaignTitle={leaderboardCampaign?.title || 'Active Fitness Challenge'}
+          isAuthenticated={isAuthenticated}
+          slides={cmsContent?.hero?.slides}
+          onOpenPass={() => setShowPassModal(true)}
+          onOpenRenew={() => setShowPlanModal(true)}
+          onOpenRegister={() => setShowRegisterModal(true)}
         />
-      </main>
+      )}
 
-      {/* Member Testimonials & Real Transformations */}
-      <TestimonialsSection
-        tenantName={tenantName}
-        testimonials={cmsContent?.testimonials?.items}
-      />
+      {/* 2. Live Gym Operating Hours & Capacity Status */}
+      {(cmsContent?.section_visibility?.pulse !== false) && (
+        <GymPulseBar tenantName={tenantName} />
+      )}
 
-      {/* FAQs & Front Desk Support */}
-      <FaqLocationSection
-        tenantName={tenantName}
-        faqs={cmsContent?.faqs?.items}
-        contactSocials={cmsContent?.contact_socials}
-      />
+      {/* 3. How Turnstile Gate Access Works */}
+      {(cmsContent?.section_visibility?.how_it_works !== false) && (
+        <HowItWorksSection />
+      )}
+
+      {/* 4. Elite Amenities & Infrastructure Grid */}
+      {(cmsContent?.section_visibility?.amenities !== false) && (
+        <AmenitiesGrid items={cmsContent?.amenities?.items} />
+      )}
+
+      {/* 5. Weekly Class Timetable & Group Sessions */}
+      {(cmsContent?.section_visibility?.classes !== false) && (
+        <ClassScheduleSection
+          tenantName={tenantName}
+          schedule={cmsContent?.classes}
+          onSelectClass={(clsName) => {
+            if (!isAuthenticated) {
+              setNotificationMsg(`✨ Selected ${clsName}. Sign in or create a pass to reserve your spot.`);
+              setShowLoginModal(true);
+            } else {
+              setNotificationMsg(`🎉 Spot reserved for ${clsName}! See you at the studio.`);
+              setTimeout(() => setNotificationMsg(''), 5000);
+            }
+          }}
+        />
+      )}
+
+      {/* 6. Interactive Body Mass Index (BMI) Telemetry Calculator */}
+      {(cmsContent?.section_visibility?.bmi !== false) && (
+        <BmiCalculatorSection
+          tenantName={tenantName}
+          onExplorePlans={() => {
+            const plansEl = document.getElementById('plans');
+            if (plansEl) plansEl.scrollIntoView({ behavior: 'smooth' });
+          }}
+        />
+      )}
+
+      {/* 7. Elite Certified Trainers & Master Coaches */}
+      {(cmsContent?.section_visibility?.trainers !== false) && (
+        <TrainersShowcaseSection
+          tenantName={tenantName}
+          trainers={cmsContent?.trainers?.items}
+          onBookTrainer={(trainerName) => {
+            if (!isAuthenticated) {
+              setNotificationMsg(`💬 Booking 1-on-1 consultation with Coach ${trainerName}. Create an account to complete.`);
+              setShowRegisterModal(true);
+            } else {
+              const msg = encodeURIComponent(`Hello ${tenantName}, I would like to schedule a 1-on-1 personal training consultation with coach ${trainerName}.`);
+              window.open(`https://wa.me/?text=${msg}`, '_blank');
+            }
+          }}
+        />
+      )}
+
+      {/* 8. Compact & Categorized Membership Plans */}
+      {(cmsContent?.section_visibility?.plans !== false) && (
+        <main className="w-full max-w-6xl mx-auto px-6 py-12" id="plans">
+          <MembershipPlansSection
+            plans={pricingPlans}
+            currencySymbol={currencySymbol}
+            onSelectPlan={handlePlanSelect}
+          />
+        </main>
+      )}
+
+      {/* 9. Member Testimonials & Real Transformations */}
+      {(cmsContent?.section_visibility?.testimonials !== false) && (
+        <TestimonialsSection
+          tenantName={tenantName}
+          testimonials={cmsContent?.testimonials?.items}
+        />
+      )}
+
+      {/* 10. FAQs & Front Desk Support */}
+      {(cmsContent?.section_visibility?.faqs !== false) && (
+        <FaqLocationSection
+          tenantName={tenantName}
+          faqs={cmsContent?.faqs?.items}
+          contactSocials={cmsContent?.contact_socials}
+        />
+      )}
 
       {/* Modern Gym Footer with Socials, Physical Address, Operating Hours & Links */}
       <FooterSection

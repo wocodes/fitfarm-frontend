@@ -5,13 +5,27 @@ import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { apiFetch } from '../lib/apiClient';
 
-type CmsTab = 'hero' | 'classes' | 'trainers' | 'testimonials' | 'amenities' | 'faqs';
+type CmsTab = 'visibility' | 'hero' | 'classes' | 'trainers' | 'testimonials' | 'amenities' | 'faqs';
 
 export default function WebsiteCmsPage() {
-  const [activeTab, setActiveTab] = useState<CmsTab>('hero');
+  const [activeTab, setActiveTab] = useState<CmsTab>('visibility');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  // Section Visibility State
+  const [sectionVisibility, setSectionVisibility] = useState<Record<string, boolean>>({
+    hero: true,
+    pulse: true,
+    how_it_works: true,
+    amenities: true,
+    classes: true,
+    bmi: true,
+    trainers: true,
+    plans: true,
+    testimonials: true,
+    faqs: true,
+  });
 
   // CMS Content States
   const [heroSlides, setHeroSlides] = useState<any[]>([]);
@@ -29,6 +43,9 @@ export default function WebsiteCmsPage() {
       const res = await apiFetch('/cms');
       if (res.success && res.data && res.data.sections) {
         const s = res.data.sections;
+        if (s.section_visibility) {
+          setSectionVisibility((prev) => ({ ...prev, ...s.section_visibility }));
+        }
         if (s.hero?.slides) setHeroSlides(s.hero.slides);
         if (s.classes) setClassesData(s.classes);
         if (s.trainers?.items) setTrainersList(s.trainers.items);
@@ -50,6 +67,26 @@ export default function WebsiteCmsPage() {
   const showToast = (msg: string) => {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(null), 4000);
+  };
+
+  // Toggle individual section visibility
+  const toggleSectionVisibility = async (key: string) => {
+    const updated = {
+      ...sectionVisibility,
+      [key]: !sectionVisibility[key],
+    };
+    setSectionVisibility(updated);
+    try {
+      const res = await apiFetch('/cms/section_visibility', {
+        method: 'POST',
+        body: JSON.stringify(updated),
+      });
+      if (res.success) {
+        showToast(`${updated[key] ? '🟢 Activated' : '⚪ Deactivated'} ${key.replace(/_/g, ' ').toUpperCase()} section on homepage.`);
+      }
+    } catch (err: any) {
+      showToast(`❌ Failed to update visibility: ${err.message}`);
+    }
   };
 
   // Save current active tab section
@@ -152,6 +189,7 @@ export default function WebsiteCmsPage() {
           {/* CMS Tabs Bar */}
           <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-gray-800">
             {[
+              { id: 'visibility', label: 'Section Toggles & Layout', icon: '🎛️' },
               { id: 'hero', label: 'Hero Slides', icon: '🖼️' },
               { id: 'classes', label: 'Class Timetable', icon: '📅' },
               { id: 'trainers', label: 'Master Coaches', icon: '🏋️' },
@@ -182,13 +220,197 @@ export default function WebsiteCmsPage() {
             </div>
           ) : (
             <div>
+              {/* TAB 0: MASTER SECTION VISIBILITY & LAYOUT TOGGLES */}
+              {activeTab === 'visibility' && (
+                <div className="space-y-6 animate-fadeIn">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-800/60 pb-4">
+                    <div>
+                      <h2 className="text-lg font-black text-white">Homepage Section Activation & Controls</h2>
+                      <p className="text-xs text-gray-400">
+                        Instantly toggle any homepage section on or off. Deactivated sections are completely hidden on the member portal.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={async () => {
+                          const allOn: Record<string, boolean> = {};
+                          Object.keys(sectionVisibility).forEach((k) => (allOn[k] = true));
+                          setSectionVisibility(allOn);
+                          await apiFetch('/cms/section_visibility', { method: 'POST', body: JSON.stringify(allOn) });
+                          showToast('🟢 All homepage sections activated!');
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-xs font-bold text-gray-300 hover:text-white transition"
+                      >
+                        Activate All
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Section Cards Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {[
+                      {
+                        key: 'hero',
+                        name: 'Hero Slider & Top CTA',
+                        icon: '🖼️',
+                        desc: 'Top headline, rotating imagery, tag badges, digital pass CTA, and online renewal button.',
+                        editTab: 'hero',
+                      },
+                      {
+                        key: 'pulse',
+                        name: 'Live Gym Pulse & Operating Hours',
+                        icon: '🟢',
+                        desc: 'Real-time open/closed status badge, operating hours ticker, and occupancy capacity indicator.',
+                        editTab: null,
+                      },
+                      {
+                        key: 'how_it_works',
+                        name: 'How Gate Entry Works',
+                        icon: '🚀',
+                        desc: 'Step-by-step visual onboarding showing QR turnstile scanning, biometric gates, and instant check-in.',
+                        editTab: null,
+                      },
+                      {
+                        key: 'amenities',
+                        name: 'Facilities & Equipment Grid',
+                        icon: '✨',
+                        desc: 'Olympic free weights, cardio suites, recovery zones, sauna, and premium gym infrastructure.',
+                        editTab: 'amenities',
+                      },
+                      {
+                        key: 'classes',
+                        name: 'Weekly Class Timetable',
+                        icon: '📅',
+                        desc: 'Interactive day-by-day group session schedule with booked slots, instructors, and intensity badges.',
+                        editTab: 'classes',
+                      },
+                      {
+                        key: 'bmi',
+                        name: 'Interactive BMI Telemetry Calculator',
+                        icon: '⚖️',
+                        desc: 'Member body mass index calculator with customized calorie, workout, and plan recommendations.',
+                        editTab: null,
+                      },
+                      {
+                        key: 'trainers',
+                        name: 'Master Coaches & Trainers Roster',
+                        icon: '🏋️',
+                        desc: 'Coaches showcase with certifications, bios, specialties, and 1-on-1 consultation booking buttons.',
+                        editTab: 'trainers',
+                      },
+                      {
+                        key: 'plans',
+                        name: 'Membership Pricing Plans',
+                        icon: '💳',
+                        desc: 'Active tiered membership plans, feature checklists, and instant Paystack online checkout.',
+                        editTab: null,
+                      },
+                      {
+                        key: 'testimonials',
+                        name: 'Member Reviews & Transformation Stories',
+                        icon: '⭐',
+                        desc: 'Authentic social proof, member ratings, transformation PR badges, and workout streaks.',
+                        editTab: 'testimonials',
+                      },
+                      {
+                        key: 'faqs',
+                        name: 'Frequently Asked Questions (FAQs)',
+                        icon: '❓',
+                        desc: 'Accordion FAQ answering gate access, billing renewals, pass pausing, and front desk questions.',
+                        editTab: 'faqs',
+                      },
+                    ].map((sec) => {
+                      const isVisible = sectionVisibility[sec.key] !== false;
+                      return (
+                        <div
+                          key={sec.key}
+                          className={`p-5 rounded-3xl border transition-all duration-300 flex flex-col justify-between space-y-4 ${
+                            isVisible
+                              ? 'bg-[#0e0e12] border-gray-800/80 hover:border-orange-500/30 shadow-lg'
+                              : 'bg-[#0a0a0c]/60 border-gray-900 opacity-60'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-start gap-3">
+                              <span className="text-2xl p-2.5 rounded-2xl bg-[#14141a] border border-gray-800 flex-shrink-0">
+                                {sec.icon}
+                              </span>
+                              <div>
+                                <h3 className="text-sm font-black text-white flex items-center gap-2">
+                                  <span>{sec.name}</span>
+                                  {isVisible ? (
+                                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] font-mono font-bold uppercase">
+                                      Active
+                                    </span>
+                                  ) : (
+                                    <span className="px-2 py-0.5 rounded-full bg-gray-800 text-gray-400 border border-gray-700 text-[9px] font-mono font-bold uppercase">
+                                      Hidden
+                                    </span>
+                                  )}
+                                </h3>
+                                <p className="text-xs text-gray-400 mt-1 leading-relaxed">{sec.desc}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between border-t border-gray-800/60 pt-3">
+                            {sec.editTab ? (
+                              <button
+                                onClick={() => setActiveTab(sec.editTab as CmsTab)}
+                                className="text-xs font-bold text-orange-400 hover:text-orange-300 flex items-center gap-1 transition"
+                              >
+                                <span>Edit Content</span>
+                                <span>→</span>
+                              </button>
+                            ) : (
+                              <span className="text-[11px] text-gray-500 italic">Managed via System Settings</span>
+                            )}
+
+                            {/* Interactive Toggle Switch */}
+                            <button
+                              onClick={() => toggleSectionVisibility(sec.key)}
+                              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                                isVisible ? 'bg-orange-500' : 'bg-gray-800'
+                              }`}
+                              role="switch"
+                              aria-checked={isVisible}
+                            >
+                              <span
+                                aria-hidden="true"
+                                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                  isVisible ? 'translate-x-5' : 'translate-x-0'
+                                }`}
+                              />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* TAB 1: HERO SLIDES */}
               {activeTab === 'hero' && (
                 <div className="space-y-6">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                      <h2 className="text-lg font-black text-white">Homepage Hero Slider</h2>
-                      <p className="text-xs text-gray-400">Manage headline text, tags, and background imagery.</p>
+                      <div className="flex items-center gap-3">
+                        <h2 className="text-lg font-black text-white">Homepage Hero Slider</h2>
+                        <button
+                          onClick={() => toggleSectionVisibility('hero')}
+                          className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1.5 ${
+                            sectionVisibility.hero !== false
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                              : 'bg-gray-800 text-gray-400 border border-gray-700'
+                          }`}
+                        >
+                          <span className={`w-2 h-2 rounded-full ${sectionVisibility.hero !== false ? 'bg-emerald-400 animate-pulse' : 'bg-gray-500'}`}></span>
+                          <span>{sectionVisibility.hero !== false ? 'Visible on Homepage' : 'Hidden on Homepage'}</span>
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-1">Manage headline text, tags, and background imagery.</p>
                     </div>
                     <button
                       onClick={() => {
@@ -358,8 +580,21 @@ export default function WebsiteCmsPage() {
                 <div className="space-y-6">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                      <h2 className="text-lg font-black text-white">Weekly Class Schedule</h2>
-                      <p className="text-xs text-gray-400">Select a day to view or edit scheduled group fitness classes.</p>
+                      <div className="flex items-center gap-3">
+                        <h2 className="text-lg font-black text-white">Weekly Class Schedule</h2>
+                        <button
+                          onClick={() => toggleSectionVisibility('classes')}
+                          className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1.5 ${
+                            sectionVisibility.classes !== false
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                              : 'bg-gray-800 text-gray-400 border border-gray-700'
+                          }`}
+                        >
+                          <span className={`w-2 h-2 rounded-full ${sectionVisibility.classes !== false ? 'bg-emerald-400 animate-pulse' : 'bg-gray-500'}`}></span>
+                          <span>{sectionVisibility.classes !== false ? 'Visible on Homepage' : 'Hidden on Homepage'}</span>
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-1">Select a day to view or edit scheduled group fitness classes.</p>
                     </div>
                     <button
                       onClick={() => {
@@ -577,10 +812,23 @@ export default function WebsiteCmsPage() {
               {/* TAB 3: COACHES & TRAINERS */}
               {activeTab === 'trainers' && (
                 <div className="space-y-6">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                      <h2 className="text-lg font-black text-white">Master Coaches Roster</h2>
-                      <p className="text-xs text-gray-400">Manage coach biographies, specialties, certifications, and portrait photography.</p>
+                      <div className="flex items-center gap-3">
+                        <h2 className="text-lg font-black text-white">Master Coaches Roster</h2>
+                        <button
+                          onClick={() => toggleSectionVisibility('trainers')}
+                          className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1.5 ${
+                            sectionVisibility.trainers !== false
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                              : 'bg-gray-800 text-gray-400 border border-gray-700'
+                          }`}
+                        >
+                          <span className={`w-2 h-2 rounded-full ${sectionVisibility.trainers !== false ? 'bg-emerald-400 animate-pulse' : 'bg-gray-500'}`}></span>
+                          <span>{sectionVisibility.trainers !== false ? 'Visible on Homepage' : 'Hidden on Homepage'}</span>
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-1">Manage coach biographies, specialties, certifications, and portrait photography.</p>
                     </div>
                     <button
                       onClick={() => {
@@ -771,10 +1019,23 @@ export default function WebsiteCmsPage() {
               {/* TAB 4: TESTIMONIALS & REVIEWS */}
               {activeTab === 'testimonials' && (
                 <div className="space-y-6">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                      <h2 className="text-lg font-black text-white">Member Reviews & Transformation Stories</h2>
-                      <p className="text-xs text-gray-400">Display verified member feedback, milestone PRs, and quotes.</p>
+                      <div className="flex items-center gap-3">
+                        <h2 className="text-lg font-black text-white">Member Reviews & Transformation Stories</h2>
+                        <button
+                          onClick={() => toggleSectionVisibility('testimonials')}
+                          className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1.5 ${
+                            sectionVisibility.testimonials !== false
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                              : 'bg-gray-800 text-gray-400 border border-gray-700'
+                          }`}
+                        >
+                          <span className={`w-2 h-2 rounded-full ${sectionVisibility.testimonials !== false ? 'bg-emerald-400 animate-pulse' : 'bg-gray-500'}`}></span>
+                          <span>{sectionVisibility.testimonials !== false ? 'Visible on Homepage' : 'Hidden on Homepage'}</span>
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-1">Display verified member feedback, milestone PRs, and quotes.</p>
                     </div>
                     <button
                       onClick={() => {
@@ -943,10 +1204,23 @@ export default function WebsiteCmsPage() {
               {/* TAB 5: AMENITIES & FACILITIES */}
               {activeTab === 'amenities' && (
                 <div className="space-y-6">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                      <h2 className="text-lg font-black text-white">Facilities & Equipment Highlights</h2>
-                      <p className="text-xs text-gray-400">Showcase your gym floor, strength zones, and recovery suites.</p>
+                      <div className="flex items-center gap-3">
+                        <h2 className="text-lg font-black text-white">Facilities & Equipment Highlights</h2>
+                        <button
+                          onClick={() => toggleSectionVisibility('amenities')}
+                          className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1.5 ${
+                            sectionVisibility.amenities !== false
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                              : 'bg-gray-800 text-gray-400 border border-gray-700'
+                          }`}
+                        >
+                          <span className={`w-2 h-2 rounded-full ${sectionVisibility.amenities !== false ? 'bg-emerald-400 animate-pulse' : 'bg-gray-500'}`}></span>
+                          <span>{sectionVisibility.amenities !== false ? 'Visible on Homepage' : 'Hidden on Homepage'}</span>
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-1">Showcase your gym floor, strength zones, and recovery suites.</p>
                     </div>
                     <button
                       onClick={() => {
@@ -1097,10 +1371,23 @@ export default function WebsiteCmsPage() {
               {/* TAB 6: FAQS */}
               {activeTab === 'faqs' && (
                 <div className="space-y-6">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                      <h2 className="text-lg font-black text-white">Frequently Asked Questions</h2>
-                      <p className="text-xs text-gray-400">Help prospective and current members understand gate passes, rules, and billing.</p>
+                      <div className="flex items-center gap-3">
+                        <h2 className="text-lg font-black text-white">Frequently Asked Questions</h2>
+                        <button
+                          onClick={() => toggleSectionVisibility('faqs')}
+                          className={`px-3 py-1 rounded-full text-xs font-extrabold transition flex items-center gap-1.5 ${
+                            sectionVisibility.faqs !== false
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                              : 'bg-gray-800 text-gray-400 border border-gray-700'
+                          }`}
+                        >
+                          <span className={`w-2 h-2 rounded-full ${sectionVisibility.faqs !== false ? 'bg-emerald-400 animate-pulse' : 'bg-gray-500'}`}></span>
+                          <span>{sectionVisibility.faqs !== false ? 'Visible on Homepage' : 'Hidden on Homepage'}</span>
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-1">Help prospective and current members understand gate passes, rules, and billing.</p>
                     </div>
                     <button
                       onClick={() => {
