@@ -61,6 +61,7 @@ const navGroups: NavGroup[] = [
     items: [
       { label: 'Staff Attendance', href: '/staff-attendance', icon: '⏰', prefetchUrl: '/admin/staff-attendance' },
       { label: 'Manage Admins', href: '/admins', icon: '🛡️', prefetchUrl: '/admin/staff' },
+      { label: 'Website CMS & Portal', href: '/cms', icon: '💻', prefetchUrl: '/cms' },
       { label: 'Theme & Branding', href: '/theme', icon: '🎨', prefetchUrl: '/theme' },
       { label: 'Gym Settings', href: '/settings', icon: '⚙️', prefetchUrl: '/settings' },
       { label: 'Contact & Socials', href: '/contact', icon: '🌐', prefetchUrl: '/settings' },
