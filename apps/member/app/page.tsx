@@ -35,6 +35,17 @@ export default function MemberPortalPage() {
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [selectedPlanForPurchase, setSelectedPlanForPurchase] = useState<number | null>(null);
   const [notificationMsg, setNotificationMsg] = useState('');
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Track scroll position to transition floating header into sticky glassmorphism
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // 1. Fetch Tenant Public Info & Active Plans
   const fetchTenantData = useCallback(async (slug: string) => {
@@ -195,8 +206,8 @@ export default function MemberPortalPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0c] text-white flex flex-col font-sans">
-      {/* Top Floating Header & Active Session Banner on top of Hero Image */}
-      <div className="absolute top-0 inset-x-0 z-40 w-full">
+      {/* Top Fixed/Sticky Header & Active Session Banner on top of Hero Image */}
+      <div className="fixed top-0 inset-x-0 z-40 w-full transition-all duration-300">
         {/* Active Workout Session Banner */}
         {activeSession && (
           <div className="bg-[#121217]/95 backdrop-blur-md border-b border-emerald-500/30 px-6 py-2.5 flex items-center justify-between text-xs animate-fadeIn">
@@ -233,8 +244,14 @@ export default function MemberPortalPage() {
           </div>
         )}
 
-        {/* Top Navigation Bar Floating on Top of Hero Slider */}
-        <header className="relative px-6 py-5 flex items-center justify-between bg-gradient-to-b from-black/80 via-black/40 to-transparent backdrop-blur-[2px] transition-all">
+        {/* Top Navigation Bar Floating on Top of Hero Slider & Sticky on Scroll */}
+        <header
+          className={`relative px-6 transition-all duration-300 flex items-center justify-between ${
+            isScrolled
+              ? 'py-3.5 bg-[#0a0a0c]/90 backdrop-blur-xl border-b border-gray-800/80 shadow-2xl'
+              : 'py-5 bg-gradient-to-b from-black/80 via-black/40 to-transparent backdrop-blur-[2px] border-b border-transparent'
+          }`}
+        >
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center font-black text-black text-lg shadow-lg shadow-orange-500/20">
               {tenantName.charAt(0)}
