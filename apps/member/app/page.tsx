@@ -7,6 +7,11 @@ import HowItWorksSection from './components/HowItWorksSection';
 import AmenitiesGrid from './components/AmenitiesGrid';
 import MembershipPlansSection from './components/MembershipPlansSection';
 import FaqLocationSection from './components/FaqLocationSection';
+import ClassScheduleSection from './components/ClassScheduleSection';
+import BmiCalculatorSection from './components/BmiCalculatorSection';
+import TrainersShowcaseSection from './components/TrainersShowcaseSection';
+import TestimonialsSection from './components/TestimonialsSection';
+import FooterSection from './components/FooterSection';
 import DigitalPassModal from './components/DigitalPassModal';
 import MemberDashboardModal from './components/MemberDashboardModal';
 import PlanPurchaseModal from './components/PlanPurchaseModal';
@@ -308,8 +313,45 @@ export default function MemberPortalPage() {
       {/* Elite Amenities & Infrastructure Grid */}
       <AmenitiesGrid />
 
+      {/* Weekly Class Timetable & Group Sessions */}
+      <ClassScheduleSection
+        tenantName={tenantName}
+        onSelectClass={(clsName) => {
+          if (!isAuthenticated) {
+            setNotificationMsg(`✨ Selected ${clsName}. Sign in or create a pass to reserve your spot.`);
+            setShowLoginModal(true);
+          } else {
+            setNotificationMsg(`🎉 Spot reserved for ${clsName}! See you at the studio.`);
+            setTimeout(() => setNotificationMsg(''), 5000);
+          }
+        }}
+      />
+
+      {/* Interactive Body Mass Index (BMI) Telemetry Calculator */}
+      <BmiCalculatorSection
+        tenantName={tenantName}
+        onExplorePlans={() => {
+          const plansEl = document.getElementById('plans');
+          if (plansEl) plansEl.scrollIntoView({ behavior: 'smooth' });
+        }}
+      />
+
+      {/* Elite Certified Trainers & Master Coaches */}
+      <TrainersShowcaseSection
+        tenantName={tenantName}
+        onBookTrainer={(trainerName) => {
+          if (!isAuthenticated) {
+            setNotificationMsg(`💬 Booking 1-on-1 consultation with Coach ${trainerName}. Create an account to complete.`);
+            setShowRegisterModal(true);
+          } else {
+            const msg = encodeURIComponent(`Hello ${tenantName}, I would like to schedule a 1-on-1 personal training consultation with coach ${trainerName}.`);
+            window.open(`https://wa.me/?text=${msg}`, '_blank');
+          }
+        }}
+      />
+
       {/* Compact & Categorized Membership Plans */}
-      <main className="w-full max-w-6xl mx-auto px-6 py-12">
+      <main className="w-full max-w-6xl mx-auto px-6 py-12" id="plans">
         <MembershipPlansSection
           plans={pricingPlans}
           currencySymbol={currencySymbol}
@@ -317,16 +359,22 @@ export default function MemberPortalPage() {
         />
       </main>
 
+      {/* Member Testimonials & Real Transformations */}
+      <TestimonialsSection tenantName={tenantName} />
+
       {/* FAQs & Front Desk Support */}
       <FaqLocationSection tenantName={tenantName} />
 
-      {/* Footer */}
-      <footer className="py-8 px-6 border-t border-gray-800/80 text-center text-xs text-gray-500 space-y-1">
-        <p>© 2026 {tenantName}. Powered by FitCloud SaaS Management System.</p>
-        <p className="text-[10px] text-gray-600 font-mono">
-          Biometric Fingerprint • Turnstile QR Access • Real-time Attendance Telemetry • Paystack Verified
-        </p>
-      </footer>
+      {/* Modern Gym Footer with Socials, Physical Address, Operating Hours & Links */}
+      <FooterSection
+        tenantName={tenantName}
+        address={tenantInfo?.tenant?.address || '14 Admiralty Way, Lekki Phase 1, Lagos, Nigeria'}
+        phone={tenantInfo?.tenant?.phone || '+234 812 345 6789'}
+        email={tenantInfo?.tenant?.email || 'frontdesk@polanfit.com'}
+        onOpenPass={() => setShowPassModal(true)}
+        onOpenRenew={() => setShowPlanModal(true)}
+        onOpenLogin={() => setShowLoginModal(true)}
+      />
 
       {/* Modals */}
       <DigitalPassModal
