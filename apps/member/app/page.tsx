@@ -234,7 +234,9 @@ export default function MemberPortalPage() {
         )}
 
         {/* Top Sticky Navigation Bar */}
-        <header className="px-6 py-4 flex items-center justify-between border-b border-gray-800/80 bg-[#0a0a0c]/80 backdrop-blur-md">
+        <header className="relative px-6 py-4 flex items-center justify-between bg-gradient-to-b from-[#0a0a0c]/95 via-[#0a0a0c]/85 to-[#0a0a0c]/60 backdrop-blur-xl border-b border-white/[0.06] transition-all">
+          {/* Bottom subtle ambient gradient feather */}
+          <div className="absolute -bottom-2 inset-x-0 h-2 bg-gradient-to-b from-[#0a0a0c]/50 to-transparent pointer-events-none" />
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center font-black text-black text-lg shadow-lg shadow-orange-500/20">
               {tenantName.charAt(0)}

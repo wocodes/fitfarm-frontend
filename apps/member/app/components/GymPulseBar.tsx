@@ -8,7 +8,7 @@ interface GymPulseBarProps {
 
 export default function GymPulseBar({ tenantName = 'PolanFit Arena' }: GymPulseBarProps) {
   return (
-    <div className="w-full bg-[#101014] border-y border-gray-800/80 px-6 py-4 shadow-xl">
+    <div className="w-full bg-[#0a0a0c]/80 backdrop-blur-xl border-b border-gray-800/60 px-6 py-4 shadow-2xl relative z-20">
       <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
         {/* Operating Status */}
         <div className="flex items-center gap-3">

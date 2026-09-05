@@ -86,9 +86,12 @@ export default function HeroSlider({
         );
       })}
 
-      {/* Balanced Ambient Gradient Overlay (Brightened) */}
-      <div className="absolute inset-0 z-20 bg-gradient-to-t from-[#0a0a0c] via-[#0a0a0c]/35 to-[#0a0a0c]/50 pointer-events-none" />
+      {/* Balanced Ambient Gradient Overlay */}
+      <div className="absolute inset-0 z-20 bg-gradient-to-t from-[#0a0a0c] via-[#0a0a0c]/30 to-[#0a0a0c]/50 pointer-events-none" />
       <div className="absolute inset-0 z-20 bg-black/20 pointer-events-none" />
+
+      {/* Deep Bottom Transition Fade / Dissolve into Page Body */}
+      <div className="absolute bottom-0 inset-x-0 h-48 z-20 bg-gradient-to-t from-[#0a0a0c] via-[#0a0a0c]/85 to-transparent pointer-events-none" />
 
       {/* Content Overlay */}
       <div className="relative z-30 max-w-5xl w-full mx-auto px-6 py-20 text-center space-y-6">
