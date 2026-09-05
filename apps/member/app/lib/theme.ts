@@ -74,6 +74,53 @@ function hexToRgb(hex: string): string {
   return `${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}`;
 }
 
+function hexToHsl(hex: string): [number, number, number] {
+  let c = hex.replace('#', '');
+  if (c.length === 3) c = c.split('').map((x) => x + x).join('');
+  const num = parseInt(c, 16);
+  if (isNaN(num)) return [18, 95, 58];
+  let r = ((num >> 16) & 255) / 255;
+  let g = ((num >> 8) & 255) / 255;
+  let b = (num & 255) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h = 0, s = 0, l = (max + min) / 2;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+  return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
+}
+
+function hslToHex(h: number, s: number, l: number): string {
+  s /= 100;
+  l /= 100;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color).toString(16).padStart(2, '0');
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+export function computeThemeHarmonics(primaryHex: string) {
+  const [h, s, l] = hexToHsl(primaryHex);
+  // Harmonious same-color gradient end (elevated luminous tone in same family)
+  const endHex = hslToHex((h + 14) % 360, Math.min(100, s + 4), Math.min(88, Math.max(12, l + 8)));
+  // Brightest radiant tone for heading text gradient highlights
+  const lightHex = hslToHex((h + 6) % 360, Math.min(100, s + 8), Math.min(94, Math.max(16, l + 18)));
+  // Deeper border/shadow tone
+  const deepHex = hslToHex(h, s, Math.max(15, l - 10));
+
+  return { endHex, lightHex, deepHex };
+}
+
 export function loadFontFamily(fontName: string) {
   if (typeof window === 'undefined') return;
 
@@ -97,6 +144,7 @@ export function applyTheme(theme?: Partial<ThemeSettings> | null) {
   const accent = theme?.accent_color || '#1e293b';
   const fontFamily = theme?.font_family || 'Inter';
   const rgb = hexToRgb(primary);
+  const { endHex, lightHex, deepHex } = computeThemeHarmonics(primary);
 
   // Load font if needed
   loadFontFamily(fontFamily);
@@ -113,6 +161,9 @@ export function applyTheme(theme?: Partial<ThemeSettings> | null) {
       --brand-primary: ${primary} !important;
       --brand-primary-rgb: ${rgb} !important;
       --brand-accent: ${accent} !important;
+      --brand-gradient-end: ${endHex} !important;
+      --brand-text-grad-start: ${lightHex} !important;
+      --brand-primary-deep: ${deepHex} !important;
       --brand-font: '${fontFamily}', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
     }
     
@@ -120,24 +171,34 @@ export function applyTheme(theme?: Partial<ThemeSettings> | null) {
       font-family: var(--brand-font);
     }
     
-    /* Clean, solid, vibrant button backgrounds - eliminate any gradient fading */
+    /* 1. Harmonious Same-Color Theme Gradient for Buttons */
+    .brand-btn-gradient,
     button.bg-gradient-to-r,
     a.bg-gradient-to-r,
     .btn-gradient {
-      background-image: none !important;
-      background-color: var(--brand-primary) !important;
-      opacity: 1 !important;
+      background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-gradient-end) 100%) !important;
+      color: #000000 !important;
+      box-shadow: 0 10px 25px -5px rgb(var(--brand-primary-rgb) / 0.3) !important;
     }
     
-    /* Eliminate text fade and transparency - make all brand text 100% solid and opaque */
-    .bg-clip-text.text-transparent {
-      background-image: none !important;
-      -webkit-background-clip: unset !important;
-      background-clip: unset !important;
-      color: var(--brand-primary) !important;
-      -webkit-text-fill-color: var(--brand-primary) !important;
-      opacity: 1 !important;
-      filter: none !important;
+    .brand-btn-gradient:hover,
+    button.bg-gradient-to-r:hover,
+    a.bg-gradient-to-r:hover,
+    .btn-gradient:hover {
+      filter: brightness(1.08) !important;
+      transform: translateY(-1px);
+    }
+
+    /* 2. Harmonious Same-Color Theme Gradient for Headings */
+    .brand-text-gradient,
+    .bg-gradient-to-r.from-orange-400.via-amber-400,
+    .heading-gradient {
+      background: linear-gradient(135deg, var(--brand-text-grad-start) 0%, var(--brand-gradient-end) 50%, var(--brand-primary) 100%) !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+      color: transparent !important;
+      display: inline-block !important;
     }
     
     /* Dynamic Primary Color Overrides */
@@ -146,7 +207,6 @@ export function applyTheme(theme?: Partial<ThemeSettings> | null) {
     .bg-orange-600,
     .hover\\:bg-orange-600:hover {
       background-color: var(--brand-primary) !important;
-      opacity: 1 !important;
     }
     
     .text-orange-400,
@@ -154,7 +214,6 @@ export function applyTheme(theme?: Partial<ThemeSettings> | null) {
     .hover\\:text-orange-400:hover,
     .group-hover\\:text-orange-400:hover {
       color: var(--brand-primary) !important;
-      opacity: 1 !important;
     }
     
     .border-orange-500,

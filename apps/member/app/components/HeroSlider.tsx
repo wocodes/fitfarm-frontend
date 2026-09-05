@@ -104,7 +104,7 @@ export default function HeroSlider({
         {/* Hero Title */}
         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-tight tracking-tight max-w-4xl mx-auto drop-shadow-2xl">
           Push Beyond Limits at{' '}
-          <span className="text-orange-500">
+          <span className="brand-text-gradient font-black">
             {tenantName}
           </span>
         </h1>
@@ -120,7 +120,7 @@ export default function HeroSlider({
             <>
               <button
                 onClick={onOpenPass}
-                className="px-7 py-4 bg-orange-500 hover:bg-orange-600 font-extrabold text-black rounded-xl shadow-xl shadow-orange-500/25 text-sm transition transform hover:-translate-y-0.5 flex items-center gap-2"
+                className="px-7 py-4 brand-btn-gradient font-extrabold text-black rounded-xl shadow-xl shadow-orange-500/25 text-sm transition transform hover:-translate-y-0.5 flex items-center gap-2"
               >
                 <span>📱</span>
                 <span>Open Entrance QR Pass</span>
@@ -137,7 +137,7 @@ export default function HeroSlider({
             <>
               <button
                 onClick={onOpenRegister}
-                className="px-7 py-4 bg-orange-500 hover:bg-orange-600 font-extrabold text-black rounded-xl shadow-xl shadow-orange-500/25 text-sm transition transform hover:-translate-y-0.5 flex items-center gap-2"
+                className="px-7 py-4 brand-btn-gradient font-extrabold text-black rounded-xl shadow-xl shadow-orange-500/25 text-sm transition transform hover:-translate-y-0.5 flex items-center gap-2"
               >
                 <span>🚀</span>
                 <span>Register & Get Digital Pass</span>
@@ -170,7 +170,7 @@ export default function HeroSlider({
                 onClick={() => setCurrentIndex(index)}
                 className={`h-2 rounded-full transition-all duration-300 ${
                   currentIndex === index
-                    ? 'w-8 bg-orange-500'
+                    ? 'w-8 brand-btn-gradient'
                     : 'w-2 bg-gray-600/60 hover:bg-gray-400'
                 }`}
                 aria-label={`Go to slide ${index + 1}`}

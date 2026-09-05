@@ -250,7 +250,7 @@ export default function MemberPortalPage() {
               <>
                 <button
                   onClick={() => setShowPassModal(true)}
-                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 font-extrabold text-black text-xs rounded-xl shadow-lg shadow-orange-500/20 transition flex items-center gap-1.5"
+                  className="px-4 py-2 brand-btn-gradient font-extrabold text-black text-xs rounded-xl shadow-lg shadow-orange-500/20 transition flex items-center gap-1.5"
                 >
                   <span>📱</span>
                   <span>Digital Pass</span>
@@ -279,7 +279,7 @@ export default function MemberPortalPage() {
                 </button>
                 <button
                   onClick={() => setShowRegisterModal(true)}
-                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 font-extrabold text-black text-xs rounded-xl shadow-lg shadow-orange-500/20 transition"
+                  className="px-4 py-2 brand-btn-gradient font-extrabold text-black text-xs rounded-xl shadow-lg shadow-orange-500/20 transition"
                 >
                   Join Gym
                 </button>

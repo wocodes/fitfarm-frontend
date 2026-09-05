@@ -400,6 +400,19 @@ export default function ThemeSettingsPage() {
                 </p>
               </div>
 
+              {/* Dynamic Brand Heading Gradient Preview */}
+              <div className="p-4 rounded-2xl bg-[#0f0f13] border border-gray-800 space-y-1">
+                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                  Theme Heading Gradient
+                </span>
+                <h4 className="text-lg font-black brand-text-gradient leading-tight">
+                  PolanFit Power & Motion
+                </h4>
+                <p className="text-[11px] text-gray-400">
+                  Luminous same-color gradient calculated from your brand palette.
+                </p>
+              </div>
+
               {/* Simulated Digital Gate Pass */}
               <div className="p-5 rounded-2xl bg-[#0f0f13] border border-gray-800 space-y-4">
                 <div className="flex items-center justify-between">
@@ -410,14 +423,15 @@ export default function ThemeSettingsPage() {
                 </div>
 
                 <div className="h-2 w-full rounded-full bg-gray-800 overflow-hidden">
-                  <div className="h-full w-3/4 rounded-full bg-orange-500" />
+                  <div className="h-full w-3/4 rounded-full brand-btn-gradient" />
                 </div>
 
                 <button
                   type="button"
-                  className="w-full py-2.5 rounded-xl bg-orange-500 text-black font-extrabold text-xs shadow-lg shadow-orange-500/20"
+                  className="w-full py-3 rounded-xl brand-btn-gradient text-black font-extrabold text-xs shadow-lg flex items-center justify-center gap-2 transition"
                 >
-                  📱 Scan QR at Turnstile
+                  <span>📱</span>
+                  <span>Scan QR at Turnstile</span>
                 </button>
               </div>
 
