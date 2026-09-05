@@ -17,11 +17,24 @@ import MemberDashboardModal from './components/MemberDashboardModal';
 import PlanPurchaseModal from './components/PlanPurchaseModal';
 import MemberAuthModals from './components/MemberAuthModals';
 import { memberApiFetch, getMemberToken, clearMemberToken } from './lib/api';
+import { applyTheme } from './lib/theme';
+
+function getInitialPortalCache(): any {
+  if (typeof window === 'undefined') return null;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('tenant') || 'polanfit-fitness';
+    const raw = localStorage.getItem(`fitcloud_portal_info_${slug}`);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return null;
+}
 
 export default function MemberPortalPage() {
-  const [tenantName, setTenantName] = useState('PolanFit Arena');
+  const [cachedData] = useState<any>(() => getInitialPortalCache());
+  const [tenantName, setTenantName] = useState<string>(() => cachedData?.tenant?.name || 'PolanFit Arena');
   const [tenantSlug, setTenantSlug] = useState('polanfit-fitness');
-  const [tenantInfo, setTenantInfo] = useState<any>(null);
+  const [tenantInfo, setTenantInfo] = useState<any>(() => cachedData || null);
 
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -29,7 +42,7 @@ export default function MemberPortalPage() {
   const [workoutElapsed, setWorkoutElapsed] = useState('00h 00m 00s');
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
-  const [pricingPlans, setPricingPlans] = useState<any[]>([]);
+  const [pricingPlans, setPricingPlans] = useState<any[]>(() => cachedData?.pricing_plans || []);
   const [leaderboardStandings, setLeaderboardStandings] = useState<any[]>([]);
   const [leaderboardCampaign, setLeaderboardCampaign] = useState<any>(null);
 
@@ -40,7 +53,8 @@ export default function MemberPortalPage() {
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [selectedPlanForPurchase, setSelectedPlanForPurchase] = useState<number | null>(null);
   const [notificationMsg, setNotificationMsg] = useState('');
-  const [cmsContent, setCmsContent] = useState<any>(null);
+  const [cmsContent, setCmsContent] = useState<any>(() => cachedData?.cms || null);
+  const [isColdLoading, setIsColdLoading] = useState<boolean>(() => !cachedData);
 
   // 1. Fetch Tenant Public Info & Active Plans
   const fetchTenantData = useCallback(async (slug: string) => {
@@ -55,9 +69,17 @@ export default function MemberPortalPage() {
         if (res.data.cms) {
           setCmsContent(res.data.cms);
         }
+        if (res.data.theme) {
+          applyTheme(res.data.theme);
+        }
+        try {
+          localStorage.setItem(`fitcloud_portal_info_${slug}`, JSON.stringify(res.data));
+        } catch {}
       }
     } catch (err) {
       console.error('Failed to fetch tenant info:', err);
+    } finally {
+      setIsColdLoading(false);
     }
   }, []);
 
@@ -202,6 +224,23 @@ export default function MemberPortalPage() {
 
   const currencySymbol = tenantInfo?.tenant?.currency === 'USD' ? '$' : '₦';
 
+  if (isColdLoading && !tenantInfo && !cmsContent) {
+    return (
+      <div className="min-h-screen bg-[#070709] flex flex-col items-center justify-center p-6 text-center space-y-4 font-sans">
+        <div className="relative">
+          <div className="w-16 h-16 rounded-3xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-500 text-3xl font-black shadow-2xl shadow-orange-500/20 animate-pulse">
+            ⚡
+          </div>
+          <div className="absolute -inset-1.5 rounded-3xl border border-orange-500/30 animate-ping opacity-25"></div>
+        </div>
+        <div className="space-y-1">
+          <h2 className="text-white font-black text-lg tracking-tight">Smart Pass Member Portal</h2>
+          <p className="text-xs text-gray-500 font-mono">Syncing live biometric telemetry & arena passes...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0a0a0c] text-white flex flex-col font-sans">
       {/* Top Fixed/Sticky Header & Active Session Banner on top of Hero Image */}
@@ -315,7 +354,10 @@ export default function MemberPortalPage() {
 
       {/* 2. Live Gym Operating Hours & Capacity Status */}
       {(cmsContent?.section_visibility?.pulse !== false) && (
-        <GymPulseBar tenantName={tenantName} />
+        <GymPulseBar
+          tenantName={tenantName}
+          hours={cmsContent?.contact_socials?.hours_weekday}
+        />
       )}
 
       {/* 3. How Turnstile Gate Access Works */}

@@ -4,9 +4,13 @@ import React from 'react';
 
 interface GymPulseBarProps {
   tenantName?: string;
+  hours?: string;
 }
 
-export default function GymPulseBar({ tenantName = 'PolanFit Arena' }: GymPulseBarProps) {
+export default function GymPulseBar({
+  tenantName = 'PolanFit Arena',
+  hours = '06:00 AM – 10:00 PM',
+}: GymPulseBarProps) {
   return (
     <div className="w-full bg-[#0a0a0c]/80 backdrop-blur-xl border-b border-gray-800/60 px-6 py-4 shadow-2xl relative z-20">
       <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
@@ -18,7 +22,7 @@ export default function GymPulseBar({ tenantName = 'PolanFit Arena' }: GymPulseB
           </span>
           <div>
             <span className="font-extrabold text-white block">Gym Open Today</span>
-            <span className="text-gray-400 font-mono text-[11px]">06:00 AM – 10:00 PM</span>
+            <span className="text-gray-400 font-mono text-[11px]">{hours}</span>
           </div>
         </div>
 
