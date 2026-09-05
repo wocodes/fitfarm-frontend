@@ -10,6 +10,7 @@ interface FooterSectionProps {
   address?: string;
   phone?: string;
   email?: string;
+  contactSocials?: any;
 }
 
 export default function FooterSection({
@@ -20,9 +21,25 @@ export default function FooterSection({
   address = '14 Admiralty Way, Lekki Phase 1, Lagos, Nigeria',
   phone = '+234 812 345 6789',
   email = 'frontdesk@polanfit.com',
+  contactSocials,
 }: FooterSectionProps) {
+  const activeAddress = contactSocials?.address || address;
+  const activePhone = contactSocials?.phone || phone;
+  const activeEmail = contactSocials?.email || email;
+
+  const socialIg = contactSocials?.social_ig || 'https://instagram.com';
+  const socialX = contactSocials?.social_x || 'https://x.com';
+  const socialFb = contactSocials?.social_fb || 'https://facebook.com';
+  const socialYt = contactSocials?.social_yt || 'https://youtube.com';
+  const socialTk = contactSocials?.social_tk || 'https://tiktok.com';
+  const socialWa = contactSocials?.social_wa || 'https://wa.me/?text=Hello%20PolanFit%20Desk,%20I%20have%20an%20inquiry%20regarding%20memberships.';
+
+  const hoursWeekday = contactSocials?.hours_weekday || '06:00 – 22:00';
+  const hoursWeekend = contactSocials?.hours_weekend || '07:00 – 21:00';
+  const hoursHolidays = contactSocials?.hours_holidays || '08:00 – 18:00';
+
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    `${tenantName} ${address}`
+    `${tenantName} ${activeAddress}`
   )}`;
 
   return (
@@ -64,7 +81,7 @@ export default function FooterSection({
               <div className="flex items-center gap-2">
                 {/* Instagram */}
                 <a
-                  href="https://instagram.com"
+                  href={socialIg}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Instagram"
@@ -77,7 +94,7 @@ export default function FooterSection({
 
                 {/* X (Twitter) */}
                 <a
-                  href="https://x.com"
+                  href={socialX}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="X (Twitter)"
@@ -90,7 +107,7 @@ export default function FooterSection({
 
                 {/* Facebook */}
                 <a
-                  href="https://facebook.com"
+                  href={socialFb}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Facebook"
@@ -103,7 +120,7 @@ export default function FooterSection({
 
                 {/* YouTube */}
                 <a
-                  href="https://youtube.com"
+                  href={socialYt}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="YouTube"
@@ -116,7 +133,7 @@ export default function FooterSection({
 
                 {/* TikTok */}
                 <a
-                  href="https://tiktok.com"
+                  href={socialTk}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="TikTok"
@@ -139,7 +156,7 @@ export default function FooterSection({
               <div className="flex items-start gap-2.5">
                 <span className="text-orange-400 mt-0.5 text-base">📍</span>
                 <div>
-                  <p className="font-bold text-gray-200 leading-snug">{address}</p>
+                  <p className="font-bold text-gray-200 leading-snug">{activeAddress}</p>
                   <p className="text-[11px] text-gray-500 mt-0.5">Secure underground member parking available.</p>
                 </div>
               </div>
@@ -160,14 +177,14 @@ export default function FooterSection({
             <div className="pt-2 space-y-1.5 text-xs">
               <p className="flex items-center gap-2">
                 <span className="text-gray-500">📞 Phone:</span>
-                <a href={`tel:${phone}`} className="text-gray-300 hover:text-white font-mono font-bold">
-                  {phone}
+                <a href={`tel:${activePhone}`} className="text-gray-300 hover:text-white font-mono font-bold">
+                  {activePhone}
                 </a>
               </p>
               <p className="flex items-center gap-2">
                 <span className="text-gray-500">✉️ Email:</span>
-                <a href={`mailto:${email}`} className="text-gray-300 hover:text-white font-mono">
-                  {email}
+                <a href={`mailto:${activeEmail}`} className="text-gray-300 hover:text-white font-mono">
+                  {activeEmail}
                 </a>
               </p>
             </div>
@@ -181,21 +198,21 @@ export default function FooterSection({
             <div className="space-y-2 text-xs bg-[#0e0e12] p-3.5 rounded-2xl border border-gray-800/80">
               <div className="flex items-center justify-between pb-1.5 border-b border-gray-800/60">
                 <span className="text-gray-400">Monday – Friday</span>
-                <span className="font-mono text-white font-bold">06:00 – 22:00</span>
+                <span className="font-mono text-white font-bold">{hoursWeekday}</span>
               </div>
               <div className="flex items-center justify-between pb-1.5 border-b border-gray-800/60">
                 <span className="text-gray-400">Saturday – Sunday</span>
-                <span className="font-mono text-white font-bold">07:00 – 21:00</span>
+                <span className="font-mono text-white font-bold">{hoursWeekend}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-400">Public Holidays</span>
-                <span className="font-mono text-orange-400 font-bold">08:00 – 18:00</span>
+                <span className="font-mono text-orange-400 font-bold">{hoursHolidays}</span>
               </div>
             </div>
 
             <div className="pt-1">
               <a
-                href="https://wa.me/?text=Hello%20PolanFit%20Desk,%20I%20have%20an%20inquiry%20regarding%20memberships."
+                href={socialWa}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-2 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold transition flex items-center justify-center gap-2"

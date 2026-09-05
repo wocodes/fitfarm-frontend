@@ -4,29 +4,36 @@ import React, { useState } from 'react';
 
 interface FaqLocationSectionProps {
   tenantName?: string;
+  faqs?: { q: string; a: string }[];
+  contactSocials?: any;
 }
 
-export default function FaqLocationSection({ tenantName = 'PolanFit Arena' }: FaqLocationSectionProps) {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+const DEFAULT_FAQS = [
+  {
+    q: 'Do I need a physical keycard or RFID fob?',
+    a: 'No! Your digital entrance pass with an encrypted high-contrast QR barcode is saved directly on your phone. You can also register your biometric fingerprint at the front desk for instant contactless entry.',
+  },
+  {
+    q: 'How do I renew or upgrade my membership plan?',
+    a: 'Simply click "Renew / Upgrade Online" on your dashboard or select any plan on this page. Payments are verified instantly via Paystack (card, bank transfer, USSD) and your turnstile access extends immediately.',
+  },
+  {
+    q: 'Can I pause or freeze my membership if I travel?',
+    a: 'Yes, Quarterly and Annual members can pause their subscription for up to 30 days per year. Just notify our front desk team or contact support.',
+  },
+  {
+    q: 'Are boxing and golf simulator facilities included in standard memberships?',
+    a: 'Standard memberships cover unlimited gym floor, strength, and cardio access. Boxing group classes, 1-on-1 sparring, and our TrackMan golf simulator suite can be added directly under the Extras & Amenities tab.',
+  },
+];
 
-  const faqs = [
-    {
-      q: 'Do I need a physical keycard or RFID fob?',
-      a: 'No! Your digital entrance pass with an encrypted high-contrast QR barcode is saved directly on your phone. You can also register your biometric fingerprint at the front desk for instant contactless entry.',
-    },
-    {
-      q: 'How do I renew or upgrade my membership plan?',
-      a: 'Simply click "Renew / Upgrade Online" on your dashboard or select any plan on this page. Payments are verified instantly via Paystack (card, bank transfer, USSD) and your turnstile access extends immediately.',
-    },
-    {
-      q: 'Can I pause or freeze my membership if I travel?',
-      a: 'Yes, Quarterly and Annual members can pause their subscription for up to 30 days per year. Just notify our front desk team or contact support.',
-    },
-    {
-      q: 'Are boxing and golf simulator facilities included in standard memberships?',
-      a: 'Standard memberships cover unlimited gym floor, strength, and cardio access. Boxing group classes, 1-on-1 sparring, and our TrackMan golf simulator suite can be added directly under the Extras & Amenities tab.',
-    },
-  ];
+export default function FaqLocationSection({
+  tenantName = 'PolanFit Arena',
+  faqs,
+  contactSocials,
+}: FaqLocationSectionProps) {
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const displayFaqs = faqs && faqs.length > 0 ? faqs : DEFAULT_FAQS;
 
   return (
     <div className="w-full py-16 px-6 max-w-6xl mx-auto space-y-12">
@@ -46,7 +53,7 @@ export default function FaqLocationSection({ tenantName = 'PolanFit Arena' }: Fa
           </div>
 
           <div className="space-y-3">
-            {faqs.map((faq, idx) => {
+            {displayFaqs.map((faq, idx) => {
               const isOpen = openIndex === idx;
               return (
                 <div
@@ -91,7 +98,9 @@ export default function FaqLocationSection({ tenantName = 'PolanFit Arena' }: Fa
           <div className="p-4 rounded-2xl bg-[#070709] border border-gray-800/80 space-y-2.5 text-xs text-gray-300">
             <div className="flex items-center justify-between">
               <span className="text-gray-400">Operating Hours:</span>
-              <span className="font-mono text-white">06:00 AM – 10:00 PM</span>
+              <span className="font-mono text-white">
+                {contactSocials?.hours_weekday || '06:00 AM – 10:00 PM'}
+              </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-gray-400">Turnstile Inquiries:</span>
@@ -105,7 +114,7 @@ export default function FaqLocationSection({ tenantName = 'PolanFit Arena' }: Fa
 
           <div className="space-y-2 pt-1">
             <a
-              href="https://wa.me/?text=Hello%20PolanFit%20Gym%20Desk,%20I%20have%20an%20inquiry%20about%20memberships."
+              href={contactSocials?.social_wa || 'https://wa.me/?text=Hello%20PolanFit%20Gym%20Desk,%20I%20have%20an%20inquiry%20about%20memberships.'}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 font-extrabold text-black text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"

@@ -63,14 +63,17 @@ const TRAINERS: Trainer[] = [
 
 interface TrainersShowcaseSectionProps {
   tenantName?: string;
+  trainers?: Trainer[];
   onBookTrainer?: (trainerName: string) => void;
 }
 
 export default function TrainersShowcaseSection({
   tenantName = 'PolanFit Arena',
+  trainers,
   onBookTrainer,
 }: TrainersShowcaseSectionProps) {
   const [selectedTrainer, setSelectedTrainer] = useState<Trainer | null>(null);
+  const displayTrainers = trainers && trainers.length > 0 ? trainers : TRAINERS;
 
   const handleConsult = (trainer: Trainer) => {
     setSelectedTrainer(trainer);
@@ -103,7 +106,7 @@ export default function TrainersShowcaseSection({
 
       {/* Trainers Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {TRAINERS.map((trainer) => (
+        {displayTrainers.map((trainer) => (
           <div
             key={trainer.id}
             className="group rounded-3xl bg-[#0e0e12] border border-gray-800/80 hover:border-orange-500/50 transition-all duration-300 overflow-hidden flex flex-col justify-between shadow-xl hover:shadow-orange-500/10"

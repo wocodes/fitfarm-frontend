@@ -40,6 +40,7 @@ export default function MemberPortalPage() {
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [selectedPlanForPurchase, setSelectedPlanForPurchase] = useState<number | null>(null);
   const [notificationMsg, setNotificationMsg] = useState('');
+  const [cmsContent, setCmsContent] = useState<any>(null);
 
   // 1. Fetch Tenant Public Info & Active Plans
   const fetchTenantData = useCallback(async (slug: string) => {
@@ -50,6 +51,9 @@ export default function MemberPortalPage() {
         if (res.data.tenant?.name) setTenantName(res.data.tenant.name);
         if (res.data.pricing_plans && Array.isArray(res.data.pricing_plans)) {
           setPricingPlans(res.data.pricing_plans);
+        }
+        if (res.data.cms) {
+          setCmsContent(res.data.cms);
         }
       }
     } catch (err) {
@@ -299,6 +303,7 @@ export default function MemberPortalPage() {
         tenantName={tenantName}
         campaignTitle={leaderboardCampaign?.title || 'Active Fitness Challenge'}
         isAuthenticated={isAuthenticated}
+        slides={cmsContent?.hero?.slides}
         onOpenPass={() => setShowPassModal(true)}
         onOpenRenew={() => setShowPlanModal(true)}
         onOpenRegister={() => setShowRegisterModal(true)}
@@ -311,11 +316,12 @@ export default function MemberPortalPage() {
       <HowItWorksSection />
 
       {/* Elite Amenities & Infrastructure Grid */}
-      <AmenitiesGrid />
+      <AmenitiesGrid items={cmsContent?.amenities?.items} />
 
       {/* Weekly Class Timetable & Group Sessions */}
       <ClassScheduleSection
         tenantName={tenantName}
+        schedule={cmsContent?.classes}
         onSelectClass={(clsName) => {
           if (!isAuthenticated) {
             setNotificationMsg(`✨ Selected ${clsName}. Sign in or create a pass to reserve your spot.`);
@@ -339,6 +345,7 @@ export default function MemberPortalPage() {
       {/* Elite Certified Trainers & Master Coaches */}
       <TrainersShowcaseSection
         tenantName={tenantName}
+        trainers={cmsContent?.trainers?.items}
         onBookTrainer={(trainerName) => {
           if (!isAuthenticated) {
             setNotificationMsg(`💬 Booking 1-on-1 consultation with Coach ${trainerName}. Create an account to complete.`);
@@ -360,10 +367,17 @@ export default function MemberPortalPage() {
       </main>
 
       {/* Member Testimonials & Real Transformations */}
-      <TestimonialsSection tenantName={tenantName} />
+      <TestimonialsSection
+        tenantName={tenantName}
+        testimonials={cmsContent?.testimonials?.items}
+      />
 
       {/* FAQs & Front Desk Support */}
-      <FaqLocationSection tenantName={tenantName} />
+      <FaqLocationSection
+        tenantName={tenantName}
+        faqs={cmsContent?.faqs?.items}
+        contactSocials={cmsContent?.contact_socials}
+      />
 
       {/* Modern Gym Footer with Socials, Physical Address, Operating Hours & Links */}
       <FooterSection
@@ -371,6 +385,7 @@ export default function MemberPortalPage() {
         address={tenantInfo?.tenant?.address || '14 Admiralty Way, Lekki Phase 1, Lagos, Nigeria'}
         phone={tenantInfo?.tenant?.phone || '+234 812 345 6789'}
         email={tenantInfo?.tenant?.email || 'frontdesk@polanfit.com'}
+        contactSocials={cmsContent?.contact_socials}
         onOpenPass={() => setShowPassModal(true)}
         onOpenRenew={() => setShowPlanModal(true)}
         onOpenLogin={() => setShowLoginModal(true)}

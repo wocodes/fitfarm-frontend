@@ -41,7 +41,20 @@ const AMENITIES = [
   },
 ];
 
-export default function AmenitiesGrid() {
+interface AmenitiesGridProps {
+  items?: any[];
+}
+
+export default function AmenitiesGrid({ items }: AmenitiesGridProps) {
+  const displayAmenities = items && items.length > 0
+    ? items.map((it, idx) => ({
+        title: it.title,
+        subtitle: it.description || it.subtitle,
+        tag: it.category || it.tag || 'Facility',
+        image: it.image || `/images/amenities/${(idx % 6) + 1}.webp`,
+      }))
+    : AMENITIES;
+
   return (
     <div className="w-full py-16 px-6 max-w-6xl mx-auto space-y-10">
       <div className="text-center space-y-2 max-w-xl mx-auto">
@@ -57,7 +70,7 @@ export default function AmenitiesGrid() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {AMENITIES.map((item) => (
+        {displayAmenities.map((item, idx) => (
           <div
             key={item.title}
             className="group relative rounded-2xl overflow-hidden bg-[#0f0f13] border border-gray-800 hover:border-orange-500/50 transition duration-300 flex flex-col justify-end min-h-[280px]"

@@ -62,9 +62,15 @@ const TESTIMONIALS: Testimonial[] = [
 
 interface TestimonialsSectionProps {
   tenantName?: string;
+  testimonials?: Testimonial[];
 }
 
-export default function TestimonialsSection({ tenantName = 'PolanFit Arena' }: TestimonialsSectionProps) {
+export default function TestimonialsSection({
+  tenantName = 'PolanFit Arena',
+  testimonials,
+}: TestimonialsSectionProps) {
+  const displayTestimonials = testimonials && testimonials.length > 0 ? testimonials : TESTIMONIALS;
+
   return (
     <section className="w-full py-16 px-6 max-w-6xl mx-auto space-y-12" id="reviews">
       {/* Top Trust Metrics Bar */}
@@ -114,7 +120,7 @@ export default function TestimonialsSection({ tenantName = 'PolanFit Arena' }: T
 
       {/* Testimonials 4-Card Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {TESTIMONIALS.map((t) => (
+        {displayTestimonials.map((t) => (
           <div
             key={t.id}
             className="group rounded-3xl bg-[#0e0e12] border border-gray-800/80 hover:border-orange-500/40 p-6 transition-all duration-300 flex flex-col justify-between space-y-4 hover:shadow-xl hover:shadow-orange-500/5 relative overflow-hidden"

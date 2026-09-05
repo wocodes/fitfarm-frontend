@@ -6,12 +6,20 @@ interface HeroSliderProps {
   tenantName: string;
   campaignTitle?: string;
   isAuthenticated: boolean;
+  slides?: any[];
   onOpenPass: () => void;
   onOpenRenew: () => void;
   onOpenRegister: () => void;
 }
 
-const SLIDES = [
+interface SlideItem {
+  src: string;
+  tagline: string;
+  title?: string;
+  subtitle?: string;
+}
+
+const DEFAULT_SLIDES: SlideItem[] = [
   {
     src: '/images/hero/1.webp',
     tagline: 'High-Performance Training Arena',
@@ -38,20 +46,30 @@ export default function HeroSlider({
   tenantName,
   campaignTitle = 'Active Fitness Challenge',
   isAuthenticated,
+  slides,
   onOpenPass,
   onOpenRenew,
   onOpenRegister,
 }: HeroSliderProps) {
+  const effectiveSlides: SlideItem[] = slides && slides.length > 0
+    ? slides.map((s, i) => ({
+        src: s.image || s.src || `/images/hero/${(i % 5) + 1}.webp`,
+        tagline: s.tag || s.tagline || 'High-Performance Training Arena',
+        title: s.title,
+        subtitle: s.subtitle,
+      }))
+    : DEFAULT_SLIDES;
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
   const nextSlide = useCallback(() => {
-    setCurrentIndex((prev) => (prev + 1) % SLIDES.length);
-  }, []);
+    setCurrentIndex((prev) => (prev + 1) % effectiveSlides.length);
+  }, [effectiveSlides.length]);
 
   const prevSlide = useCallback(() => {
-    setCurrentIndex((prev) => (prev - 1 + SLIDES.length) % SLIDES.length);
-  }, []);
+    setCurrentIndex((prev) => (prev - 1 + effectiveSlides.length) % effectiveSlides.length);
+  }, [effectiveSlides.length]);
 
   useEffect(() => {
     if (isPaused) return;
@@ -72,11 +90,11 @@ export default function HeroSlider({
       onMouseLeave={() => setIsPaused(false)}
     >
       {/* Background Slides with Smooth Crossfade */}
-      {SLIDES.map((slide, index) => {
+      {effectiveSlides.map((slide, index) => {
         const isActive = index === currentIndex;
         return (
           <div
-            key={slide.src}
+            key={slide.src + index}
             className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${isActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
               }`}
           >
@@ -109,15 +127,23 @@ export default function HeroSlider({
 
         {/* Hero Title */}
         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-tight tracking-tight max-w-4xl mx-auto drop-shadow-2xl">
-          Push Beyond Limits at{' '}
-          <span className="brand-text-gradient font-black">
-            {tenantName}
-          </span>
+          {effectiveSlides[currentIndex]?.title ? (
+            effectiveSlides[currentIndex].title
+          ) : (
+            <>
+              Push Beyond Limits at{' '}
+              <span className="brand-text-gradient font-black">
+                {tenantName}
+              </span>
+            </>
+          )}
         </h1>
 
         {/* Dynamic Tagline from Current Slide */}
         <p className="text-gray-300 max-w-2xl mx-auto text-sm sm:text-base md:text-lg font-medium leading-relaxed drop-shadow-md">
-          {SLIDES[currentIndex].tagline} — Scan your digital QR pass at turnstile kiosks, track workout progress, and manage memberships online.
+          {effectiveSlides[currentIndex]?.subtitle || (
+            `${effectiveSlides[currentIndex]?.tagline || 'High-Performance Training Arena'} — Scan your digital QR pass at turnstile kiosks, track workout progress, and manage memberships online.`
+          )}
         </p>
 
         {/* Action Buttons */}
@@ -170,7 +196,7 @@ export default function HeroSlider({
           </button>
 
           <div className="flex items-center gap-2">
-            {SLIDES.map((_, index) => (
+            {effectiveSlides.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentIndex(index)}

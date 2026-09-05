@@ -337,17 +337,23 @@ const SCHEDULE_DATA: Record<DayName, ClassItem[]> = {
 
 interface ClassScheduleSectionProps {
   tenantName?: string;
+  schedule?: Record<string, ClassItem[]>;
   onSelectClass?: (className: string) => void;
 }
 
-export default function ClassScheduleSection({ tenantName = 'PolanFit Arena', onSelectClass }: ClassScheduleSectionProps) {
+export default function ClassScheduleSection({
+  tenantName = 'PolanFit Arena',
+  schedule,
+  onSelectClass,
+}: ClassScheduleSectionProps) {
   // Get current day of week to default smartly
   const todayName = WEEK_DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
   const [selectedDay, setSelectedDay] = useState<DayName>(todayName);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [reservedMsg, setReservedMsg] = useState<string | null>(null);
 
-  const classes = SCHEDULE_DATA[selectedDay] || [];
+  const activeSchedule = schedule && Object.keys(schedule).length > 0 ? schedule : SCHEDULE_DATA;
+  const classes = activeSchedule[selectedDay] || [];
   const filteredClasses = selectedCategory === 'All'
     ? classes
     : classes.filter((c) => c.category === selectedCategory);
@@ -410,7 +416,7 @@ export default function ClassScheduleSection({ tenantName = 'PolanFit Arena', on
         {WEEK_DAYS.map((day) => {
           const isSelected = selectedDay === day;
           const isToday = day === todayName;
-          const dayClassesCount = SCHEDULE_DATA[day]?.length || 0;
+          const dayClassesCount = activeSchedule[day]?.length || 0;
 
           return (
             <button
