@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import RegisterModal from './components/RegisterModal';
 import SignInModal from './components/SignInModal';
@@ -11,68 +11,194 @@ export default function FitCloudLandingPage() {
   const [activeTab, setActiveTab] = useState<'biometrics' | 'subscriptions' | 'audit' | 'multitenant'>('biometrics');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
+  // Live Hardware Terminal Simulation State
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanResult, setScanResult] = useState<any | null>(null);
+  const [todayCheckins, setTodayCheckins] = useState(348);
+  const [activeMembersCount] = useState(1482);
+  const [simulatedLogs, setSimulatedLogs] = useState([
+    {
+      id: 1,
+      member: 'Emmanuel Chinazaekpere',
+      gender: 'm',
+      plan: 'Quarterly Diamond VIP',
+      expiry: 'Dec 18, 2026',
+      gate: 'Turnstile 01 (Left)',
+      time: 'Just now',
+      latency: '34ms',
+      status: 'GRANTED',
+    },
+    {
+      id: 2,
+      member: 'Opetemi Afolabi',
+      gender: 'f',
+      plan: 'Annual Unlimited Access',
+      expiry: 'Jan 25, 2027',
+      gate: 'Turnstile 02 (Center)',
+      time: '2 mins ago',
+      latency: '28ms',
+      status: 'GRANTED',
+    },
+    {
+      id: 3,
+      member: 'Kelechi Sunday',
+      gender: 'm',
+      plan: 'Monthly Standard Pass',
+      expiry: 'Nov 30, 2026',
+      gate: 'Fast-Track Optical Gate',
+      time: '5 mins ago',
+      latency: '41ms',
+      status: 'GRANTED',
+    },
+  ]);
+
+  // Interactive Revenue Split Calculator State
+  const [memberVolume, setMemberVolume] = useState<number>(350);
+  const [averagePlanPrice, setAveragePlanPrice] = useState<number>(35000); // ₦35,000 / mo
+  const [currency, setCurrency] = useState<'NGN' | 'USD'>('NGN');
+
+  const grossMonthly = memberVolume * averagePlanPrice;
+  const saasSplit1Pct = Math.round(grossMonthly * 0.01);
+  const gymNetPayout = grossMonthly - saasSplit1Pct;
+
+  // Simulate Member Tap on Gate
+  const handleSimulateTap = () => {
+    if (isScanning) return;
+    setIsScanning(true);
+
+    setTimeout(() => {
+      const demoMembers = [
+        { name: 'Dr. Chinedu Okafor', plan: 'Executive VIP All-Access', gate: 'Gate 01 (Optical)', expiry: 'Mar 14, 2027' },
+        { name: 'Amina Bello', plan: 'Strength & Conditioning Pass', gate: 'Gate 02 (Flap)', expiry: 'Oct 02, 2026' },
+        { name: 'Tunde Bakare', plan: 'Morning Peak Unlimited', gate: 'Turnstile 03', expiry: 'Jan 10, 2027' },
+        { name: 'Fatima Aliyu', plan: 'Pilates & Boxing Bundle', gate: 'Gate 01 (Optical)', expiry: 'Dec 05, 2026' },
+      ];
+
+      const pick = demoMembers[Math.floor(Math.random() * demoMembers.length)];
+      const latencyNum = Math.floor(Math.random() * 15) + 22; // 22ms - 37ms
+
+      const newLog = {
+        id: Date.now(),
+        member: pick.name,
+        gender: Math.random() > 0.5 ? 'm' : 'f',
+        plan: pick.plan,
+        expiry: pick.expiry,
+        gate: pick.gate,
+        time: 'Just now',
+        latency: `${latencyNum}ms`,
+        status: 'GRANTED',
+      };
+
+      setSimulatedLogs((prev) => [newLog, ...prev.slice(0, 3)]);
+      setTodayCheckins((prev) => prev + 1);
+      setScanResult(newLog);
+      setIsScanning(false);
+
+      setTimeout(() => setScanResult(null), 4000);
+    }, 900);
+  };
+
   const faqs = [
     {
-      q: 'How does the hardware fingerprint scanning work?',
-      a: 'FitCloud integrates directly with USB and IP-networked biometric fingerprint scanners. When a member scans their finger at the gym entrance, FitCloud validates their active plan, expiration date, and remaining sessions in under 50ms before triggering turnstiles or access gates.'
+      q: 'How does physical biometric turnstile integration work?',
+      a: 'FitCloud integrates directly with standard IP-networked and USB biometric terminals (ZKTeco, Hikvision, optical speed gates, and RFID readers). When a member scans their finger or dynamic QR pass, our cloud validates their active plan, branch permissions, and remaining sessions in <50ms before pulsing the gate relay to open.',
     },
     {
-      q: 'What is the difference between the Free Tier and Annual Plan?',
-      a: 'The Free Tier has $0 upfront setup fee and $0 monthly cost—FitCloud automatically splits 1% on incoming member Paystack transactions. The Annual Plan is a flat $299/year license key with 0% transaction splitting fee.'
+      q: 'What is the difference between the Free Setup Tier and Annual Enterprise?',
+      a: 'The Free Setup Tier has $0 upfront cost, $0 setup fee, and $0 monthly base subscription—FitCloud automatically splits 1% on incoming member Paystack subscription payments. The Annual Enterprise Plan is a flat $299/year license key with 0% transaction split fee, ideal for large gyms with high membership volume.',
     },
     {
-      q: 'Can I customize the portal with my gym logo and theme colors?',
-      a: 'Yes! Every gym tenant gets a dedicated admin dashboard and public member portal with custom branding, logo uploads, primary/accent colors, and custom subdomain (e.g. yourgym.fitcloud.io).'
+      q: 'Can every gym tenant have their own logo, theme colors, and custom domain?',
+      a: 'Yes! Every gym tenant gets an isolated admin dashboard and public member portal. You can upload custom logos, set primary brand colors, adjust custom fonts, and run on your own custom subdomain (e.g. yourgym.fitcloud.io or yourgym.com).',
     },
     {
-      q: 'Does FitCloud track audit logs when plans are paused or updated?',
-      a: 'Absolutely. FitCloud maintains an immutable audit log detailing every member plan pause, unpause, profile update, transaction approval, and staff activity—recording previous vs new states, admin names, and timestamps.'
-    }
+      q: 'Does FitCloud automatically extend membership expiration when a plan is paused?',
+      a: 'Yes. When a member requests a freeze (travel, injury, or medical leave), FitCloud locks their gate pass and freezes their timer. Upon resumption, the system automatically shifts their expiration date forward by the exact number of paused days, with full audit trail logging.',
+    },
+    {
+      q: 'Are audit logs immutable and timestamped?',
+      a: 'Absolutely. FitCloud maintains an immutable security audit log recording every member plan pause/resume, profile edit, gate override, transaction verification, and staff action—including previous vs new state values, staff user IDs, and timestamps.',
+    },
   ];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0c] text-white font-sans selection:bg-orange-500 selection:text-black">
-      {/* 1. Header & Navigation Bar */}
-      <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[#0a0a0c]/80 border-b border-gray-800/80 transition-all">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          {/* Logo & Version Badge */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center font-extrabold text-xl text-black shadow-lg shadow-orange-500/25">
-              FC
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-white via-gray-100 to-gray-400 bg-clip-text text-transparent">
-                  FitCloud
-                </span>
-                <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/30">
-                  SaaS v2.0
-                </span>
+    <div className="min-h-screen bg-[#070709] text-white font-sans selection:bg-orange-500 selection:text-black relative">
+      {/* Background Ambient Radial Glow & Matrix Grid */}
+      <div className="fixed inset-0 bg-tech-grid pointer-events-none opacity-40 z-0" />
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-radial-gradient pointer-events-none z-0" />
+
+      {/* 1. Modern Floating Header Dock */}
+      <header className="sticky top-4 z-50 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="rounded-3xl backdrop-blur-2xl bg-[#0a0a0c]/85 border border-white/[0.08] shadow-2xl px-5 py-3 flex items-center justify-between transition-all">
+          {/* Brand Logo & Telemetry Indicator */}
+          <div className="flex items-center gap-4">
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center font-black text-xl text-black shadow-lg shadow-orange-500/25 group-hover:scale-105 transition">
+                ⚡
               </div>
-              <p className="text-[11px] text-gray-400 font-medium">Gym Management System</p>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-heading font-black text-xl tracking-tight bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
+                    FitCloud
+                  </span>
+                  <span className="text-[10px] font-mono font-extrabold uppercase px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/30">
+                    OS v2.4
+                  </span>
+                </div>
+                <p className="text-[10px] text-gray-400 font-mono">Biometric Gym Operating System</p>
+              </div>
+            </Link>
+
+            {/* Edge Gateway Status Pill */}
+            <div className="hidden xl:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-mono font-semibold">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Edge Gateways Online • 24ms</span>
             </div>
           </div>
 
-          {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300">
-            <a href="#features" className="hover:text-orange-400 transition-colors">Features</a>
-            <a href="#benefits" className="hover:text-orange-400 transition-colors">Why FitCloud</a>
-            <a href="#hardware" className="hover:text-orange-400 transition-colors">Hardware</a>
+          {/* Nav Links */}
+          <nav className="hidden md:flex items-center gap-7 text-xs font-bold text-gray-300">
+            <a href="#hardware" className="hover:text-orange-400 transition-colors">Turnstiles & Hardware</a>
+            <a href="#demo" className="hover:text-orange-400 transition-colors">Live Simulation</a>
+            <a href="#calculator" className="hover:text-orange-400 transition-colors">Revenue Calculator</a>
             <a href="#pricing" className="hover:text-orange-400 transition-colors">Pricing</a>
             <a href="#faq" className="hover:text-orange-400 transition-colors">FAQs</a>
           </nav>
 
-          {/* Action CTAs */}
-          <div className="flex items-center gap-4">
+          {/* Action Hub */}
+          <div className="flex items-center gap-3">
+            {/* Quick Portals Dropdown / Link */}
+            <a
+              href="http://localhost:3001"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-gray-300 hover:text-white text-xs font-bold border border-white/[0.08] transition"
+              title="Open PolanFit Admin Dashboard"
+            >
+              <span>Gym Admin</span>
+              <span className="text-orange-400 text-[11px]">↗</span>
+            </a>
+
+            <a
+              href="http://localhost:3002"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-gray-300 hover:text-white text-xs font-bold border border-white/[0.08] transition"
+              title="Open Member Landing Page"
+            >
+              <span>Member Portal</span>
+              <span className="text-orange-400 text-[11px]">↗</span>
+            </a>
+
             <button
               onClick={() => setIsSignInOpen(true)}
-              className="text-xs sm:text-sm font-semibold text-gray-300 hover:text-white px-4 py-2.5 rounded-xl border border-gray-800 hover:border-gray-700 bg-gray-900/50 hover:bg-gray-800 transition"
+              className="text-xs font-bold text-gray-300 hover:text-white px-3.5 py-2 rounded-xl hover:bg-white/[0.06] transition"
             >
               Sign In
             </button>
             <button
               onClick={() => setIsRegisterOpen(true)}
-              className="text-xs sm:text-sm font-bold text-black px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 transition shadow-lg shadow-orange-500/20 transform hover:-translate-y-0.5 active:translate-y-0"
+              className="text-xs font-extrabold text-black px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 transition shadow-lg shadow-orange-500/20 transform hover:-translate-y-0.5 active:translate-y-0"
             >
               Get Started Free →
             </button>
@@ -81,112 +207,213 @@ export default function FitCloudLandingPage() {
       </header>
 
       {/* 2. Hero Section */}
-      <section className="relative pt-16 pb-24 overflow-hidden">
-        {/* Background Ambient Glows */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-orange-500/10 blur-[140px] rounded-full pointer-events-none" />
-        <div className="absolute top-10 right-10 w-[300px] h-[300px] bg-amber-500/10 blur-[100px] rounded-full pointer-events-none" />
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          {/* Tagline Pill */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/25 text-orange-400 text-xs font-semibold mb-8 animate-pulse">
-            <span>🖐️ Biometric Scan & Multi-Tenant Gym Operating System</span>
+      <section className="relative pt-20 pb-20 overflow-hidden z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          {/* Glowing Pill Tag */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-bold font-mono mb-8 shadow-lg shadow-orange-500/10 animate-pulse">
+            <span>🖐️ Optical Turnstiles • Smart Passes • Instant Paystack Split</span>
           </div>
 
-          {/* Hero Headline */}
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.1] max-w-5xl mx-auto">
-            The Intelligent Cloud Platform for <span className="bg-gradient-to-r from-orange-400 via-amber-400 to-orange-500 bg-clip-text text-transparent">Modern Fitness Centers</span>
+          {/* Main Headline */}
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-heading font-black tracking-tight leading-[1.08] max-w-5xl mx-auto">
+            The Intelligent Cloud OS for{' '}
+            <span className="bg-gradient-to-r from-orange-400 via-amber-400 to-orange-500 bg-clip-text text-transparent">
+              Modern Fitness Centers
+            </span>
           </h1>
 
-          {/* Hero Subheadline */}
+          {/* Subheadline */}
           <p className="mt-6 text-base sm:text-xl text-gray-400 max-w-3xl mx-auto font-normal leading-relaxed">
-            Automate member hardware check-ins, membership renewals, subscription pause/resume controls, and Paystack revenue splitting—all from one unified, branded dashboard.
+            Unify high-speed turnstiles, encrypted biometric member entry, automated subscription freeze/resume controls, and Paystack revenue splitting—all from one branded multi-tenant dashboard.
           </p>
 
-          {/* Hero CTAs */}
+          {/* CTAs */}
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               onClick={() => setIsRegisterOpen(true)}
-              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-black font-extrabold text-base transition shadow-xl shadow-orange-500/25 transform hover:-translate-y-0.5"
+              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-black font-extrabold text-sm sm:text-base transition shadow-xl shadow-orange-500/25 transform hover:-translate-y-0.5 active:translate-y-0"
             >
-              Start Free Setup Now →
+              🚀 Launch Your Gym in 2 Minutes →
             </button>
+            <a
+              href="#demo"
+              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#121217] hover:bg-[#181820] text-gray-200 border border-white/[0.08] hover:border-orange-500/30 font-bold text-sm sm:text-base transition flex items-center justify-center gap-2"
+            >
+              <span>🖐️ Test Turnstile Simulator</span>
+            </a>
             <Link
               href="/setup"
-              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gray-900 hover:bg-gray-800 text-gray-200 border border-gray-800 hover:border-gray-700 font-bold text-base transition flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] text-gray-400 hover:text-white border border-white/[0.05] font-semibold text-sm transition flex items-center justify-center gap-1.5"
             >
-              <span>⚡ Live Setup Wizard</span>
+              <span>⚡ Setup Wizard</span>
             </Link>
           </div>
 
-          {/* 3. Live Glassmorphic Dashboard Interactive Preview */}
-          <div className="mt-16 relative max-w-5xl mx-auto">
-            <div className="p-3 sm:p-5 rounded-3xl bg-gradient-to-b from-gray-800/60 to-gray-900/90 border border-gray-700/60 shadow-2xl backdrop-blur-2xl">
-              <div className="rounded-2xl bg-[#0f0f13] border border-gray-800 p-4 sm:p-6 text-left">
-                {/* Mock Header */}
-                <div className="flex items-center justify-between pb-4 mb-6 border-b border-gray-800">
+          {/* Fast-Track Client Quick Links */}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-gray-500 font-mono">
+            <span>Explore Active Demo Workspaces:</span>
+            <a
+              href="http://localhost:3001"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-orange-400 hover:text-orange-300 underline font-bold"
+            >
+              PolanFit Gym Admin Dashboard (Port 3001) ↗
+            </a>
+            <span>•</span>
+            <a
+              href="http://localhost:3002"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-orange-400 hover:text-orange-300 underline font-bold"
+            >
+              PolanFit Public Member Landing & Pass (Port 3002) ↗
+            </a>
+          </div>
+
+          {/* 3. HERO CENTERPIECE: Live Hardware Terminal & Biometric Gate Simulator */}
+          <div id="demo" className="mt-16 relative max-w-5xl mx-auto scroll-mt-28">
+            <div className="p-3 sm:p-5 rounded-3xl bg-gradient-to-b from-white/[0.08] to-white/[0.02] border border-white/[0.1] shadow-2xl backdrop-blur-2xl">
+              <div className="rounded-2xl bg-[#0b0b0f] border border-gray-800/80 p-5 sm:p-7 text-left space-y-6">
+                {/* Simulated Terminal Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-gray-800 gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full bg-red-500" />
-                    <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                    <div className="w-3 h-3 rounded-full bg-green-500" />
-                    <span className="ml-2 text-xs font-mono text-gray-400">polanfit.fitcloud.io/admin</span>
+                    <div className="flex gap-1.5">
+                      <div className="w-3 h-3 rounded-full bg-red-500/80" />
+                      <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+                      <div className="w-3 h-3 rounded-full bg-green-500/80" />
+                    </div>
+                    <span className="text-xs font-mono text-gray-400">terminal.fitcloud.io/gate-01-optical</span>
+                    <span className="px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400 text-[10px] font-mono font-bold uppercase">
+                      Hardware Active
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                    <span className="text-xs font-semibold text-emerald-400">Hardware Terminal Connected</span>
-                  </div>
+
+                  {/* Simulate Gate Tap Action Button */}
+                  <button
+                    onClick={handleSimulateTap}
+                    disabled={isScanning}
+                    className={`px-5 py-2.5 rounded-xl font-extrabold text-xs transition flex items-center gap-2 shadow-lg ${
+                      isScanning
+                        ? 'bg-amber-500 text-black animate-pulse'
+                        : 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-emerald-500/20'
+                    }`}
+                  >
+                    <span>🖐️</span>
+                    <span>{isScanning ? 'Validating Biometric Scan...' : 'Simulate Member Gate Tap'}</span>
+                  </button>
                 </div>
 
-                {/* Key Metrics Widgets */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                  <div className="p-4 rounded-xl bg-gray-900/80 border border-gray-800">
-                    <span className="text-xs text-gray-400 font-medium">Active Members</span>
-                    <p className="text-2xl font-black text-white mt-1">1,482</p>
-                    <span className="text-[10px] text-emerald-400 font-bold">+12% this month</span>
+                {/* Key Telemetry Metrics */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="p-4 rounded-2xl bg-[#121217] border border-gray-800">
+                    <span className="text-[11px] text-gray-400 font-medium">Active Subscriptions</span>
+                    <p className="text-2xl font-black text-white mt-1">{activeMembersCount}</p>
+                    <span className="text-[10px] text-emerald-400 font-bold font-mono">● 92% Good Standing</span>
                   </div>
-                  <div className="p-4 rounded-xl bg-gray-900/80 border border-gray-800">
-                    <span className="text-xs text-gray-400 font-medium">Monthly Revenue</span>
+
+                  <div className="p-4 rounded-2xl bg-[#121217] border border-gray-800">
+                    <span className="text-[11px] text-gray-400 font-medium">Today's Check-ins</span>
+                    <p className="text-2xl font-black text-white mt-1">{todayCheckins}</p>
+                    <span className="text-[10px] text-orange-400 font-bold font-mono">⚡ +1 Tap Just Now</span>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-[#121217] border border-gray-800">
+                    <span className="text-[11px] text-gray-400 font-medium">Turnstile Gate Response</span>
+                    <p className="text-2xl font-black text-emerald-400 mt-1 font-mono">28 ms</p>
+                    <span className="text-[10px] text-gray-400 font-mono">Sub-50ms Optical Relay</span>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-[#121217] border border-gray-800">
+                    <span className="text-[11px] text-gray-400 font-medium">Paystack Revenue Split</span>
                     <p className="text-2xl font-black text-white mt-1">₦4,850,000</p>
-                    <span className="text-[10px] text-orange-400 font-bold">100% Split Verified</span>
-                  </div>
-                  <div className="p-4 rounded-xl bg-gray-900/80 border border-gray-800">
-                    <span className="text-xs text-gray-400 font-medium">Today's Check-ins</span>
-                    <p className="text-2xl font-black text-white mt-1">349</p>
-                    <span className="text-[10px] text-emerald-400 font-bold">98% Hardware Scans</span>
-                  </div>
-                  <div className="p-4 rounded-xl bg-gray-900/80 border border-gray-800">
-                    <span className="text-xs text-gray-400 font-medium">Scan Latency</span>
-                    <p className="text-2xl font-black text-emerald-400 mt-1">42 ms</p>
-                    <span className="text-[10px] text-gray-400">Ultra-fast response</span>
+                    <span className="text-[10px] text-emerald-400 font-bold font-mono">1% Automated SaaS Split</span>
                   </div>
                 </div>
 
-                {/* Live Biometric Check-In Feed Preview */}
-                <div className="p-4 rounded-xl bg-gray-900/60 border border-gray-800">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-bold text-gray-300 uppercase tracking-wider">Live Check-In Terminal Feed</span>
-                    <span className="text-[11px] text-orange-400 font-mono">Auto-refreshed</span>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="p-3 rounded-lg bg-[#141419] border border-gray-800 flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-3">
-                        <span className="text-base">🖐️</span>
-                        <div>
-                          <p className="font-bold text-white">Emmanuel Chinazaekpere <span className="text-gray-400 font-normal text-[11px]">(m)</span></p>
-                          <p className="text-[10px] text-gray-400">Plan: Monthly Standard • Valid until Nov 2026</p>
-                        </div>
+                {/* Interactive Scan Chamber & Live Terminal Stream */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+                  {/* Left: Interactive Hardware Scanner Visualizer */}
+                  <div className="md:col-span-4 p-5 rounded-2xl bg-[#121217] border border-gray-800 flex flex-col items-center justify-center text-center relative overflow-hidden">
+                    {/* Laser scanning beam overlay */}
+                    {isScanning && (
+                      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-emerald-400/30 to-transparent h-16 w-full animate-laser pointer-events-none" />
+                    )}
+
+                    <div className="relative mb-4">
+                      <div
+                        className={`w-24 h-24 rounded-3xl flex items-center justify-center text-4xl transition-all duration-300 ${
+                          isScanning
+                            ? 'bg-amber-500/20 border-2 border-amber-400 scale-105 shadow-2xl shadow-amber-500/30'
+                            : scanResult
+                            ? 'bg-emerald-500/20 border-2 border-emerald-400 scale-105 shadow-2xl shadow-emerald-500/30'
+                            : 'bg-black/50 border border-gray-800'
+                        }`}
+                      >
+                        {isScanning ? '⚡' : scanResult ? '🔓' : '🖐️'}
                       </div>
-                      <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">ACCESS GRANTED</span>
+                      <div className="absolute -bottom-2 inset-x-0 flex justify-center">
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full text-[9px] font-mono font-extrabold uppercase ${
+                            isScanning
+                              ? 'bg-amber-400 text-black animate-pulse'
+                              : scanResult
+                              ? 'bg-emerald-400 text-black'
+                              : 'bg-gray-800 text-gray-400'
+                          }`}
+                        >
+                          {isScanning ? 'Reading Biometrics...' : scanResult ? 'Turnstile Unlocked' : 'Standby For Tap'}
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="p-3 rounded-lg bg-[#141419] border border-gray-800 flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-3">
-                        <span className="text-base">🖐️</span>
-                        <div>
-                          <p className="font-bold text-white">Opetemi Afolabi <span className="text-gray-400 font-normal text-[11px]">(f)</span></p>
-                          <p className="text-[10px] text-gray-400">Plan: Quarterly Gold • Valid until Dec 2026</p>
+                    <h4 className="text-xs font-bold text-white mt-2">ZKTeco Optical Turnstile 01</h4>
+                    <p className="text-[10px] text-gray-400 mt-1">Tap the green button above to trigger an optical gate relay.</p>
+                  </div>
+
+                  {/* Right: Live Terminal Event Feed */}
+                  <div className="md:col-span-8 p-4 rounded-2xl bg-[#121217] border border-gray-800 flex flex-col justify-between">
+                    <div className="flex items-center justify-between pb-3 mb-3 border-b border-gray-800/80">
+                      <span className="text-xs font-bold text-gray-300 uppercase tracking-wider font-mono">
+                        Hardware Event Stream
+                      </span>
+                      <span className="text-[11px] text-orange-400 font-mono flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-ping" />
+                        Live Optical Relay
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      {simulatedLogs.map((log) => (
+                        <div
+                          key={log.id}
+                          className="p-3 rounded-xl bg-[#0b0b0f] border border-gray-800/80 flex items-center justify-between text-xs hover:border-gray-700 transition"
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                              {log.gender === 'f' ? '👩' : '👨'}
+                            </span>
+                            <div>
+                              <p className="font-bold text-white flex items-center gap-2">
+                                <span>{log.member}</span>
+                                <span className="text-[10px] text-gray-500 font-mono">({log.gate})</span>
+                              </p>
+                              <p className="text-[10px] text-gray-400">
+                                {log.plan} • Valid until {log.expiry}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="text-right flex-shrink-0">
+                            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-mono font-bold block">
+                              ACCESS GRANTED
+                            </span>
+                            <span className="text-[9px] text-gray-500 font-mono mt-0.5 block">
+                              {log.latency} • {log.time}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                      <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">ACCESS GRANTED</span>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -196,123 +423,217 @@ export default function FitCloudLandingPage() {
         </div>
       </section>
 
-      {/* 4. Stats Counter Bar */}
-      <section className="py-12 border-y border-gray-800/80 bg-gray-950/50">
+      {/* 4. Telemetry SLA Strip */}
+      <section className="py-12 border-y border-white/[0.08] bg-[#0c0c10]/60 backdrop-blur-xl relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
-              <p className="text-3xl sm:text-4xl font-black text-orange-400">99.99%</p>
-              <p className="text-xs text-gray-400 font-medium mt-1">Uptime SLA Guarantee</p>
+              <p className="text-3xl sm:text-5xl font-heading font-black text-orange-400">99.99%</p>
+              <p className="text-xs text-gray-400 font-mono font-medium mt-1">Uptime SLA Guarantee</p>
             </div>
             <div>
-              <p className="text-3xl sm:text-4xl font-black text-amber-400">&lt;50ms</p>
-              <p className="text-xs text-gray-400 font-medium mt-1">Biometric Hardware Response</p>
+              <p className="text-3xl sm:text-5xl font-heading font-black text-amber-400">&lt;50ms</p>
+              <p className="text-xs text-gray-400 font-mono font-medium mt-1">Biometric Turnstile Latency</p>
             </div>
             <div>
-              <p className="text-3xl sm:text-4xl font-black text-orange-400">100%</p>
-              <p className="text-xs text-gray-400 font-medium mt-1">Automated Revenue Split</p>
+              <p className="text-3xl sm:text-5xl font-heading font-black text-emerald-400">100%</p>
+              <p className="text-xs text-gray-400 font-mono font-medium mt-1">Automated Split Settlements</p>
             </div>
             <div>
-              <p className="text-3xl sm:text-4xl font-black text-amber-400">250+</p>
-              <p className="text-xs text-gray-400 font-medium mt-1">Fitness Centers Powered</p>
+              <p className="text-3xl sm:text-5xl font-heading font-black text-orange-400">250+</p>
+              <p className="text-xs text-gray-400 font-mono font-medium mt-1">Fitness Centers Powered</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 5. Pros & Key Benefits Section */}
-      <section id="benefits" className="py-24 relative">
+      {/* 5. HARDWARE ECOSYSTEM & INTEGRATIONS */}
+      <section id="hardware" className="py-24 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-orange-400 mb-3">Why Gym Owners Choose FitCloud</h2>
-            <p className="text-3xl sm:text-5xl font-extrabold tracking-tight">Everything You Need to Scale Your Gym Operations</p>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-orange-400 mb-3 font-mono">
+              Hardware Compatibility
+            </h2>
+            <p className="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight">
+              Seamlessly Connect Any Physical Access Gate
+            </p>
+            <p className="text-sm text-gray-400 mt-4 leading-relaxed">
+              No proprietary lock-in. FitCloud pairs natively with industry-standard turnstiles, biometric fingerprint units, optical laser barcode readers, and RFID keycards.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Benefit Card 1 */}
-            <div className="p-8 rounded-3xl bg-[#121217] border border-gray-800 hover:border-orange-500/50 transition-all duration-300 group hover:-translate-y-1">
-              <div className="w-14 h-14 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition">
-                🖐️
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                icon: '🚀',
+                title: 'High-Speed Optical Turnstiles',
+                desc: 'Flap barriers, tripod barriers, and swing speed gates with dual-direction optical sensors and dry contact relay triggers.',
+                badge: 'TCP/IP & Relay',
+              },
+              {
+                icon: '🖐️',
+                title: 'Biometric Fingerprint & Vein',
+                desc: 'LiveID & SilkID optical fingerprint sensors with 360-degree recognition, spoof detection, and sub-second template matching.',
+                badge: 'USB & Networked',
+              },
+              {
+                icon: '📱',
+                title: 'Encrypted Dynamic Barcode / QR',
+                desc: 'Rotating barcode pass verification. Prevents member screenshot sharing by refreshing optical security tokens every 30 seconds.',
+                badge: 'Laser & 2D Imager',
+              },
+              {
+                icon: '💳',
+                title: 'RFID & NFC Smart Proximity',
+                desc: 'Compatible with 13.56MHz Mifare classic cards, key fobs, silicone fitness wristbands, and Apple/Google Wallet NFC tags.',
+                badge: '13.56MHz / 125KHz',
+              },
+              {
+                icon: '🔒',
+                title: 'Automated Smart Locker Suites',
+                desc: 'Automatically allocate a digital locker cabinet on successful turnstile entry and release it on gym checkout.',
+                badge: 'Relay Controller',
+              },
+              {
+                icon: '🖥️',
+                title: 'Front Desk Kiosk & Cashier POS',
+                desc: 'Web-based cashier terminal for front-desk attendants to register members, issue smart passes, and take cash payments.',
+                badge: 'Web Bluetooth & USB',
+              },
+            ].map((hw, idx) => (
+              <div
+                key={idx}
+                className="p-7 rounded-3xl bg-[#0f0f13] border border-white/[0.08] hover:border-orange-500/40 transition-all duration-300 group hover:-translate-y-1 shadow-lg"
+              >
+                <div className="flex items-start justify-between mb-5">
+                  <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+                    {hw.icon}
+                  </div>
+                  <span className="px-2.5 py-1 rounded-full bg-white/[0.04] text-gray-400 border border-white/[0.08] text-[10px] font-mono font-bold">
+                    {hw.badge}
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">{hw.title}</h3>
+                <p className="text-xs text-gray-400 leading-relaxed">{hw.desc}</p>
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Automated Biometric Scans</h3>
-              <p className="text-sm text-gray-400 leading-relaxed">
-                Connect physical fingerprint turnstiles directly to your cloud portal. Verify member plans and expiration dates instantly without manual staff intervention.
-              </p>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 6. INTERACTIVE REVENUE SPLIT CALCULATOR */}
+      <section id="calculator" className="py-24 bg-[#0a0a0e]/80 border-t border-white/[0.08] relative z-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-orange-400 mb-3 font-mono">
+              Transparent Economics
+            </h2>
+            <p className="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight">
+              Interactive Revenue Split Calculator
+            </p>
+            <p className="text-sm text-gray-400 mt-4 leading-relaxed">
+              Launch with $0 upfront cost. FitCloud only charges a 1% automated transaction split when your members pay for plans through Paystack.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Sliders Console */}
+            <div className="lg:col-span-7 p-8 rounded-3xl bg-[#121217] border border-white/[0.08] space-y-8 shadow-2xl">
+              {/* Slider 1: Member Count */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-bold text-gray-300 uppercase font-mono">Active Gym Members</span>
+                  <span className="text-lg font-black text-orange-400 font-mono">{memberVolume} Members</span>
+                </div>
+                <input
+                  type="range"
+                  min="50"
+                  max="2500"
+                  step="25"
+                  value={memberVolume}
+                  onChange={(e) => setMemberVolume(Number(e.target.value))}
+                  className="w-full accent-orange-500 h-2 bg-gray-800 rounded-lg cursor-pointer"
+                />
+                <div className="flex justify-between text-[10px] text-gray-500 font-mono mt-1">
+                  <span>50 Members</span>
+                  <span>1,000 Members</span>
+                  <span>2,500+ Members</span>
+                </div>
+              </div>
+
+              {/* Slider 2: Average Monthly Fee */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-bold text-gray-300 uppercase font-mono">Average Monthly Membership Price</span>
+                  <span className="text-lg font-black text-amber-400 font-mono">₦{averagePlanPrice.toLocaleString()}</span>
+                </div>
+                <input
+                  type="range"
+                  min="10000"
+                  max="120000"
+                  step="5000"
+                  value={averagePlanPrice}
+                  onChange={(e) => setAveragePlanPrice(Number(e.target.value))}
+                  className="w-full accent-amber-500 h-2 bg-gray-800 rounded-lg cursor-pointer"
+                />
+                <div className="flex justify-between text-[10px] text-gray-500 font-mono mt-1">
+                  <span>₦10,000 / mo</span>
+                  <span>₦60,000 / mo</span>
+                  <span>₦120,000 / mo</span>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.05] text-xs text-gray-400 space-y-1 font-mono">
+                <p>💡 <span className="text-white font-bold">100% Automated Paystack Settlement:</span> 99% of member fees transfer instantly to your gym bank account. Zero manual invoicing.</p>
+              </div>
             </div>
 
-            {/* Benefit Card 2 */}
-            <div className="p-8 rounded-3xl bg-[#121217] border border-gray-800 hover:border-amber-500/50 transition-all duration-300 group hover:-translate-y-1">
-              <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition">
-                🚀
+            {/* Calculated Breakdown Cards */}
+            <div className="lg:col-span-5 space-y-4">
+              <div className="p-6 rounded-3xl bg-[#14141a] border border-white/[0.08] shadow-xl space-y-2">
+                <span className="text-[11px] text-gray-400 font-mono font-bold uppercase">Estimated Gross Monthly Revenue</span>
+                <p className="text-3xl sm:text-4xl font-black text-white font-heading">
+                  ₦{grossMonthly.toLocaleString()}
+                </p>
+                <p className="text-xs text-gray-500">Collected from {memberVolume} paying members every month</p>
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Custom Subdomains & Theme</h3>
-              <p className="text-sm text-gray-400 leading-relaxed">
-                Provide your gym with its own branded subdomain (<code className="text-orange-400">yourgym.fitcloud.io</code>), logo, and primary color palette matching your brand identity.
-              </p>
-            </div>
 
-            {/* Benefit Card 3 */}
-            <div className="p-8 rounded-3xl bg-[#121217] border border-gray-800 hover:border-orange-500/50 transition-all duration-300 group hover:-translate-y-1">
-              <div className="w-14 h-14 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition">
-                💳
+              <div className="p-6 rounded-3xl bg-emerald-500/10 border border-emerald-500/30 shadow-xl space-y-2">
+                <span className="text-[11px] text-emerald-400 font-mono font-bold uppercase">Your Gym Net Revenue (99%)</span>
+                <p className="text-3xl sm:text-4xl font-black text-emerald-400 font-heading">
+                  ₦{gymNetPayout.toLocaleString()}
+                </p>
+                <p className="text-xs text-emerald-400/80">Direct instant deposit into your registered bank account</p>
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Zero-Upfront Split Payments</h3>
-              <p className="text-sm text-gray-400 leading-relaxed">
-                Launch with $0 setup cost. FitCloud automatically splits 1% on incoming member Paystack subscription payments directly to the SaaS platform.
-              </p>
-            </div>
 
-            {/* Benefit Card 4 */}
-            <div className="p-8 rounded-3xl bg-[#121217] border border-gray-800 hover:border-amber-500/50 transition-all duration-300 group hover:-translate-y-1">
-              <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition">
-                📊
+              <div className="p-5 rounded-3xl bg-[#121217] border border-white/[0.08] flex items-center justify-between text-xs font-mono">
+                <span className="text-gray-400">FitCloud Platform Split (1%):</span>
+                <span className="font-bold text-orange-400 text-sm">₦{saasSplit1Pct.toLocaleString()}</span>
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Audit Logs & Plan Tracking</h3>
-              <p className="text-sm text-gray-400 leading-relaxed">
-                Track full audit trails for plan pause/resume actions, member profile modifications, and manual payment approvals—complete with member names and previous state values.
-              </p>
-            </div>
-
-            {/* Benefit Card 5 */}
-            <div className="p-8 rounded-3xl bg-[#121217] border border-gray-800 hover:border-orange-500/50 transition-all duration-300 group hover:-translate-y-1">
-              <div className="w-14 h-14 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition">
-                📱
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">Dedicated Portals</h3>
-              <p className="text-sm text-gray-400 leading-relaxed">
-                Tailored web interfaces for Central SaaS Admins, Gym Branch Managers, Desk Receptionists, and Members to view attendance and subscription status.
-              </p>
-            </div>
-
-            {/* Benefit Card 6 */}
-            <div className="p-8 rounded-3xl bg-[#121217] border border-gray-800 hover:border-amber-500/50 transition-all duration-300 group hover:-translate-y-1">
-              <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition">
-                🔒
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">Multi-Role Security</h3>
-              <p className="text-sm text-gray-400 leading-relaxed">
-                Granular permission controls for Super Admins, Alpha Admins, and Staff Admins—securing sensitive biometric simulation and administrative features.
-              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 6. Interactive Feature Showcase Section */}
-      <section id="features" className="py-24 bg-gray-950/60 border-t border-gray-800/80">
+      {/* 7. INTERACTIVE CAPABILITIES PREVIEW TABS */}
+      <section id="features" className="py-24 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-orange-400 mb-3">Capabilities Preview</h2>
-            <p className="text-3xl sm:text-4xl font-extrabold">Explore Powerful Platform Features</p>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-orange-400 mb-3 font-mono">
+              Engineered for Enterprise
+            </h2>
+            <p className="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight">
+              Explore Powerful Platform Capabilities
+            </p>
           </div>
 
           {/* Tab Navigation */}
           <div className="flex flex-wrap items-center justify-center gap-3 mb-12">
             {[
-              { id: 'biometrics', label: '🖐️ Biometric Scanning' },
-              { id: 'subscriptions', label: '⚡ Pause/Resume Control' },
-              { id: 'audit', label: '📝 Detailed Audit Logs' },
-              { id: 'multitenant', label: '🚀 Multi-Tenant Setup' }
+              { id: 'biometrics', label: '🖐️ Optical Biometrics' },
+              { id: 'subscriptions', label: '⚡ Smart Pause/Resume' },
+              { id: 'audit', label: '📝 Immutable Audit Logs' },
+              { id: 'multitenant', label: '🚀 Isolated Multi-Tenancy' },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -320,7 +641,7 @@ export default function FitCloudLandingPage() {
                 className={`px-5 py-3 rounded-2xl font-bold text-xs sm:text-sm transition ${
                   activeTab === tab.id
                     ? 'bg-orange-500 text-black shadow-lg shadow-orange-500/20'
-                    : 'bg-[#121217] text-gray-400 hover:text-white border border-gray-800'
+                    : 'bg-[#121217] text-gray-400 hover:text-white border border-gray-800 hover:border-gray-700'
                 }`}
               >
                 {tab.label}
@@ -328,52 +649,64 @@ export default function FitCloudLandingPage() {
             ))}
           </div>
 
-          {/* Tab Display Card */}
-          <div className="max-w-4xl mx-auto p-6 sm:p-10 rounded-3xl bg-[#121217] border border-gray-800 shadow-2xl">
+          {/* Tab Content Display Card */}
+          <div className="max-w-4xl mx-auto p-6 sm:p-10 rounded-3xl bg-[#121217] border border-white/[0.08] shadow-2xl">
             {activeTab === 'biometrics' && (
               <div className="space-y-4">
-                <h3 className="text-2xl font-bold text-white">Instant Hardware Fingerprint Validation</h3>
+                <div className="inline-flex px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold">
+                  ● Real-Time Hardware Relay
+                </div>
+                <h3 className="text-2xl font-bold text-white">Instant Hardware Fingerprint & QR Validation</h3>
                 <p className="text-sm text-gray-400 leading-relaxed">
-                  When a gym member places their finger on the entrance hardware scanner, FitCloud performs an instant lookup, validates plan status (ACTIVE vs PAUSED), verifies expiration dates, and emits turnstile trigger signals in under 50ms.
+                  When a gym member taps their finger or presents their dynamic encrypted QR code, FitCloud verifies active subscription tier, branch validity, and expiration in under 35ms.
                 </p>
-                <div className="p-4 rounded-2xl bg-black/50 border border-emerald-500/30 text-emerald-400 text-xs font-mono">
-                  [HARDWARE-SCAN] Member UID: fc-m-088 | Status: ACTIVE | Access Granted | Latency: 38ms
+                <div className="p-4 rounded-2xl bg-black/60 border border-emerald-500/30 text-emerald-400 text-xs font-mono">
+                  [HARDWARE-SCAN] Member UID: fc-m-088 | Status: ACTIVE | Access Granted | Latency: 28ms | Gate: Optical SpeedGate 01
                 </div>
               </div>
             )}
 
             {activeTab === 'subscriptions' && (
               <div className="space-y-4">
-                <h3 className="text-2xl font-bold text-white">Automated Date Extension on Plan Resumption</h3>
+                <div className="inline-flex px-3 py-1 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/30 text-xs font-mono font-bold">
+                  ● Automatic Date Shift
+                </div>
+                <h3 className="text-2xl font-bold text-white">Automated Expiration Extension on Plan Resume</h3>
                 <p className="text-sm text-gray-400 leading-relaxed">
-                  When a gym member requests a plan pause (e.g. travel or medical leave), FitCloud freezes their expiration timer. Upon resuming, the system automatically extends their plan expiration date by the exact number of paused days.
+                  When a member pauses their membership (travel, injury, or medical leave), their access pass is instantly locked. Upon resuming, FitCloud calculates the exact paused duration and shifts their expiration date forward.
                 </p>
-                <div className="p-4 rounded-2xl bg-black/50 border border-orange-500/30 text-orange-400 text-xs font-mono">
-                  [PLAN-RESUME] Member: Opetemi Afolabi | Paused Delta: 14 Days | Expiration extended to Dec 15, 2026
+                <div className="p-4 rounded-2xl bg-black/60 border border-orange-500/30 text-orange-400 text-xs font-mono">
+                  [PLAN-RESUME] Member: Opetemi Afolabi | Paused Delta: 14 Days | Expiration extended from Dec 01 to Dec 15, 2026
                 </div>
               </div>
             )}
 
             {activeTab === 'audit' && (
               <div className="space-y-4">
-                <h3 className="text-2xl font-bold text-white">Complete Audit Logs with Previous & New Values</h3>
+                <div className="inline-flex px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/30 text-xs font-mono font-bold">
+                  ● Cryptographic Integrity
+                </div>
+                <h3 className="text-2xl font-bold text-white">Comprehensive Audit Trails with State Diffs</h3>
                 <p className="text-sm text-gray-400 leading-relaxed">
-                  Every administrative action is recorded with full accountability—capturing the staff admin username, affected member name, member UID, previous value/state, and new value.
+                  Every single administrative action is immutably recorded—capturing the staff admin username, affected member name, member UID, previous value/state, and new value.
                 </p>
-                <div className="p-4 rounded-2xl bg-black/50 border border-gray-700 text-gray-300 text-xs font-mono">
-                  [AUDIT-LOG] Admin: Kelechi Sunday | Action: UPDATE_MEMBER | Member: Javier Abiodun (ID: fc-m-012) | Diff: phone: '08011112222' -&gt; '08139291535'
+                <div className="p-4 rounded-2xl bg-black/60 border border-gray-700 text-gray-300 text-xs font-mono">
+                  [AUDIT-LOG] Admin: Kelechi Sunday | Action: UPDATE_MEMBER | Member: Javier Abiodun (ID: fc-m-012) | Diff: phone: &apos;08011112222&apos; -&gt; &apos;08139291535&apos;
                 </div>
               </div>
             )}
 
             {activeTab === 'multitenant' && (
               <div className="space-y-4">
-                <h3 className="text-2xl font-bold text-white">Automated Gym Provisioning Wizard</h3>
+                <div className="inline-flex px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-mono font-bold">
+                  ● 2-Minute Provisioning
+                </div>
+                <h3 className="text-2xl font-bold text-white">Dedicated Subdomain, Branding & Portal</h3>
                 <p className="text-sm text-gray-400 leading-relaxed">
-                  Provision a new gym facility in under 2 minutes. Enter gym name, set primary and accent colors, create admin credentials, and select your pricing tier.
+                  Provision a new gym facility in under 2 minutes. Enter gym name, set primary and accent colors, create admin credentials, and enjoy completely isolated member passes and databases.
                 </p>
-                <div className="p-4 rounded-2xl bg-black/50 border border-amber-500/30 text-amber-400 text-xs font-mono">
-                  [PROVISION-SUCCESS] Tenant: PolanFit Gym | Subdomain: polanfit.fitcloud.io | Database Schema: Isolated
+                <div className="p-4 rounded-2xl bg-black/60 border border-amber-500/30 text-amber-400 text-xs font-mono">
+                  [PROVISION-SUCCESS] Tenant: PolanFit Gym | Subdomain: polanfit.fitcloud.io | Database Schema: Isolated | Color: #fa6a2e
                 </div>
               </div>
             )}
@@ -381,30 +714,34 @@ export default function FitCloudLandingPage() {
         </div>
       </section>
 
-      {/* 7. Pricing Section */}
-      <section id="pricing" className="py-24 relative">
+      {/* 8. TRANSPARENT PRICING */}
+      <section id="pricing" className="py-24 border-t border-white/[0.08] relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-orange-400 mb-3">Transparent Pricing</h2>
-            <p className="text-3xl sm:text-5xl font-extrabold tracking-tight">Choose Your Operating Model</p>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-orange-400 mb-3 font-mono">
+              Transparent Licensing
+            </h2>
+            <p className="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight">
+              Choose Your Gym Operating Model
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Option 1: Free Tier */}
             <div className="p-8 sm:p-10 rounded-3xl bg-[#121217] border-2 border-orange-500 relative flex flex-col justify-between shadow-2xl shadow-orange-500/10">
-              <span className="absolute -top-3.5 right-8 px-4 py-1 rounded-full bg-orange-500 text-black font-extrabold text-xs uppercase tracking-wider">
+              <span className="absolute -top-3.5 right-8 px-4 py-1 rounded-full bg-orange-500 text-black font-extrabold text-xs uppercase tracking-wider font-mono">
                 Most Popular
               </span>
               <div>
-                <span className="text-xs font-bold text-orange-400 uppercase tracking-widest">Option 1</span>
-                <h3 className="text-3xl font-black text-white mt-1">Free Setup Tier</h3>
+                <span className="text-xs font-bold text-orange-400 uppercase tracking-widest font-mono">Option 1</span>
+                <h3 className="text-3xl font-black text-white mt-1 font-heading">Free Setup Tier</h3>
                 <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-5xl font-black text-white">$0</span>
-                  <span className="text-gray-400 text-sm">upfront cost</span>
+                  <span className="text-5xl font-black text-white font-heading">$0</span>
+                  <span className="text-gray-400 text-sm font-mono">upfront cost</span>
                 </div>
-                <p className="text-xs text-gray-400 mt-2">1% automated transaction split fee via Paystack.</p>
+                <p className="text-xs text-gray-400 mt-2">1% automated transaction split fee via Paystack. Zero monthly subscription.</p>
 
-                <ul className="mt-8 space-y-3 text-sm text-gray-300">
+                <ul className="mt-8 space-y-3.5 text-sm text-gray-300">
                   <li className="flex items-center gap-3">
                     <span className="text-emerald-400 font-bold">✓</span> $0 Upfront Hardware Setup Cost
                   </li>
@@ -412,36 +749,39 @@ export default function FitCloudLandingPage() {
                     <span className="text-emerald-400 font-bold">✓</span> Unlimited Members & Staff Accounts
                   </li>
                   <li className="flex items-center gap-3">
-                    <span className="text-emerald-400 font-bold">✓</span> Automated Paystack Split Payment
+                    <span className="text-emerald-400 font-bold">✓</span> Automated Paystack 1% Split Payment
                   </li>
                   <li className="flex items-center gap-3">
-                    <span className="text-emerald-400 font-bold">✓</span> Full Audit Log & Biometrics
+                    <span className="text-emerald-400 font-bold">✓</span> Optical Turnstiles & Biometrics Included
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="text-emerald-400 font-bold">✓</span> Full Audit Logs & Smart Pass Engine
                   </li>
                 </ul>
               </div>
 
               <button
                 onClick={() => setIsRegisterOpen(true)}
-                className="mt-8 w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 font-extrabold text-black transition text-sm shadow-lg shadow-orange-500/20 transform hover:-translate-y-0.5"
+                className="mt-8 w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 font-extrabold text-black transition text-sm shadow-lg shadow-orange-500/20 transform hover:-translate-y-0.5 active:translate-y-0"
               >
-                Start Your Full 30-Day Free Trial →
+                Start Free in 2 Minutes →
               </button>
             </div>
 
             {/* Option 2: Annual Enterprise */}
-            <div className="p-8 sm:p-10 rounded-3xl bg-[#121217] border border-gray-800 flex flex-col justify-between hover:border-gray-700 transition">
+            <div className="p-8 sm:p-10 rounded-3xl bg-[#121217] border border-white/[0.08] flex flex-col justify-between hover:border-gray-700 transition">
               <div>
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Option 2</span>
-                <h3 className="text-3xl font-black text-white mt-1">Annual Enterprise</h3>
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono">Option 2</span>
+                <h3 className="text-3xl font-black text-white mt-1 font-heading">Annual Enterprise</h3>
                 <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-5xl font-black text-white">$299</span>
-                  <span className="text-gray-400 text-sm">/ year</span>
+                  <span className="text-5xl font-black text-white font-heading">$299</span>
+                  <span className="text-gray-400 text-sm font-mono">/ year</span>
                 </div>
-                <p className="text-xs text-gray-400 mt-2">0% transaction split fee. Flat annual license key.</p>
+                <p className="text-xs text-gray-400 mt-2">0% transaction split fee. Flat annual license key for high-volume facilities.</p>
 
-                <ul className="mt-8 space-y-3 text-sm text-gray-300">
+                <ul className="mt-8 space-y-3.5 text-sm text-gray-300">
                   <li className="flex items-center gap-3">
-                    <span className="text-emerald-400 font-bold">✓</span> Zero Transaction Split Fee
+                    <span className="text-emerald-400 font-bold">✓</span> 0% Transaction Split Fee
                   </li>
                   <li className="flex items-center gap-3">
                     <span className="text-emerald-400 font-bold">✓</span> Unlimited Locations & Branches
@@ -452,43 +792,52 @@ export default function FitCloudLandingPage() {
                   <li className="flex items-center gap-3">
                     <span className="text-emerald-400 font-bold">✓</span> Custom Domain SSL Configuration
                   </li>
+                  <li className="flex items-center gap-3">
+                    <span className="text-emerald-400 font-bold">✓</span> Dedicated Turnstile Hardware Engineer
+                  </li>
                 </ul>
               </div>
 
               <button
                 onClick={() => setIsRegisterOpen(true)}
-                className="mt-8 w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 font-extrabold text-black transition text-sm shadow-lg shadow-orange-500/20 transform hover:-translate-y-0.5"
+                className="mt-8 w-full py-4 rounded-2xl bg-white/[0.05] hover:bg-white/[0.1] text-white border border-white/[0.1] font-extrabold transition text-sm hover:border-orange-500/40 transform hover:-translate-y-0.5 active:translate-y-0"
               >
-                Start Your Full 30-Day Free Trial →
+                Get Enterprise License →
               </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 8. FAQ Accordion Section */}
-      <section id="faq" className="py-24 bg-gray-950/60 border-t border-gray-800/80">
+      {/* 9. FAQ ACCORDION SECTION */}
+      <section id="faq" className="py-24 bg-[#08080c] border-t border-white/[0.08] relative z-10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-orange-400 mb-3">Got Questions?</h2>
-            <p className="text-3xl sm:text-4xl font-extrabold">Frequently Asked Questions</p>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-orange-400 mb-3 font-mono">
+              Got Questions?
+            </h2>
+            <p className="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight">
+              Frequently Asked Questions
+            </p>
           </div>
 
           <div className="space-y-4">
             {faqs.map((faq, idx) => (
               <div
                 key={idx}
-                className="rounded-2xl bg-[#121217] border border-gray-800 overflow-hidden transition"
+                className="rounded-2xl bg-[#121217] border border-white/[0.08] overflow-hidden transition"
               >
                 <button
                   onClick={() => setOpenFaqIndex(openFaqIndex === idx ? null : idx)}
                   className="w-full p-6 text-left font-bold text-white flex items-center justify-between gap-4"
                 >
-                  <span>{faq.q}</span>
-                  <span className="text-orange-400 text-xl font-mono">{openFaqIndex === idx ? '−' : '+'}</span>
+                  <span className="text-base sm:text-lg">{faq.q}</span>
+                  <span className="text-orange-400 text-2xl font-mono flex-shrink-0">
+                    {openFaqIndex === idx ? '−' : '+'}
+                  </span>
                 </button>
                 {openFaqIndex === idx && (
-                  <div className="px-6 pb-6 text-sm text-gray-400 leading-relaxed border-t border-gray-800/60 pt-4">
+                  <div className="px-6 pb-6 text-sm text-gray-400 leading-relaxed border-t border-white/[0.06] pt-4">
                     {faq.a}
                   </div>
                 )}
@@ -498,40 +847,52 @@ export default function FitCloudLandingPage() {
         </div>
       </section>
 
-      {/* 9. Final CTA Banner */}
-      <section className="py-20 relative overflow-hidden">
-        <div className="max-w-5xl mx-auto px-4 text-center relative z-10">
-          <div className="p-10 sm:p-16 rounded-3xl bg-gradient-to-r from-orange-500/20 via-amber-500/10 to-orange-500/20 border border-orange-500/30 backdrop-blur-xl">
-            <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">Ready to Upgrade Your Gym System?</h2>
-            <p className="mt-4 text-base sm:text-lg text-gray-300 max-w-2xl mx-auto">
-              Join hundreds of modern fitness facilities operating on FitCloud SaaS today.
+      {/* 10. CLOSING HERO CTA */}
+      <section className="py-20 relative overflow-hidden z-10">
+        <div className="max-w-5xl mx-auto px-4 text-center">
+          <div className="p-10 sm:p-16 rounded-3xl bg-gradient-to-r from-orange-500/20 via-amber-500/10 to-orange-500/20 border border-orange-500/30 backdrop-blur-2xl shadow-2xl">
+            <h2 className="text-3xl sm:text-5xl font-heading font-black text-white tracking-tight">
+              Ready to Upgrade Your Gym Operating System?
+            </h2>
+            <p className="mt-4 text-base sm:text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed">
+              Join hundreds of modern fitness facilities operating on FitCloud SaaS. Zero upfront setup cost.
             </p>
-            <button
-              onClick={() => setIsRegisterOpen(true)}
-              className="mt-8 px-10 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-black font-black text-lg transition shadow-2xl shadow-orange-500/30 transform hover:-translate-y-0.5"
-            >
-              Get Started Free in 2 Minutes →
-            </button>
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+              <button
+                onClick={() => setIsRegisterOpen(true)}
+                className="w-full sm:w-auto px-10 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-black font-black text-base transition shadow-2xl shadow-orange-500/30 transform hover:-translate-y-0.5 active:translate-y-0"
+              >
+                Get Started Free in 2 Minutes →
+              </button>
+              <a
+                href="http://localhost:3001"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#121217] hover:bg-[#181820] text-gray-200 border border-white/[0.1] font-bold text-base transition"
+              >
+                Launch PolanFit Demo Portal ↗
+              </a>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* 10. Footer */}
-      <footer className="py-12 border-t border-gray-800 bg-[#070709] text-gray-500 text-xs">
+      {/* 11. FOOTER */}
+      <footer className="py-12 border-t border-white/[0.08] bg-[#050507] text-gray-500 text-xs relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-xl bg-orange-500 flex items-center justify-center font-bold text-black text-xs">
-              FC
+            <div className="w-8 h-8 rounded-xl bg-orange-500 flex items-center justify-center font-bold text-black text-sm">
+              ⚡
             </div>
-            <span className="font-bold text-white text-sm">FitCloud SaaS</span>
-            <span>© 2026 FitCloud Platform. All rights reserved.</span>
+            <span className="font-heading font-bold text-white text-sm">FitCloud OS</span>
+            <span>© 2026 FitCloud Multi-Tenant SaaS. All rights reserved.</span>
           </div>
 
           <div className="flex items-center gap-6 text-gray-400">
             <Link href="/setup" className="hover:text-white transition">Setup Wizard</Link>
             <Link href="/super-admin" className="hover:text-white transition">Super Admin</Link>
-            <a href="#features" className="hover:text-white transition">Features</a>
-            <a href="#pricing" className="hover:text-white transition">Pricing</a>
+            <a href="http://localhost:3001" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">Gym Admin (Port 3001)</a>
+            <a href="http://localhost:3002" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">Member Pass (Port 3002)</a>
           </div>
         </div>
       </footer>
