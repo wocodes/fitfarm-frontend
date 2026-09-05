@@ -187,7 +187,7 @@ export default function Sidebar() {
                       }}
                       className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
                         isActive
-                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-black font-extrabold shadow-md shadow-orange-500/20'
+                          ? 'bg-orange-500 text-black font-extrabold shadow-md shadow-orange-500/20'
                           : 'text-gray-400 hover:text-white hover:bg-gray-800/60'
                       }`}
                     >

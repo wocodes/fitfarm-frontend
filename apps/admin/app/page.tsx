@@ -601,7 +601,7 @@ export default function AdminDashboardPage() {
                       onClick={() => setActivityRange(r)}
                       className={`px-2.5 py-1 rounded-lg transition-all capitalize text-[11px] ${
                         activityRange === r
-                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-black font-black shadow-md shadow-orange-500/20'
+                          ? 'bg-orange-500 text-black font-black shadow-md shadow-orange-500/20'
                           : 'text-gray-400 hover:text-white font-medium'
                       }`}
                     >
@@ -1283,7 +1283,7 @@ export default function AdminDashboardPage() {
                   <button
                     type="submit"
                     disabled={paymentLoading || !paymentForm.amount}
-                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 font-extrabold text-black text-xs transition shadow-lg shadow-orange-500/20"
+                    className="px-6 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 font-extrabold text-black text-xs transition shadow-lg shadow-orange-500/20"
                   >
                     {paymentLoading ? 'Recording...' : `Record ₦${Number(paymentForm.amount || 0).toLocaleString()} Payment`}
                   </button>

@@ -104,7 +104,7 @@ export default function HeroSlider({
         {/* Hero Title */}
         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-tight tracking-tight max-w-4xl mx-auto drop-shadow-2xl">
           Push Beyond Limits at{' '}
-          <span className="bg-gradient-to-r from-orange-400 via-amber-400 to-orange-500 bg-clip-text text-transparent">
+          <span className="text-orange-500">
             {tenantName}
           </span>
         </h1>
@@ -120,7 +120,7 @@ export default function HeroSlider({
             <>
               <button
                 onClick={onOpenPass}
-                className="px-7 py-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 font-extrabold text-black rounded-xl shadow-xl shadow-orange-500/25 text-sm transition transform hover:-translate-y-0.5 flex items-center gap-2"
+                className="px-7 py-4 bg-orange-500 hover:bg-orange-600 font-extrabold text-black rounded-xl shadow-xl shadow-orange-500/25 text-sm transition transform hover:-translate-y-0.5 flex items-center gap-2"
               >
                 <span>📱</span>
                 <span>Open Entrance QR Pass</span>
@@ -137,7 +137,7 @@ export default function HeroSlider({
             <>
               <button
                 onClick={onOpenRegister}
-                className="px-7 py-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 font-extrabold text-black rounded-xl shadow-xl shadow-orange-500/25 text-sm transition transform hover:-translate-y-0.5 flex items-center gap-2"
+                className="px-7 py-4 bg-orange-500 hover:bg-orange-600 font-extrabold text-black rounded-xl shadow-xl shadow-orange-500/25 text-sm transition transform hover:-translate-y-0.5 flex items-center gap-2"
               >
                 <span>🚀</span>
                 <span>Register & Get Digital Pass</span>
@@ -160,20 +160,20 @@ export default function HeroSlider({
             className="w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 border border-gray-700/60 text-gray-400 hover:text-white flex items-center justify-center text-xs backdrop-blur-sm transition"
             aria-label="Previous Slide"
           >
-            ‹
+            ←
           </button>
 
           <div className="flex items-center gap-2">
-            {SLIDES.map((_, idx) => (
+            {SLIDES.map((_, index) => (
               <button
-                key={idx}
-                onClick={() => setCurrentIndex(idx)}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  idx === currentIndex
-                    ? 'w-8 bg-gradient-to-r from-orange-500 to-amber-500'
+                key={index}
+                onClick={() => setCurrentIndex(index)}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  currentIndex === index
+                    ? 'w-8 bg-orange-500'
                     : 'w-2 bg-gray-600/60 hover:bg-gray-400'
                 }`}
-                aria-label={`Go to slide ${idx + 1}`}
+                aria-label={`Go to slide ${index + 1}`}
               />
             ))}
           </div>

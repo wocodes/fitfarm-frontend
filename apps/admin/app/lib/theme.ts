@@ -120,12 +120,33 @@ export function applyTheme(theme?: Partial<ThemeSettings> | null) {
       font-family: var(--brand-font);
     }
     
+    /* Clean, solid, vibrant button backgrounds - eliminate any gradient fading */
+    button.bg-gradient-to-r,
+    a.bg-gradient-to-r,
+    .btn-gradient {
+      background-image: none !important;
+      background-color: var(--brand-primary) !important;
+      opacity: 1 !important;
+    }
+    
+    /* Eliminate text fade and transparency - make all brand text 100% solid and opaque */
+    .bg-clip-text.text-transparent {
+      background-image: none !important;
+      -webkit-background-clip: unset !important;
+      background-clip: unset !important;
+      color: var(--brand-primary) !important;
+      -webkit-text-fill-color: var(--brand-primary) !important;
+      opacity: 1 !important;
+      filter: none !important;
+    }
+    
     /* Dynamic Primary Color Overrides */
     .bg-orange-500,
     .hover\\:bg-orange-500:hover,
     .bg-orange-600,
     .hover\\:bg-orange-600:hover {
       background-color: var(--brand-primary) !important;
+      opacity: 1 !important;
     }
     
     .text-orange-400,
@@ -133,6 +154,7 @@ export function applyTheme(theme?: Partial<ThemeSettings> | null) {
     .hover\\:text-orange-400:hover,
     .group-hover\\:text-orange-400:hover {
       color: var(--brand-primary) !important;
+      opacity: 1 !important;
     }
     
     .border-orange-500,
@@ -147,13 +169,6 @@ export function applyTheme(theme?: Partial<ThemeSettings> | null) {
     .hover\\:border-orange-500\\/40:hover,
     .hover\\:border-orange-500\\/50:hover {
       border-color: var(--brand-primary) !important;
-    }
-    
-    .from-orange-500 {
-      --tw-gradient-from: var(--brand-primary) var(--tw-gradient-from-position) !important;
-    }
-    .to-orange-500 {
-      --tw-gradient-to: var(--brand-primary) var(--tw-gradient-to-position) !important;
     }
     
     .shadow-orange-500\\/20,

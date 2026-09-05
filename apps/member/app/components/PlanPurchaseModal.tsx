@@ -227,7 +227,7 @@ export default function PlanPurchaseModal({
           <button
             onClick={handleCheckout}
             disabled={loading}
-            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 font-extrabold text-black text-sm transition shadow-xl shadow-orange-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full py-3.5 rounded-xl bg-orange-500 hover:bg-orange-600 font-extrabold text-black text-sm transition shadow-xl shadow-orange-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
           >
             <span>🔒</span>
             <span>{loading ? 'Processing Checkout...' : `Pay ₦${Number(chosenPlan?.price || 25000).toLocaleString()} via Paystack`}</span>

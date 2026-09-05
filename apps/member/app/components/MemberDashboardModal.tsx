@@ -189,7 +189,7 @@ export default function MemberDashboardModal({
                     onClose();
                     onOpenPass();
                   }}
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 font-extrabold text-black text-xs transition shadow-lg shadow-orange-500/20 flex items-center justify-center gap-1.5"
+                  className="flex-1 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 font-extrabold text-black text-xs transition shadow-lg shadow-orange-500/20 flex items-center justify-center gap-1.5"
                 >
                   <span>📱</span>
                   <span>Open Digital Gate Pass</span>

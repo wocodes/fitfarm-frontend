@@ -160,7 +160,7 @@ export default function MemberAuthModals({
               <button
                 type="submit"
                 disabled={loginLoading}
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 font-extrabold text-black text-xs transition shadow-lg shadow-orange-500/20 disabled:opacity-50"
+                className="w-full py-3.5 rounded-xl bg-orange-500 hover:bg-orange-600 font-extrabold text-black text-xs transition shadow-lg shadow-orange-500/20 disabled:opacity-50"
               >
                 {loginLoading ? 'Signing in...' : 'Sign In to Portal'}
               </button>
@@ -274,7 +274,7 @@ export default function MemberAuthModals({
               <button
                 type="submit"
                 disabled={regLoading}
-                className="w-full mt-2 py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 font-extrabold text-black text-xs transition shadow-lg shadow-orange-500/20 disabled:opacity-50"
+                className="w-full mt-2 py-3.5 rounded-xl bg-orange-500 hover:bg-orange-600 font-extrabold text-black text-xs transition shadow-lg shadow-orange-500/20 disabled:opacity-50"
               >
                 {regLoading ? 'Registering...' : 'Complete Registration & Get Pass'}
               </button>

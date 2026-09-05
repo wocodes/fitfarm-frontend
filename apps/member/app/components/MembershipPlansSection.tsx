@@ -172,7 +172,7 @@ export default function MembershipPlansSection({
               }`}
             >
               {isPopular && (
-                <span className="absolute -top-2.5 right-4 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-black font-black text-[9px] uppercase tracking-wider shadow-md">
+                <span className="absolute -top-2.5 right-4 px-2.5 py-0.5 rounded-full bg-orange-500 text-black font-black text-[9px] uppercase tracking-wider shadow-md">
                   POPULAR
                 </span>
               )}
@@ -218,7 +218,7 @@ export default function MembershipPlansSection({
                   onClick={() => onSelectPlan(plan.id)}
                   className={`w-full py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-md ${
                     isPopular
-                      ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 text-black shadow-orange-500/20'
+                      ? 'bg-orange-500 hover:bg-orange-600 text-black shadow-orange-500/20'
                       : 'bg-gray-800 hover:bg-gray-700 text-white'
                   }`}
                 >

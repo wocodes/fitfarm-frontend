@@ -38,7 +38,7 @@ export default function Header({ title, subtitle }: HeaderProps) {
         {/* Quick Kiosk Link Button */}
         <a
           href="/check-in"
-          className="px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-black font-extrabold text-xs transition shadow-lg shadow-orange-500/20"
+          className="px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-black font-extrabold text-xs transition shadow-lg shadow-orange-500/20"
         >
           🚪 Open Entrance Kiosk
         </a>

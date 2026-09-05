@@ -227,16 +227,16 @@ export default function MemberPortalPage() {
 
         {/* Global Toast Notification */}
         {notificationMsg && (
-          <div className="bg-gradient-to-r from-orange-500/20 to-amber-500/20 border-b border-orange-500/30 text-orange-400 px-6 py-2 text-xs font-bold flex items-center justify-between animate-fadeIn">
+          <div className="bg-orange-500/10 border-b border-orange-500/30 text-orange-400 px-6 py-2 text-xs font-bold flex items-center justify-between animate-fadeIn">
             <span>{notificationMsg}</span>
             <button onClick={() => setNotificationMsg('')} className="text-orange-400 hover:text-white font-mono">✕</button>
           </div>
         )}
 
-        {/* Main Navbar */}
-        <header className="bg-[#0a0a0c]/85 backdrop-blur-xl border-b border-gray-800/70 px-6 py-3.5 flex items-center justify-between">
+        {/* Top Sticky Navigation Bar */}
+        <header className="px-6 py-4 flex items-center justify-between border-b border-gray-800/80 bg-[#0a0a0c]/80 backdrop-blur-md">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center font-black text-black text-xl shadow-lg shadow-orange-500/20">
+            <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center font-black text-black text-lg shadow-lg shadow-orange-500/20">
               {tenantName.charAt(0)}
             </div>
             <div>
@@ -250,7 +250,7 @@ export default function MemberPortalPage() {
               <>
                 <button
                   onClick={() => setShowPassModal(true)}
-                  className="px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 font-extrabold text-black text-xs rounded-xl shadow-lg shadow-orange-500/20 transition flex items-center gap-1.5"
+                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 font-extrabold text-black text-xs rounded-xl shadow-lg shadow-orange-500/20 transition flex items-center gap-1.5"
                 >
                   <span>📱</span>
                   <span>Digital Pass</span>
@@ -279,7 +279,7 @@ export default function MemberPortalPage() {
                 </button>
                 <button
                   onClick={() => setShowRegisterModal(true)}
-                  className="px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 font-extrabold text-black text-xs rounded-xl shadow-lg shadow-orange-500/20 transition"
+                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 font-extrabold text-black text-xs rounded-xl shadow-lg shadow-orange-500/20 transition"
                 >
                   Join Gym
                 </button>
