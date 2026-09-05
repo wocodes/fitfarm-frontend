@@ -406,7 +406,7 @@ export default function ClassScheduleSection({ tenantName = 'PolanFit Arena', on
       )}
 
       {/* Days of Week Tab Bar */}
-      <div className="grid grid-cols-7 gap-2 overflow-x-auto pb-2">
+      <div className="grid grid-cols-7 gap-2 overflow-x-auto pt-3.5 pb-2">
         {WEEK_DAYS.map((day) => {
           const isSelected = selectedDay === day;
           const isToday = day === todayName;
@@ -423,7 +423,7 @@ export default function ClassScheduleSection({ tenantName = 'PolanFit Arena', on
               }`}
             >
               {isToday && (
-                <span className="absolute -top-2.5 px-2 py-0.5 rounded-full bg-orange-500 text-[9px] font-black text-black uppercase tracking-wider">
+                <span className="absolute -top-2.5 inset-x-0 mx-auto w-fit px-2.5 py-0.5 rounded-full bg-orange-500 text-[9px] font-black text-black uppercase tracking-wider shadow-md shadow-orange-500/40 z-10 pointer-events-none">
                   Today
                 </span>
               )}
