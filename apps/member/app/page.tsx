@@ -195,8 +195,8 @@ export default function MemberPortalPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0c] text-white flex flex-col font-sans">
-      {/* Top Sticky Header & Active Session Banner */}
-      <div className="sticky top-0 z-40 w-full">
+      {/* Top Floating Header & Active Session Banner on top of Hero Image */}
+      <div className="absolute top-0 inset-x-0 z-40 w-full">
         {/* Active Workout Session Banner */}
         {activeSession && (
           <div className="bg-[#121217]/95 backdrop-blur-md border-b border-emerald-500/30 px-6 py-2.5 flex items-center justify-between text-xs animate-fadeIn">
@@ -233,10 +233,8 @@ export default function MemberPortalPage() {
           </div>
         )}
 
-        {/* Top Sticky Navigation Bar with Transparent Fade Base */}
-        <header className="relative px-6 py-4 flex items-center justify-between bg-gradient-to-b from-[#0a0a0c] via-[#0a0a0c]/80 to-transparent backdrop-blur-md transition-all">
-          {/* Transparent Faded Hairline at Base */}
-          <div className="absolute bottom-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
+        {/* Top Navigation Bar Floating on Top of Hero Slider */}
+        <header className="relative px-6 py-5 flex items-center justify-between bg-gradient-to-b from-black/80 via-black/40 to-transparent backdrop-blur-[2px] transition-all">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center font-black text-black text-lg shadow-lg shadow-orange-500/20">
               {tenantName.charAt(0)}

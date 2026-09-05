@@ -63,7 +63,7 @@ export default function HeroSlider({
 
   return (
     <div
-      className="relative min-h-[560px] md:min-h-[640px] w-full flex items-center justify-center overflow-hidden"
+      className="relative min-h-[600px] md:min-h-[680px] w-full flex items-center justify-center overflow-hidden"
       style={{
         WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 82%, rgba(0,0,0,0) 100%)',
         maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 82%, rgba(0,0,0,0) 100%)',
@@ -90,14 +90,14 @@ export default function HeroSlider({
       })}
 
       {/* Balanced Ambient Gradient Overlay */}
-      <div className="absolute inset-0 z-20 bg-gradient-to-t from-[#0a0a0c] via-[#0a0a0c]/20 to-[#0a0a0c]/50 pointer-events-none" />
+      <div className="absolute inset-0 z-20 bg-gradient-to-t from-[#0a0a0c] via-[#0a0a0c]/20 to-[#0a0a0c]/60 pointer-events-none" />
       <div className="absolute inset-0 z-20 bg-black/20 pointer-events-none" />
 
       {/* Deep Bottom Transition Fade / Dissolve into Page Body */}
       <div className="absolute bottom-0 inset-x-0 h-48 z-20 bg-gradient-to-t from-[#0a0a0c] via-[#0a0a0c]/85 to-transparent pointer-events-none" />
 
       {/* Content Overlay */}
-      <div className="relative z-30 max-w-5xl w-full mx-auto px-6 py-20 text-center space-y-6">
+      <div className="relative z-30 max-w-5xl w-full mx-auto px-6 pt-28 pb-16 sm:pt-36 sm:pb-20 text-center space-y-6">
         {/* Campaign Pill */}
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-bold uppercase tracking-wider backdrop-blur-md shadow-lg shadow-orange-500/10 animate-fadeIn">
           <span className="flex h-2 w-2 relative">
