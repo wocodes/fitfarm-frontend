@@ -64,6 +64,10 @@ export default function HeroSlider({
   return (
     <div
       className="relative min-h-[560px] md:min-h-[640px] w-full flex items-center justify-center overflow-hidden"
+      style={{
+        WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 82%, rgba(0,0,0,0) 100%)',
+        maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 82%, rgba(0,0,0,0) 100%)',
+      }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -73,9 +77,8 @@ export default function HeroSlider({
         return (
           <div
             key={slide.src}
-            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-              isActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
-            }`}
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${isActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
+              }`}
           >
             <img
               src={slide.src}
@@ -87,7 +90,7 @@ export default function HeroSlider({
       })}
 
       {/* Balanced Ambient Gradient Overlay */}
-      <div className="absolute inset-0 z-20 bg-gradient-to-t from-[#0a0a0c] via-[#0a0a0c]/30 to-[#0a0a0c]/50 pointer-events-none" />
+      <div className="absolute inset-0 z-20 bg-gradient-to-t from-[#0a0a0c] via-[#0a0a0c]/20 to-[#0a0a0c]/50 pointer-events-none" />
       <div className="absolute inset-0 z-20 bg-black/20 pointer-events-none" />
 
       {/* Deep Bottom Transition Fade / Dissolve into Page Body */}
@@ -171,11 +174,10 @@ export default function HeroSlider({
               <button
                 key={index}
                 onClick={() => setCurrentIndex(index)}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  currentIndex === index
-                    ? 'w-8 brand-btn-gradient'
-                    : 'w-2 bg-gray-600/60 hover:bg-gray-400'
-                }`}
+                className={`h-2 rounded-full transition-all duration-300 ${currentIndex === index
+                  ? 'w-8 brand-btn-gradient'
+                  : 'w-2 bg-gray-600/60 hover:bg-gray-400'
+                  }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
             ))}
