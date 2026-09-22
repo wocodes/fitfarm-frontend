@@ -1,15 +1,72 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import RegisterModal from './components/RegisterModal';
 import SignInModal from './components/SignInModal';
+
+// Animated counter hook for premium stat reveals
+function useAnimatedCounter(target: number, duration: number = 2000, startOnReveal: boolean = true) {
+  const [count, setCount] = useState(0);
+  const [started, setStarted] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const start = useCallback(() => {
+    if (started) return;
+    setStarted(true);
+    const startTime = performance.now();
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.round(eased * target));
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [target, duration, started]);
+
+  useEffect(() => {
+    if (!startOnReveal || !ref.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) start(); },
+      { threshold: 0.3 }
+    );
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [start, startOnReveal]);
+
+  return { count, ref, start };
+}
 
 export default function FitCloudLandingPage() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isSignInOpen, setIsSignInOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'biometrics' | 'subscriptions' | 'audit' | 'multitenant'>('biometrics');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+
+  // Scroll-triggered reveal animation observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+    );
+    document.querySelectorAll('.reveal-up, .reveal-left, .reveal-right, .reveal-scale').forEach((el) => {
+      observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  // Animated counters for SLA strip
+  const uptimeCounter = useAnimatedCounter(9999, 2200);
+  const latencyCounter = useAnimatedCounter(50, 1800);
+  const centersCounter = useAnimatedCounter(250, 2500);
 
   // Live Hardware Terminal Simulation State
   const [isScanning, setIsScanning] = useState(false);
@@ -122,10 +179,15 @@ export default function FitCloudLandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#070709] text-white font-sans selection:bg-orange-500 selection:text-black relative">
+    <div className="min-h-screen bg-[#070709] text-white font-sans selection:bg-orange-500 selection:text-black relative noise-overlay">
       {/* Background Ambient Radial Glow & Matrix Grid */}
-      <div className="fixed inset-0 bg-tech-grid pointer-events-none opacity-40 z-0" />
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-radial-gradient pointer-events-none z-0" />
+      <div className="fixed inset-0 bg-tech-grid pointer-events-none opacity-30 z-0" />
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[700px] bg-radial-gradient pointer-events-none z-0" />
+
+      {/* Floating Ambient Orbs for depth */}
+      <div className="fixed top-[15%] left-[10%] w-[400px] h-[400px] rounded-full bg-orange-500/[0.04] blur-[120px] pointer-events-none z-0 animate-float-orb" />
+      <div className="fixed top-[40%] right-[5%] w-[350px] h-[350px] rounded-full bg-amber-500/[0.03] blur-[100px] pointer-events-none z-0 animate-float-orb-slow" />
+      <div className="fixed bottom-[20%] left-[20%] w-[300px] h-[300px] rounded-full bg-emerald-500/[0.025] blur-[100px] pointer-events-none z-0 animate-float-orb-fast" />
 
       {/* 1. Modern Floating Header Dock */}
       <header className="sticky top-4 z-50 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -207,73 +269,81 @@ export default function FitCloudLandingPage() {
       </header>
 
       {/* 2. Hero Section */}
-      <section className="relative pt-20 pb-20 overflow-hidden z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="relative pt-24 pb-20 overflow-hidden z-10">
+        {/* Hero-local ambient glows */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-orange-500/[0.08] via-amber-500/[0.04] to-transparent rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute top-20 right-[10%] w-[300px] h-[300px] bg-amber-500/[0.06] rounded-full blur-[100px] pointer-events-none animate-float-orb-slow" />
+        <div className="absolute top-40 left-[5%] w-[250px] h-[250px] bg-orange-600/[0.05] rounded-full blur-[80px] pointer-events-none animate-float-orb" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           {/* Glowing Pill Tag */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-bold font-mono mb-8 shadow-lg shadow-orange-500/10 animate-pulse">
-            <span>🖐️ Optical Turnstiles • Smart Passes • Instant Paystack Split</span>
+          <div className="reveal-up inline-flex items-center gap-2 px-5 py-2 rounded-full bg-orange-500/[0.08] border border-orange-500/25 text-orange-400 text-xs font-bold font-mono mb-10 shadow-lg shadow-orange-500/10">
+            <span className="w-1.5 h-1.5 rounded-full bg-orange-400 dot-pulse" />
+            <span>Optical Turnstiles • Smart Passes • Instant Paystack Split</span>
           </div>
 
           {/* Main Headline */}
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-heading font-black tracking-tight leading-[1.08] max-w-5xl mx-auto">
+          <h1 className="reveal-up text-4xl sm:text-6xl lg:text-[5.2rem] font-heading font-black tracking-[-0.03em] leading-[1.06] max-w-5xl mx-auto">
             The Intelligent Cloud OS for{' '}
-            <span className="bg-gradient-to-r from-orange-400 via-amber-400 to-orange-500 bg-clip-text text-transparent">
+            <span className="text-gradient-animated">
               Modern Fitness Centers
             </span>
           </h1>
 
           {/* Subheadline */}
-          <p className="mt-6 text-base sm:text-xl text-gray-400 max-w-3xl mx-auto font-normal leading-relaxed">
+          <p className="reveal-up delay-100 mt-7 text-base sm:text-xl text-gray-400 max-w-3xl mx-auto font-normal leading-relaxed">
             Unify high-speed turnstiles, encrypted biometric member entry, automated subscription freeze/resume controls, and Paystack revenue splitting—all from one branded multi-tenant dashboard.
           </p>
 
           {/* CTAs */}
-          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="reveal-up delay-200 mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               onClick={() => setIsRegisterOpen(true)}
-              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-black font-extrabold text-sm sm:text-base transition shadow-xl shadow-orange-500/25 transform hover:-translate-y-0.5 active:translate-y-0"
+              className="group w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-black font-extrabold text-sm sm:text-base transition-all duration-300 shadow-xl shadow-orange-500/25 transform hover:-translate-y-1 hover:shadow-2xl hover:shadow-orange-500/30 active:translate-y-0"
             >
               🚀 Launch Your Gym in 2 Minutes →
             </button>
             <a
               href="#demo"
-              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#121217] hover:bg-[#181820] text-gray-200 border border-white/[0.08] hover:border-orange-500/30 font-bold text-sm sm:text-base transition flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] text-gray-200 border border-white/[0.1] hover:border-orange-500/40 font-bold text-sm sm:text-base transition-all duration-300 flex items-center justify-center gap-2 hover:-translate-y-0.5"
             >
               <span>🖐️ Test Turnstile Simulator</span>
             </a>
             <Link
               href="/setup"
-              className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] text-gray-400 hover:text-white border border-white/[0.05] font-semibold text-sm transition flex items-center justify-center gap-1.5"
+              className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-white/[0.02] hover:bg-white/[0.06] text-gray-400 hover:text-white border border-white/[0.06] font-semibold text-sm transition-all duration-300 flex items-center justify-center gap-1.5 hover:-translate-y-0.5"
             >
               <span>⚡ Setup Wizard</span>
             </Link>
           </div>
 
           {/* Fast-Track Client Quick Links */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-gray-500 font-mono">
+          <div className="reveal-up delay-300 mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-gray-500 font-mono">
             <span>Explore Active Demo Workspaces:</span>
             <a
               href="http://localhost:3001"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-orange-400 hover:text-orange-300 underline font-bold"
+              className="text-orange-400/80 hover:text-orange-300 underline underline-offset-2 font-bold transition"
             >
-              PolanFit Gym Admin Dashboard (Port 3001) ↗
+              Gym Admin Dashboard ↗
             </a>
-            <span>•</span>
+            <span className="text-gray-700">•</span>
             <a
               href="http://localhost:3002"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-orange-400 hover:text-orange-300 underline font-bold"
+              className="text-orange-400/80 hover:text-orange-300 underline underline-offset-2 font-bold transition"
             >
-              PolanFit Public Member Landing & Pass (Port 3002) ↗
+              Member Landing & Smart Pass ↗
             </a>
           </div>
 
           {/* 3. HERO CENTERPIECE: Live Hardware Terminal & Biometric Gate Simulator */}
-          <div id="demo" className="mt-16 relative max-w-5xl mx-auto scroll-mt-28">
-            <div className="p-3 sm:p-5 rounded-3xl bg-gradient-to-b from-white/[0.08] to-white/[0.02] border border-white/[0.1] shadow-2xl backdrop-blur-2xl">
+          <div id="demo" className="reveal-scale delay-200 mt-20 relative max-w-5xl mx-auto scroll-mt-28">
+            {/* Outer glow ring */}
+            <div className="absolute -inset-px rounded-[1.6rem] bg-gradient-to-b from-orange-500/20 via-white/[0.06] to-transparent pointer-events-none" />
+            <div className="relative p-3 sm:p-5 rounded-3xl bg-gradient-to-b from-white/[0.06] to-white/[0.01] border border-white/[0.1] shadow-2xl shadow-black/40 backdrop-blur-2xl gradient-border-glow">
               <div className="rounded-2xl bg-[#0b0b0f] border border-gray-800/80 p-5 sm:p-7 text-left space-y-6">
                 {/* Simulated Terminal Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-gray-800 gap-4">
@@ -423,41 +493,53 @@ export default function FitCloudLandingPage() {
         </div>
       </section>
 
+      {/* Gradient section divider */}
+      <div className="section-divider relative z-10" />
+
       {/* 4. Telemetry SLA Strip */}
-      <section className="py-12 border-y border-white/[0.08] bg-[#0c0c10]/60 backdrop-blur-xl relative z-10">
+      <section className="py-16 bg-[#0a0a0e]/80 backdrop-blur-xl relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <p className="text-3xl sm:text-5xl font-heading font-black text-orange-400">99.99%</p>
-              <p className="text-xs text-gray-400 font-mono font-medium mt-1">Uptime SLA Guarantee</p>
+            <div ref={uptimeCounter.ref} className="reveal-up">
+              <p className="text-3xl sm:text-5xl font-heading font-black text-orange-400 counter-value">
+                {(uptimeCounter.count / 100).toFixed(2)}%
+              </p>
+              <p className="text-xs text-gray-400 font-mono font-medium mt-2">Uptime SLA Guarantee</p>
             </div>
-            <div>
-              <p className="text-3xl sm:text-5xl font-heading font-black text-amber-400">&lt;50ms</p>
-              <p className="text-xs text-gray-400 font-mono font-medium mt-1">Biometric Turnstile Latency</p>
+            <div ref={latencyCounter.ref} className="reveal-up delay-100">
+              <p className="text-3xl sm:text-5xl font-heading font-black text-amber-400 counter-value">
+                &lt;{latencyCounter.count}ms
+              </p>
+              <p className="text-xs text-gray-400 font-mono font-medium mt-2">Biometric Turnstile Latency</p>
             </div>
-            <div>
+            <div className="reveal-up delay-200">
               <p className="text-3xl sm:text-5xl font-heading font-black text-emerald-400">100%</p>
-              <p className="text-xs text-gray-400 font-mono font-medium mt-1">Automated Split Settlements</p>
+              <p className="text-xs text-gray-400 font-mono font-medium mt-2">Automated Split Settlements</p>
             </div>
-            <div>
-              <p className="text-3xl sm:text-5xl font-heading font-black text-orange-400">250+</p>
-              <p className="text-xs text-gray-400 font-mono font-medium mt-1">Fitness Centers Powered</p>
+            <div ref={centersCounter.ref} className="reveal-up delay-300">
+              <p className="text-3xl sm:text-5xl font-heading font-black text-orange-400 counter-value">
+                {centersCounter.count}+
+              </p>
+              <p className="text-xs text-gray-400 font-mono font-medium mt-2">Fitness Centers Powered</p>
             </div>
           </div>
         </div>
       </section>
 
+      <div className="section-divider relative z-10" />
+
       {/* 5. HARDWARE ECOSYSTEM & INTEGRATIONS */}
-      <section id="hardware" className="py-24 relative z-10">
+      <section id="hardware" className="py-28 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-orange-400 mb-3 font-mono">
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <h2 className="reveal-up text-xs font-bold uppercase tracking-[0.2em] text-orange-400 mb-4 font-mono">
               Hardware Compatibility
             </h2>
-            <p className="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight">
-              Seamlessly Connect Any Physical Access Gate
+            <p className="reveal-up delay-100 text-3xl sm:text-5xl font-heading font-extrabold tracking-tight">
+              Seamlessly Connect Any{' '}
+              <span className="text-gradient-animated">Physical Access Gate</span>
             </p>
-            <p className="text-sm text-gray-400 mt-4 leading-relaxed">
+            <p className="reveal-up delay-200 text-sm text-gray-400 mt-5 leading-relaxed">
               No proprietary lock-in. FitCloud pairs natively with industry-standard turnstiles, biometric fingerprint units, optical laser barcode readers, and RFID keycards.
             </p>
           </div>
@@ -503,17 +585,17 @@ export default function FitCloudLandingPage() {
             ].map((hw, idx) => (
               <div
                 key={idx}
-                className="p-7 rounded-3xl bg-[#0f0f13] border border-white/[0.08] hover:border-orange-500/40 transition-all duration-300 group hover:-translate-y-1 shadow-lg"
+                className={`reveal-up delay-${(idx % 3) * 100 + 100} hw-card p-7 rounded-3xl bg-[#0c0c10] border border-white/[0.06] group shadow-lg`}
               >
                 <div className="flex items-start justify-between mb-5">
-                  <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+                  <div className="w-13 h-13 rounded-2xl bg-orange-500/[0.08] border border-orange-500/15 text-orange-400 flex items-center justify-center text-2xl group-hover:scale-110 group-hover:bg-orange-500/15 transition-all duration-300">
                     {hw.icon}
                   </div>
-                  <span className="px-2.5 py-1 rounded-full bg-white/[0.04] text-gray-400 border border-white/[0.08] text-[10px] font-mono font-bold">
+                  <span className="px-2.5 py-1 rounded-full bg-white/[0.03] text-gray-500 border border-white/[0.06] text-[10px] font-mono font-bold group-hover:text-orange-400 group-hover:border-orange-500/20 transition">
                     {hw.badge}
                   </span>
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">{hw.title}</h3>
+                <h3 className="text-lg font-bold text-white mb-2 group-hover:text-orange-50 transition">{hw.title}</h3>
                 <p className="text-xs text-gray-400 leading-relaxed">{hw.desc}</p>
               </div>
             ))}
@@ -521,24 +603,27 @@ export default function FitCloudLandingPage() {
         </div>
       </section>
 
+      <div className="section-divider relative z-10" />
+
       {/* 6. INTERACTIVE REVENUE SPLIT CALCULATOR */}
-      <section id="calculator" className="py-24 bg-[#0a0a0e]/80 border-t border-white/[0.08] relative z-10">
+      <section id="calculator" className="py-28 bg-[#090910]/80 relative z-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-orange-400 mb-3 font-mono">
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <h2 className="reveal-up text-xs font-bold uppercase tracking-[0.2em] text-orange-400 mb-4 font-mono">
               Transparent Economics
             </h2>
-            <p className="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight">
-              Interactive Revenue Split Calculator
+            <p className="reveal-up delay-100 text-3xl sm:text-5xl font-heading font-extrabold tracking-tight">
+              Interactive Revenue{' '}
+              <span className="text-gradient-animated">Split Calculator</span>
             </p>
-            <p className="text-sm text-gray-400 mt-4 leading-relaxed">
+            <p className="reveal-up delay-200 text-sm text-gray-400 mt-5 leading-relaxed">
               Launch with $0 upfront cost. FitCloud only charges a 1% automated transaction split when your members pay for plans through Paystack.
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             {/* Sliders Console */}
-            <div className="lg:col-span-7 p-8 rounded-3xl bg-[#121217] border border-white/[0.08] space-y-8 shadow-2xl">
+            <div className="reveal-left lg:col-span-7 p-8 rounded-3xl bg-[#0e0e13] border border-white/[0.08] space-y-8 shadow-2xl">
               {/* Slider 1: Member Count */}
               <div>
                 <div className="flex items-center justify-between mb-3">
@@ -589,7 +674,7 @@ export default function FitCloudLandingPage() {
             </div>
 
             {/* Calculated Breakdown Cards */}
-            <div className="lg:col-span-5 space-y-4">
+            <div className="reveal-right lg:col-span-5 space-y-4">
               <div className="p-6 rounded-3xl bg-[#14141a] border border-white/[0.08] shadow-xl space-y-2">
                 <span className="text-[11px] text-gray-400 font-mono font-bold uppercase">Estimated Gross Monthly Revenue</span>
                 <p className="text-3xl sm:text-4xl font-black text-white font-heading">
@@ -615,15 +700,18 @@ export default function FitCloudLandingPage() {
         </div>
       </section>
 
+      <div className="section-divider relative z-10" />
+
       {/* 7. INTERACTIVE CAPABILITIES PREVIEW TABS */}
-      <section id="features" className="py-24 relative z-10">
+      <section id="features" className="py-28 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-orange-400 mb-3 font-mono">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="reveal-up text-xs font-bold uppercase tracking-[0.2em] text-orange-400 mb-4 font-mono">
               Engineered for Enterprise
             </h2>
-            <p className="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight">
-              Explore Powerful Platform Capabilities
+            <p className="reveal-up delay-100 text-3xl sm:text-5xl font-heading font-extrabold tracking-tight">
+              Explore Powerful{' '}
+              <span className="text-gradient-animated">Platform Capabilities</span>
             </p>
           </div>
 
@@ -650,7 +738,7 @@ export default function FitCloudLandingPage() {
           </div>
 
           {/* Tab Content Display Card */}
-          <div className="max-w-4xl mx-auto p-6 sm:p-10 rounded-3xl bg-[#121217] border border-white/[0.08] shadow-2xl">
+          <div className="reveal-scale max-w-4xl mx-auto p-6 sm:p-10 rounded-3xl bg-[#0c0c10] border border-white/[0.08] shadow-2xl gradient-border-glow">
             {activeTab === 'biometrics' && (
               <div className="space-y-4">
                 <div className="inline-flex px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold">
@@ -714,21 +802,24 @@ export default function FitCloudLandingPage() {
         </div>
       </section>
 
+      <div className="section-divider relative z-10" />
+
       {/* 8. TRANSPARENT PRICING */}
-      <section id="pricing" className="py-24 border-t border-white/[0.08] relative z-10">
+      <section id="pricing" className="py-28 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-orange-400 mb-3 font-mono">
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <h2 className="reveal-up text-xs font-bold uppercase tracking-[0.2em] text-orange-400 mb-4 font-mono">
               Transparent Licensing
             </h2>
-            <p className="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight">
-              Choose Your Gym Operating Model
+            <p className="reveal-up delay-100 text-3xl sm:text-5xl font-heading font-extrabold tracking-tight">
+              Choose Your Gym{' '}
+              <span className="text-gradient-animated">Operating Model</span>
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Option 1: Free Tier */}
-            <div className="p-8 sm:p-10 rounded-3xl bg-[#121217] border-2 border-orange-500 relative flex flex-col justify-between shadow-2xl shadow-orange-500/10">
+            <div className="reveal-left pricing-featured p-8 sm:p-10 rounded-3xl bg-[#0e0e13] relative flex flex-col justify-between shadow-2xl shadow-orange-500/10">
               <span className="absolute -top-3.5 right-8 px-4 py-1 rounded-full bg-orange-500 text-black font-extrabold text-xs uppercase tracking-wider font-mono">
                 Most Popular
               </span>
@@ -769,7 +860,7 @@ export default function FitCloudLandingPage() {
             </div>
 
             {/* Option 2: Annual Enterprise */}
-            <div className="p-8 sm:p-10 rounded-3xl bg-[#121217] border border-white/[0.08] flex flex-col justify-between hover:border-gray-700 transition">
+            <div className="reveal-right p-8 sm:p-10 rounded-3xl bg-[#0e0e13] border border-white/[0.08] flex flex-col justify-between hover:border-gray-600 transition-all duration-400">
               <div>
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono">Option 2</span>
                 <h3 className="text-3xl font-black text-white mt-1 font-heading">Annual Enterprise</h3>
@@ -809,14 +900,16 @@ export default function FitCloudLandingPage() {
         </div>
       </section>
 
+      <div className="section-divider relative z-10" />
+
       {/* 9. FAQ ACCORDION SECTION */}
-      <section id="faq" className="py-24 bg-[#08080c] border-t border-white/[0.08] relative z-10">
+      <section id="faq" className="py-28 bg-[#08080c] relative z-10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-orange-400 mb-3 font-mono">
+          <div className="text-center mb-20">
+            <h2 className="reveal-up text-xs font-bold uppercase tracking-[0.2em] text-orange-400 mb-4 font-mono">
               Got Questions?
             </h2>
-            <p className="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight">
+            <p className="reveal-up delay-100 text-3xl sm:text-5xl font-heading font-extrabold tracking-tight">
               Frequently Asked Questions
             </p>
           </div>
@@ -825,7 +918,7 @@ export default function FitCloudLandingPage() {
             {faqs.map((faq, idx) => (
               <div
                 key={idx}
-                className="rounded-2xl bg-[#121217] border border-white/[0.08] overflow-hidden transition"
+                className={`reveal-up delay-${idx * 100} rounded-2xl bg-[#0e0e13] border border-white/[0.06] overflow-hidden transition-all duration-300 hover:border-white/[0.12]`}
               >
                 <button
                   onClick={() => setOpenFaqIndex(openFaqIndex === idx ? null : idx)}
@@ -847,10 +940,14 @@ export default function FitCloudLandingPage() {
         </div>
       </section>
 
+      <div className="section-divider relative z-10" />
+
       {/* 10. CLOSING HERO CTA */}
-      <section className="py-20 relative overflow-hidden z-10">
-        <div className="max-w-5xl mx-auto px-4 text-center">
-          <div className="p-10 sm:p-16 rounded-3xl bg-gradient-to-r from-orange-500/20 via-amber-500/10 to-orange-500/20 border border-orange-500/30 backdrop-blur-2xl shadow-2xl">
+      <section className="py-24 relative overflow-hidden z-10">
+        {/* Ambient glow behind CTA */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-orange-500/[0.06] rounded-full blur-[120px] pointer-events-none" />
+        <div className="max-w-5xl mx-auto px-4 text-center relative z-10">
+          <div className="reveal-scale p-10 sm:p-16 rounded-3xl bg-gradient-to-br from-orange-500/15 via-amber-500/[0.06] to-orange-600/10 border border-orange-500/25 backdrop-blur-2xl shadow-2xl gradient-border-glow">
             <h2 className="text-3xl sm:text-5xl font-heading font-black text-white tracking-tight">
               Ready to Upgrade Your Gym Operating System?
             </h2>

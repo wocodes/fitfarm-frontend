@@ -1,0 +1,70 @@
+name: Deploy FitCloud Frontends
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/**'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-frontend
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    name: ${{ matrix.app }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [central, admin, member]
+    env:
+      NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'https://api.fitfarmhq.com/api/v1' }}
+      NEXT_PUBLIC_PLATFORM_DOMAIN: ${{ secrets.NEXT_PUBLIC_PLATFORM_DOMAIN || 'fitfarmhq.com' }}
+      NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: ${{ secrets.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY }}
+      NEXT_PUBLIC_ADMIN_APP_URL: ${{ secrets.NEXT_PUBLIC_ADMIN_APP_URL || 'https://admin.fitfarmhq.com' }}
+      NEXT_PUBLIC_MEMBER_APP_URL: ${{ secrets.NEXT_PUBLIC_MEMBER_APP_URL || 'https://fitfarmhq.com' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/${{ matrix.app }}/package-lock.json
+
+      - name: Install dependencies
+        working-directory: apps/${{ matrix.app }}
+        run: npm ci
+
+      - name: Build static export
+        working-directory: apps/${{ matrix.app }}
+        run: npm run build
+
+      - name: Verify static export exists
+        working-directory: apps/${{ matrix.app }}
+        run: test -d out && echo "out/ ready for ${{ matrix.app }}" || echo "::error::no out/ dir (is output:'export' set?)"
+
+      - name: Prepare SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Rsync to Hostinger
+        env:
+          SSH_KEY: ~/.ssh/id_ed25519
+          TARGET_DIR: ${{ matrix.app == 'central' && '.' || matrix.app }}
+        run: |
+          TARGET="domains/fitfarmhq.com/public_html/${TARGET_DIR}"
+          if [ -n "${{ secrets.SSH_TARGET_ROOT }}" ]; then
+            TARGET="${{ secrets.SSH_TARGET_ROOT }}/${TARGET_DIR}"
+          fi
+          echo "Deploying ${{ matrix.app }} -> $TARGET"
+          rsync -az --delete -e "ssh -i '$SSH_KEY' -o StrictHostKeyChecking=no" \
+            "apps/${{ matrix.app }}/out/" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${TARGET}/"

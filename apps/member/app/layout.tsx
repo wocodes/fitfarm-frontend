@@ -32,11 +32,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 try {
                   var rawTheme = localStorage.getItem('fitcloud_theme_settings');
                   var slug = 'polanfit-fitness';
-                  var search = window.location.search;
-                  if (search) {
-                    var match = search.match(/[?&]tenant=([^&]+)/);
-                    if (match && match[1]) slug = decodeURIComponent(match[1]);
+                  var search = window.location.search || '';
+                  var tenantMatch = search.match(/[?&]tenant=([^&]+)/);
+                  if (tenantMatch && tenantMatch[1]) {
+                    slug = decodeURIComponent(tenantMatch[1]).toLowerCase();
+                  } else {
+                    var platformDomain = ${JSON.stringify(process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || '')};
+                    if (platformDomain) {
+                      var host = (window.location.hostname || '').toLowerCase().replace(/:\\d+$/, '').replace(/^www\\./, '');
+                      var suffix = '.' + platformDomain;
+                      if (host.slice(-suffix.length) === suffix) {
+                        var label = host.slice(0, -suffix.length);
+                        if (label && label.indexOf('.') === -1) slug = label;
+                      }
+                    }
+                    var storedSlug = localStorage.getItem('fitcloud_member_tenant');
+                    if (storedSlug) slug = storedSlug.toLowerCase();
                   }
+                  try { localStorage.setItem('fitcloud_member_tenant', slug); } catch (e) {}
                   
                   if (!rawTheme) {
                     var portalCache = localStorage.getItem('fitcloud_portal_info_' + slug);

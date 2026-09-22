@@ -18,12 +18,12 @@ import PlanPurchaseModal from './components/PlanPurchaseModal';
 import MemberAuthModals from './components/MemberAuthModals';
 import { memberApiFetch, getMemberToken, clearMemberToken } from './lib/api';
 import { applyTheme } from './lib/theme';
+import { resolveTenantSlug } from './lib/tenantResolver';
 
 function getInitialPortalCache(): any {
   if (typeof window === 'undefined') return null;
   try {
-    const params = new URLSearchParams(window.location.search);
-    const slug = params.get('tenant') || 'polanfit-fitness';
+    const slug = resolveTenantSlug();
     const raw = localStorage.getItem(`fitcloud_portal_info_${slug}`);
     if (raw) return JSON.parse(raw);
   } catch {}
@@ -142,15 +142,8 @@ export default function MemberPortalPage() {
 
   // Initial Load
   useEffect(() => {
-    let slug = 'polanfit-fitness';
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const urlSlug = params.get('tenant');
-      if (urlSlug) {
-        slug = urlSlug;
-        setTenantSlug(urlSlug);
-      }
-    }
+    const slug = resolveTenantSlug();
+    setTenantSlug(slug);
 
     fetchTenantData(slug);
     fetchLeaderboard();

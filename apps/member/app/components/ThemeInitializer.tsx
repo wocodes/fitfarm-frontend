@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { applyTheme, initThemeSync } from '../lib/theme';
 import { memberApiFetch } from '../lib/api';
+import { resolveTenantSlug } from '../lib/tenantResolver';
 
 export default function ThemeInitializer() {
   useEffect(() => {
@@ -10,12 +11,7 @@ export default function ThemeInitializer() {
     const cleanup = initThemeSync();
 
     // 2. Fetch fresh theme from tenant info
-    let slug = 'polanfit-fitness';
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const urlSlug = params.get('tenant');
-      if (urlSlug) slug = urlSlug;
-    }
+    const slug = typeof window === 'undefined' ? 'polanfit-fitness' : resolveTenantSlug();
 
     memberApiFetch(`/member/portal/info?tenant=${slug}`)
       .then((res) => {
