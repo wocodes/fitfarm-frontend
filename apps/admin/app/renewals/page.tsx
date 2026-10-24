@@ -272,7 +272,7 @@ export default function RenewalsPage() {
             </style>
           </head>
           <body>
-            <h2>FitCloud — Member Renewals & Extensions Log</h2>
+            <h2>FitFarmHQ — Member Renewals & Extensions Log</h2>
             <div class="subtitle">${datePeriodStr} | Total Records: ${items.length}</div>
             <table>
               <thead>

@@ -1,45 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import RegisterModal from './components/RegisterModal';
 import SignInModal from './components/SignInModal';
+import { ADMIN_APP_URL } from './lib/config';
 
-// Animated counter hook for premium stat reveals
-function useAnimatedCounter(target: number, duration: number = 2000, startOnReveal: boolean = true) {
-  const [count, setCount] = useState(0);
-  const [started, setStarted] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  const start = useCallback(() => {
-    if (started) return;
-    setStarted(true);
-    const startTime = performance.now();
-    const animate = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      // Ease-out cubic
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.round(eased * target));
-      if (progress < 1) requestAnimationFrame(animate);
-    };
-    requestAnimationFrame(animate);
-  }, [target, duration, started]);
-
-  useEffect(() => {
-    if (!startOnReveal || !ref.current) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) start(); },
-      { threshold: 0.3 }
-    );
-    observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [start, startOnReveal]);
-
-  return { count, ref, start };
-}
-
-export default function FitCloudLandingPage() {
+export default function FitFarmHQHomePage() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isSignInOpen, setIsSignInOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'biometrics' | 'subscriptions' | 'audit' | 'multitenant'>('biometrics');
@@ -62,11 +29,6 @@ export default function FitCloudLandingPage() {
     });
     return () => observer.disconnect();
   }, []);
-
-  // Animated counters for SLA strip
-  const uptimeCounter = useAnimatedCounter(9999, 2200);
-  const latencyCounter = useAnimatedCounter(50, 1800);
-  const centersCounter = useAnimatedCounter(250, 2500);
 
   // Live Hardware Terminal Simulation State
   const [isScanning, setIsScanning] = useState(false);
@@ -158,23 +120,23 @@ export default function FitCloudLandingPage() {
   const faqs = [
     {
       q: 'How does physical biometric turnstile integration work?',
-      a: 'FitCloud integrates directly with standard IP-networked and USB biometric terminals (ZKTeco, Hikvision, optical speed gates, and RFID readers). When a member scans their finger or dynamic QR pass, our cloud validates their active plan, branch permissions, and remaining sessions in <50ms before pulsing the gate relay to open.',
+      a: 'FitFarmHQ integrates directly with standard IP-networked and USB biometric terminals (ZKTeco, Hikvision, optical speed gates, and RFID readers). When a member scans their finger or dynamic QR pass, our cloud validates their active plan, branch permissions, and remaining sessions in <50ms before pulsing the gate relay to open.',
     },
     {
       q: 'What is the difference between the Free Setup Tier and Annual Enterprise?',
-      a: 'The Free Setup Tier has $0 upfront cost, $0 setup fee, and $0 monthly base subscription—FitCloud automatically splits 1% on incoming member Paystack subscription payments. The Annual Enterprise Plan is a flat $299/year license key with 0% transaction split fee, ideal for large gyms with high membership volume.',
+      a: 'The Free Setup Tier has $0 upfront cost, $0 setup fee, and $0 monthly base subscription—FitFarmHQ automatically splits 1% on incoming member Paystack subscription payments. The Annual Enterprise Plan is a flat $299/year license key with 0% transaction split fee, ideal for large gyms with high membership volume.',
     },
     {
       q: 'Can every gym tenant have their own logo, theme colors, and custom domain?',
       a: 'Yes! Every gym tenant gets an isolated admin dashboard and public member portal. You can upload custom logos, set primary brand colors, adjust custom fonts, and run on your own custom subdomain (e.g. yourgym.fitcloud.io or yourgym.com).',
     },
     {
-      q: 'Does FitCloud automatically extend membership expiration when a plan is paused?',
-      a: 'Yes. When a member requests a freeze (travel, injury, or medical leave), FitCloud locks their gate pass and freezes their timer. Upon resumption, the system automatically shifts their expiration date forward by the exact number of paused days, with full audit trail logging.',
+      q: 'Does FitFarmHQ automatically extend membership expiration when a plan is paused?',
+      a: 'Yes. When a member requests a freeze (travel, injury, or medical leave), FitFarmHQ locks their gate pass and freezes their timer. Upon resumption, the system automatically shifts their expiration date forward by the exact number of paused days, with full audit trail logging.',
     },
     {
       q: 'Are audit logs immutable and timestamped?',
-      a: 'Absolutely. FitCloud maintains an immutable security audit log recording every member plan pause/resume, profile edit, gate override, transaction verification, and staff action—including previous vs new state values, staff user IDs, and timestamps.',
+      a: 'Absolutely. FitFarmHQ maintains an immutable security audit log recording every member plan pause/resume, profile edit, gate override, transaction verification, and staff action—including previous vs new state values, staff user IDs, and timestamps.',
     },
   ];
 
@@ -201,20 +163,20 @@ export default function FitCloudLandingPage() {
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-heading font-black text-xl tracking-tight bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
-                    FitCloud
+                    FitFarmHQ
                   </span>
                   <span className="text-[10px] font-mono font-extrabold uppercase px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/30">
-                    OS v2.4
+                    CLOUD
                   </span>
                 </div>
-                <p className="text-[10px] text-gray-400 font-mono">Biometric Gym Operating System</p>
+                <p className="text-[10px] text-gray-400 font-mono">Gym operations, simplified</p>
               </div>
             </Link>
 
             {/* Edge Gateway Status Pill */}
             <div className="hidden xl:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-mono font-semibold">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Edge Gateways Online • 24ms</span>
+              <span>Cloud hosted • Secure by default</span>
             </div>
           </div>
 
@@ -229,29 +191,6 @@ export default function FitCloudLandingPage() {
 
           {/* Action Hub */}
           <div className="flex items-center gap-3">
-            {/* Quick Portals Dropdown / Link */}
-            <a
-              href="http://localhost:3001"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-gray-300 hover:text-white text-xs font-bold border border-white/[0.08] transition"
-              title="Open PolanFit Admin Dashboard"
-            >
-              <span>Gym Admin</span>
-              <span className="text-orange-400 text-[11px]">↗</span>
-            </a>
-
-            <a
-              href="http://localhost:3002"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-gray-300 hover:text-white text-xs font-bold border border-white/[0.08] transition"
-              title="Open Member Landing Page"
-            >
-              <span>Member Portal</span>
-              <span className="text-orange-400 text-[11px]">↗</span>
-            </a>
-
             <button
               onClick={() => setIsSignInOpen(true)}
               className="text-xs font-bold text-gray-300 hover:text-white px-3.5 py-2 rounded-xl hover:bg-white/[0.06] transition"
@@ -317,26 +256,10 @@ export default function FitCloudLandingPage() {
             </Link>
           </div>
 
-          {/* Fast-Track Client Quick Links */}
-          <div className="reveal-up delay-300 mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-gray-500 font-mono">
-            <span>Explore Active Demo Workspaces:</span>
-            <a
-              href="http://localhost:3001"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-orange-400/80 hover:text-orange-300 underline underline-offset-2 font-bold transition"
-            >
-              Gym Admin Dashboard ↗
-            </a>
-            <span className="text-gray-700">•</span>
-            <a
-              href="http://localhost:3002"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-orange-400/80 hover:text-orange-300 underline underline-offset-2 font-bold transition"
-            >
-              Member Landing & Smart Pass ↗
-            </a>
+          <div className="reveal-up delay-300 mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] text-gray-500 font-mono">
+            <span>✓ No credit card required</span>
+            <span>✓ 30-day trial</span>
+            <span>✓ Cancel anytime</span>
           </div>
 
           {/* 3. HERO CENTERPIECE: Live Hardware Terminal & Biometric Gate Simulator */}
@@ -500,27 +423,21 @@ export default function FitCloudLandingPage() {
       <section className="py-16 bg-[#0a0a0e]/80 backdrop-blur-xl relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div ref={uptimeCounter.ref} className="reveal-up">
-              <p className="text-3xl sm:text-5xl font-heading font-black text-orange-400 counter-value">
-                {(uptimeCounter.count / 100).toFixed(2)}%
-              </p>
-              <p className="text-xs text-gray-400 font-mono font-medium mt-2">Uptime SLA Guarantee</p>
+            <div className="reveal-up">
+              <p className="text-3xl sm:text-5xl font-heading font-black text-orange-400">99.99%</p>
+              <p className="text-xs text-gray-400 font-mono font-medium mt-2">Uptime SLA</p>
             </div>
-            <div ref={latencyCounter.ref} className="reveal-up delay-100">
-              <p className="text-3xl sm:text-5xl font-heading font-black text-amber-400 counter-value">
-                &lt;{latencyCounter.count}ms
-              </p>
-              <p className="text-xs text-gray-400 font-mono font-medium mt-2">Biometric Turnstile Latency</p>
+            <div className="reveal-up delay-100">
+              <p className="text-3xl sm:text-5xl font-heading font-black text-amber-400">&lt;35ms</p>
+              <p className="text-xs text-gray-400 font-mono font-medium mt-2">Access-check latency</p>
             </div>
             <div className="reveal-up delay-200">
-              <p className="text-3xl sm:text-5xl font-heading font-black text-emerald-400">100%</p>
-              <p className="text-xs text-gray-400 font-mono font-medium mt-2">Automated Split Settlements</p>
+              <p className="text-3xl sm:text-5xl font-heading font-black text-emerald-400">1%</p>
+              <p className="text-xs text-gray-400 font-mono font-medium mt-2">Paystack platform fee</p>
             </div>
-            <div ref={centersCounter.ref} className="reveal-up delay-300">
-              <p className="text-3xl sm:text-5xl font-heading font-black text-orange-400 counter-value">
-                {centersCounter.count}+
-              </p>
-              <p className="text-xs text-gray-400 font-mono font-medium mt-2">Fitness Centers Powered</p>
+            <div className="reveal-up delay-300">
+              <p className="text-3xl sm:text-5xl font-heading font-black text-orange-400">24/7</p>
+              <p className="text-xs text-gray-400 font-mono font-medium mt-2">Audit trail & backups</p>
             </div>
           </div>
         </div>
@@ -540,7 +457,7 @@ export default function FitCloudLandingPage() {
               <span className="text-gradient-animated">Physical Access Gate</span>
             </p>
             <p className="reveal-up delay-200 text-sm text-gray-400 mt-5 leading-relaxed">
-              No proprietary lock-in. FitCloud pairs natively with industry-standard turnstiles, biometric fingerprint units, optical laser barcode readers, and RFID keycards.
+              No proprietary lock-in. FitFarmHQ pairs natively with industry-standard turnstiles, biometric fingerprint units, optical laser barcode readers, and RFID keycards.
             </p>
           </div>
 
@@ -617,7 +534,7 @@ export default function FitCloudLandingPage() {
               <span className="text-gradient-animated">Split Calculator</span>
             </p>
             <p className="reveal-up delay-200 text-sm text-gray-400 mt-5 leading-relaxed">
-              Launch with $0 upfront cost. FitCloud only charges a 1% automated transaction split when your members pay for plans through Paystack.
+              Launch with $0 upfront cost. FitFarmHQ only charges a 1% automated transaction split when your members pay for plans through Paystack.
             </p>
           </div>
 
@@ -692,7 +609,7 @@ export default function FitCloudLandingPage() {
               </div>
 
               <div className="p-5 rounded-3xl bg-[#121217] border border-white/[0.08] flex items-center justify-between text-xs font-mono">
-                <span className="text-gray-400">FitCloud Platform Split (1%):</span>
+                <span className="text-gray-400">FitFarmHQ Platform Split (1%):</span>
                 <span className="font-bold text-orange-400 text-sm">₦{saasSplit1Pct.toLocaleString()}</span>
               </div>
             </div>
@@ -746,7 +663,7 @@ export default function FitCloudLandingPage() {
                 </div>
                 <h3 className="text-2xl font-bold text-white">Instant Hardware Fingerprint & QR Validation</h3>
                 <p className="text-sm text-gray-400 leading-relaxed">
-                  When a gym member taps their finger or presents their dynamic encrypted QR code, FitCloud verifies active subscription tier, branch validity, and expiration in under 35ms.
+                  When a gym member taps their finger or presents their dynamic encrypted QR code, FitFarmHQ verifies active subscription tier, branch validity, and expiration in under 35ms.
                 </p>
                 <div className="p-4 rounded-2xl bg-black/60 border border-emerald-500/30 text-emerald-400 text-xs font-mono">
                   [HARDWARE-SCAN] Member UID: fc-m-088 | Status: ACTIVE | Access Granted | Latency: 28ms | Gate: Optical SpeedGate 01
@@ -761,7 +678,7 @@ export default function FitCloudLandingPage() {
                 </div>
                 <h3 className="text-2xl font-bold text-white">Automated Expiration Extension on Plan Resume</h3>
                 <p className="text-sm text-gray-400 leading-relaxed">
-                  When a member pauses their membership (travel, injury, or medical leave), their access pass is instantly locked. Upon resuming, FitCloud calculates the exact paused duration and shifts their expiration date forward.
+                  When a member pauses their membership (travel, injury, or medical leave), their access pass is instantly locked. Upon resuming, FitFarmHQ calculates the exact paused duration and shifts their expiration date forward.
                 </p>
                 <div className="p-4 rounded-2xl bg-black/60 border border-orange-500/30 text-orange-400 text-xs font-mono">
                   [PLAN-RESUME] Member: Opetemi Afolabi | Paused Delta: 14 Days | Expiration extended from Dec 01 to Dec 15, 2026
@@ -794,7 +711,7 @@ export default function FitCloudLandingPage() {
                   Provision a new gym facility in under 2 minutes. Enter gym name, set primary and accent colors, create admin credentials, and enjoy completely isolated member passes and databases.
                 </p>
                 <div className="p-4 rounded-2xl bg-black/60 border border-amber-500/30 text-amber-400 text-xs font-mono">
-                  [PROVISION-SUCCESS] Tenant: PolanFit Gym | Subdomain: polanfit.fitcloud.io | Database Schema: Isolated | Color: #fa6a2e
+                  [PROVISION-SUCCESS] Tenant: FitFarmHQ Demo Gym | Subdomain: demo.fitfarmhq.com | Database Schema: Isolated | Color: #fa6a2e
                 </div>
               </div>
             )}
@@ -952,7 +869,7 @@ export default function FitCloudLandingPage() {
               Ready to Upgrade Your Gym Operating System?
             </h2>
             <p className="mt-4 text-base sm:text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed">
-              Join hundreds of modern fitness facilities operating on FitCloud SaaS. Zero upfront setup cost.
+              Launch your gym with a branded portal, automated access control, and clear pricing.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
@@ -962,12 +879,12 @@ export default function FitCloudLandingPage() {
                 Get Started Free in 2 Minutes →
               </button>
               <a
-                href="http://localhost:3001"
+                href={ADMIN_APP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#121217] hover:bg-[#181820] text-gray-200 border border-white/[0.1] font-bold text-base transition"
               >
-                Launch PolanFit Demo Portal ↗
+                Owner Sign In ↗
               </a>
             </div>
           </div>
@@ -981,15 +898,14 @@ export default function FitCloudLandingPage() {
             <div className="w-8 h-8 rounded-xl bg-orange-500 flex items-center justify-center font-bold text-black text-sm">
               ⚡
             </div>
-            <span className="font-heading font-bold text-white text-sm">FitCloud OS</span>
-            <span>© 2026 FitCloud Multi-Tenant SaaS. All rights reserved.</span>
+            <span className="font-heading font-bold text-white text-sm">FitFarmHQ</span>
+            <span>© 2026 FitFarmHQ. All rights reserved.</span>
           </div>
 
           <div className="flex items-center gap-6 text-gray-400">
             <Link href="/setup" className="hover:text-white transition">Setup Wizard</Link>
             <Link href="/super-admin" className="hover:text-white transition">Super Admin</Link>
-            <a href="http://localhost:3001" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">Gym Admin (Port 3001)</a>
-            <a href="http://localhost:3002" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">Member Pass (Port 3002)</a>
+            <a href={ADMIN_APP_URL} target="_blank" rel="noopener noreferrer" className="hover:text-white transition">Admin Console</a>
           </div>
         </div>
       </footer>

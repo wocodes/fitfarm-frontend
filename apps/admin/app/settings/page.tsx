@@ -612,7 +612,7 @@ export default function SettingsPage() {
 
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-gray-400 font-mono">Sample Fee: {currencySymbol}25,000 / month</span>
-                      <span className="text-gray-500 font-mono">Powered by FitCloud Engine</span>
+                      <span className="text-gray-500 font-mono">Powered by FitFarmHQ Engine</span>
                     </div>
                   </div>
                 </div>

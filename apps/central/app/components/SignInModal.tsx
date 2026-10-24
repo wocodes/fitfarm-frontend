@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { API_URL, ADMIN_APP_URL } from '../lib/config';
 
 interface SignInModalProps {
   isOpen: boolean;
@@ -24,7 +25,7 @@ export default function SignInModal({ isOpen, onClose, onSwitchToRegister }: Sig
     setLoading(true);
 
     try {
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
+      const apiBase = API_URL;
       const terminalToken = typeof window !== 'undefined' ? localStorage.getItem('fitcloud_terminal_token') : null;
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -52,7 +53,7 @@ export default function SignInModal({ isOpen, onClose, onSwitchToRegister }: Sig
         }
 
         if (user?.tenant || user?.tenant_id) {
-          const adminAppUrl = process.env.NEXT_PUBLIC_ADMIN_APP_URL || 'http://localhost:3001';
+          const adminAppUrl = ADMIN_APP_URL;
           const tenantSlug = user?.tenant?.slug || 'polanfit-fitness';
           window.location.href = `${adminAppUrl}#token=${encodeURIComponent(token)}&tenant=${encodeURIComponent(tenantSlug)}`;
         } else if (user?.role === 'super_admin' || user?.role === 'ROLE_SUPER_ADMIN' || email.includes('superadmin')) {
@@ -90,7 +91,7 @@ export default function SignInModal({ isOpen, onClose, onSwitchToRegister }: Sig
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-orange-500/20 text-orange-500 font-bold text-xl mb-3 shadow-lg shadow-orange-500/10 border border-orange-500/30">
             FC
           </div>
-          <h2 className="text-2xl font-extrabold tracking-tight">Sign In to FitCloud</h2>
+          <h2 className="text-2xl font-extrabold tracking-tight">Sign In to FitFarmHQ</h2>
           <p className="text-xs text-gray-400 mt-1">
             Access your Central SaaS Portal & Gym Management Console
           </p>
@@ -143,7 +144,7 @@ export default function SignInModal({ isOpen, onClose, onSwitchToRegister }: Sig
 
         {/* Footer Link */}
         <div className="mt-6 pt-4 border-t border-gray-800 text-center text-xs text-gray-400">
-          Don't have a FitCloud account yet?{' '}
+          Don't have a FitFarmHQ account yet?{' '}
           <button
             onClick={onSwitchToRegister}
             className="text-orange-400 font-semibold hover:underline"

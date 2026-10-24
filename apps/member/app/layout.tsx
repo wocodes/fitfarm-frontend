@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FitCloud Gym Portal",
+  title: "FitFarmHQ Gym Portal",
   description: "Member Gym Portal and Digital Turnstile Access",
 };
 

@@ -353,7 +353,7 @@ export default function CheckInKioskPage() {
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-black uppercase tracking-widest text-orange-400">
-                    FitCloud Entrance Kiosk #01
+                    FitFarmHQ Entrance Kiosk #01
                   </span>
                   {hardwareConnected && (
                     <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/40 text-[9px] font-extrabold uppercase">

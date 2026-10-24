@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import apiClient from '../lib/apiClient';
+import apiClient, { getMemberPortalUrl } from '../lib/apiClient';
 import {
   applyTheme,
   broadcastThemeChange,
@@ -449,7 +449,7 @@ export default function ThemeSettingsPage() {
               {/* Public Portal Link */}
               <div className="pt-2 border-t border-gray-800">
                 <a
-                  href="http://localhost:3002"
+                  href={getMemberPortalUrl()}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs text-orange-400 hover:underline flex items-center justify-between font-bold"

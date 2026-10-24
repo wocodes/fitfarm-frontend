@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
-import { apiFetch } from '../lib/apiClient';
+import { API_URL, apiFetch, getMemberPortalUrl } from '../lib/apiClient';
 
 type CmsTab = 'visibility' | 'hero' | 'classes' | 'trainers' | 'testimonials' | 'amenities' | 'faqs';
 
@@ -119,7 +119,7 @@ export default function WebsiteCmsPage() {
     try {
       showToast('Uploading image asset...');
       const token = localStorage.getItem('fitcloud_token') || '';
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/admin/cms/upload`, {
+      const response = await fetch(`${API_URL}/admin/cms/upload`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -168,7 +168,7 @@ export default function WebsiteCmsPage() {
 
             {/* Quick Visit Member Portal Button */}
             <a
-              href="http://localhost:3002"
+              href={getMemberPortalUrl()}
               target="_blank"
               rel="noopener noreferrer"
               className="px-4 py-2.5 rounded-xl bg-orange-500/10 hover:bg-orange-500 text-orange-400 hover:text-black font-extrabold text-xs transition border border-orange-500/30 flex items-center gap-2 shadow-lg shadow-orange-500/5 w-fit"

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { API_URL, ADMIN_APP_URL, PLATFORM_DOMAIN } from '../lib/config';
 
 export default function IntegratedTenantDashboardSetupPage() {
   const [step, setStep] = useState(1);
@@ -14,7 +15,7 @@ export default function IntegratedTenantDashboardSetupPage() {
   const [licenseInfo, setLicenseInfo] = useState<any>(null);
 
   const [pricingPath, setPricingPath] = useState<'free_tier' | 'annual_subscription'>('free_tier');
-  const [gymName, setGymName] = useState('PolanFit Fitness');
+  const [gymName, setGymName] = useState('My Gym');
   const [timezone, setTimezone] = useState('Africa/Lagos');
   const [currency, setCurrency] = useState('NGN');
 
@@ -56,7 +57,7 @@ export default function IntegratedTenantDashboardSetupPage() {
       // Check if logged in user already has an active tenant provisioned
       const token = localStorage.getItem('fitcloud_token') || localStorage.getItem('polanfit_token');
       if (token) {
-        const apiBase = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
+        const apiBase = API_URL;
         fetch(`${apiBase}/central/auth/profile`, {
           headers: {
             'Accept': 'application/json',
@@ -66,7 +67,7 @@ export default function IntegratedTenantDashboardSetupPage() {
           .then((res) => res.json())
           .then((json) => {
             if (json.success && json.data && (json.data.tenant || json.data.tenant_id)) {
-              const adminAppUrl = process.env.NEXT_PUBLIC_ADMIN_APP_URL || 'http://localhost:3001';
+              const adminAppUrl = ADMIN_APP_URL;
               const tenantSlug = json.data?.tenant?.slug || '';
               window.location.href = `${adminAppUrl}#token=${encodeURIComponent(token)}&tenant=${encodeURIComponent(tenantSlug)}`;
             }
@@ -78,7 +79,7 @@ export default function IntegratedTenantDashboardSetupPage() {
 
   const [resultData, setResultData] = useState<any>(null);
 
-  const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+  const apiBase = API_URL;
 
   // Step 1: Verify License Key
   const handleVerifyLicense = async (e: React.FormEvent) => {
@@ -208,7 +209,7 @@ export default function IntegratedTenantDashboardSetupPage() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="font-extrabold text-base tracking-tight text-white">FitCloud Central Dashboard</h1>
+              <h1 className="font-extrabold text-base tracking-tight text-white">FitFarmHQ Setup</h1>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
                 SYSTEM ONLINE
               </span>
@@ -556,7 +557,7 @@ export default function IntegratedTenantDashboardSetupPage() {
                   <div>
                     <h3 className="font-extrabold text-lg text-white">System Provisioned Successfully!</h3>
                     <p className="text-xs text-gray-300 mt-0.5">
-                      {resultData.tenant.name} is now live on <code className="text-emerald-400 font-mono">FitCloud.io</code> with a 30-Day Unlimited Trial!
+                      {resultData.tenant.name} is now live on <code className="text-emerald-400 font-mono">FitFarmHQ</code> with a 30-Day Unlimited Trial!
                     </p>
                   </div>
                 </div>
@@ -624,7 +625,7 @@ export default function IntegratedTenantDashboardSetupPage() {
 
               {/* Subdomain Pill */}
               <div className="p-2.5 rounded-xl bg-orange-500/10 border border-orange-500/20 text-[10px] font-mono text-orange-400">
-                🌐 http://localhost:3001?tenant=<span className="font-bold underline">{gymSlug || 'yourgym'}</span>
+                🌐 https://<span className="font-bold underline">{gymSlug || 'yourgym'}.{PLATFORM_DOMAIN}</span>
               </div>
 
               {/* Simulated Buttons */}
@@ -665,7 +666,7 @@ export default function IntegratedTenantDashboardSetupPage() {
           </div>
 
           <div className="pt-4 mt-4 border-t border-gray-800 text-[10px] text-gray-500 text-center">
-            FitCloud SaaS Engine v2.0
+            FitFarmHQ Provisioning Engine
           </div>
         </aside>
       </div>
