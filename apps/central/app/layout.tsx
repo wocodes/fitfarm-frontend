@@ -13,8 +13,8 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "FitCloud OS • Next-Gen Biometric & Multi-Tenant Gym Operating System",
-  description: "Cloud-native gym management platform with automated biometric turnstile gate entry, Paystack split billing, multi-tenant branch portals, and real-time attendance telemetry.",
+  title: "FitFarmHQ — Gym Management & Member Access SaaS",
+  description: "FitFarmHQ helps gyms manage members, subscriptions, check-ins, staff, and branded member portals from one cloud dashboard.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

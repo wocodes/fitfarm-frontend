@@ -275,7 +275,7 @@ export default function FooterSection({
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-gray-800/60 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-500">
-          <p>© 2026 {tenantName}. Powered by FitCloud SaaS Management System.</p>
+          <p>© 2026 {tenantName}. Powered by FitFarmHQ SaaS Management System.</p>
 
           <div className="flex items-center gap-4 text-[11px] text-gray-500">
             <span>🔒 Paystack 256-bit SSL Verified</span>

@@ -584,7 +584,7 @@ export default function AdminsPage() {
                 <div className="space-y-2">
                   <h3 className="text-xl font-extrabold text-white">No Team Administrators Registered Yet</h3>
                   <p className="text-xs text-gray-400 leading-relaxed max-w-md mx-auto">
-                    Welcome to your FitCloud Gym Center! As a tenant, you can invite your team members—such as front-desk receptionists, billing managers, and trainers—to collaborate with role-based security.
+                    Welcome to your FitFarmHQ Gym Center! As a tenant, you can invite your team members—such as front-desk receptionists, billing managers, and trainers—to collaborate with role-based security.
                   </p>
                 </div>
 

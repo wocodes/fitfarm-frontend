@@ -134,7 +134,7 @@ export default function Sidebar() {
         </div>
         <div>
           <div className="flex items-center gap-1.5">
-            <span className="font-extrabold text-base tracking-tight text-white">FitCloud</span>
+            <span className="font-extrabold text-base tracking-tight text-white">FitFarmHQ</span>
             <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30">
               Admin
             </span>

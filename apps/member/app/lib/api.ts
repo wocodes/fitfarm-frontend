@@ -2,7 +2,13 @@
 
 import { resolveTenantSlug } from './tenantResolver';
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+const isDevelopment = process.env.NODE_ENV === 'development';
+
+export const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (isDevelopment
+    ? 'http://localhost:8000/api/v1'
+    : 'https://api.fitfarmhq.com/api/v1');
 
 const TOKEN_KEY = 'fitcloud_member_token';
 const MEMBER_KEY = 'fitcloud_member_user';

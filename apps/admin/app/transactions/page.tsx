@@ -267,7 +267,7 @@ export default function TransactionsPage() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `FitCloud_Transactions_${new Date().toISOString().slice(0, 10)}.csv`;
+      link.download = `FitFarmHQ_Transactions_${new Date().toISOString().slice(0, 10)}.csv`;
       link.click();
       URL.revokeObjectURL(url);
     } catch (err) {
@@ -302,7 +302,7 @@ export default function TransactionsPage() {
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Transactions Ledger');
 
-      XLSX.writeFile(workbook, `FitCloud_Transactions_Ledger_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      XLSX.writeFile(workbook, `FitFarmHQ_Transactions_Ledger_${new Date().toISOString().slice(0, 10)}.xlsx`);
     } catch (err) {
       console.error('Excel Export Error:', err);
       alert('Failed to generate Excel (.xlsx) document.');
@@ -330,7 +330,7 @@ export default function TransactionsPage() {
         <!DOCTYPE html>
         <html>
         <head>
-          <title>FitCloud — Financial Transactions Audit Ledger</title>
+          <title>FitFarmHQ — Financial Transactions Audit Ledger</title>
           <style>
             body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 24px; color: #111; background: #fff; }
             h2 { margin-bottom: 4px; color: #000; font-size: 20px; font-weight: 800; }
@@ -345,7 +345,7 @@ export default function TransactionsPage() {
           </style>
         </head>
         <body>
-          <h2>FitCloud — Financial Transactions Audit Ledger</h2>
+          <h2>FitFarmHQ — Financial Transactions Audit Ledger</h2>
           <div class="subtitle">${datePeriodStr} | Total Records: ${list.length} | Total Approved Volume: NGN ${summary.totalVolume.toLocaleString()}</div>
           <table>
             <thead>

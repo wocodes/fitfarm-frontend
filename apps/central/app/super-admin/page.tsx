@@ -58,7 +58,7 @@ export default function SuperAdminPage() {
             👑
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold text-white">FitCloud Super Admin Center</h1>
+            <h1 className="text-2xl font-extrabold text-white">FitFarmHQ Super Admin Center</h1>
             <p className="text-xs text-gray-400">Platform God Mode Console • fitcloud.io/super-admin</p>
           </div>
         </div>

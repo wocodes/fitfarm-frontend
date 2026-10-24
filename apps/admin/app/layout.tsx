@@ -5,7 +5,7 @@ import TopProgressBar from "./components/TopProgressBar";
 import ThemeInitializer from "./components/ThemeInitializer";
 
 export const metadata: Metadata = {
-  title: "FitCloud Admin Center",
+  title: "FitFarmHQ Admin Center",
   description: "Gym Management Admin Center Dashboard",
 };
 

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { API_URL } from '../lib/config';
 
 interface RegisterModalProps {
   isOpen: boolean;
@@ -38,7 +39,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToSignIn }: Reg
     setLoading(true);
 
     try {
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+      const apiBase = API_URL;
 
       let licenseKey = '';
       const res = await fetch(`${apiBase}/central/auth/register`, {
@@ -132,7 +133,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToSignIn }: Reg
           </div>
           <h2 className="text-2xl font-extrabold tracking-tight">Create Your Account</h2>
           <p className="text-xs text-gray-400 mt-1">
-            Start managing your gym with FitCloud in under 2 minutes.
+            Start managing your gym with FitFarmHQ in under 2 minutes.
           </p>
         </div>
 

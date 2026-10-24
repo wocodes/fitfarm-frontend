@@ -386,7 +386,7 @@ export default function QRGeneratorPage() {
                       <div className="border-b border-gray-200 pb-4">
                         <h1 className="text-3xl font-black tracking-tight text-gray-900 uppercase">{customText}</h1>
                         <p className="text-sm font-semibold text-gray-600 mt-1">
-                          FitCloud Gym Management — {qrData.locationName}
+                          FitFarmHQ Gym Management — {qrData.locationName}
                         </p>
                       </div>
 
@@ -394,7 +394,7 @@ export default function QRGeneratorPage() {
                       <div className="inline-block p-6 bg-white rounded-3xl border-2 border-gray-900 shadow-md">
                         <img
                           src={qrImageUrl}
-                          alt="FitCloud Check-In QR Code"
+                          alt="FitFarmHQ Check-In QR Code"
                           className="w-[320px] h-[320px] mx-auto object-contain"
                         />
                       </div>
@@ -409,8 +409,8 @@ export default function QRGeneratorPage() {
 
                       {/* Footer Instructions */}
                       <div className="pt-4 border-t border-gray-200 text-xs text-gray-500 font-medium space-y-1">
-                        <p>Open your Smartphone Camera or FitCloud Member App to scan.</p>
-                        <p className="text-gray-900 font-bold text-sm">Powered by FitCloud.io</p>
+                        <p>Open your Smartphone Camera or FitFarmHQ Member App to scan.</p>
+                        <p className="text-gray-900 font-bold text-sm">Powered by FitFarmHQ.io</p>
                       </div>
                     </div>
 

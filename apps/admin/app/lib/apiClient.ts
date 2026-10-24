@@ -2,8 +2,25 @@
 
 import { getTerminalToken } from './terminalManager';
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
-export const CENTRAL_URL = process.env.NEXT_PUBLIC_CENTRAL_URL || 'http://localhost:3000';
+const isDevelopment = process.env.NODE_ENV === 'development';
+
+export const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (isDevelopment
+    ? 'http://localhost:8000/api/v1'
+    : 'https://api.fitfarmhq.com/api/v1');
+
+export const CENTRAL_URL =
+  process.env.NEXT_PUBLIC_CENTRAL_URL ||
+  (isDevelopment ? 'http://localhost:3000' : 'https://fitfarmhq.com');
+
+export function getMemberPortalUrl(): string {
+  const slug = getTenantSlug();
+  const platform =
+    process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || 'fitfarmhq.com';
+
+  return slug ? `https://${slug}.${platform}` : `https://${platform}`;
+}
 
 export function getAuthToken(): string | null {
   if (typeof window === 'undefined') return null;

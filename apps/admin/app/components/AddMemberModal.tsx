@@ -78,9 +78,6 @@ export default function AddMemberModal({
     nextOfKinAddress: '',
   });
 
-  const apiBase = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
-  const tenantSlug = process.env.NEXT_PUBLIC_TENANT_SLUG || 'polanfit-fitness';
-
   const getAuthToken = () => {
     if (typeof window === 'undefined') return '';
     return localStorage.getItem('fitcloud_token') || localStorage.getItem('polanfit_token') || '';
@@ -480,7 +477,7 @@ export default function AddMemberModal({
             <div>
               <h4 className="text-2xl font-black text-white">Registration Successful!</h4>
               <p className="text-gray-400 text-xs mt-1 max-w-md mx-auto">
-                Member account and full profile have been created and saved in FitCloud SaaS.
+                Member account and full profile have been created and saved in FitFarmHQ SaaS.
               </p>
             </div>
 
