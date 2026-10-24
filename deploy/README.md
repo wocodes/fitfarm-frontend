@@ -13,8 +13,8 @@ The Laravel API runs as a normal PHP app with its document root set to `public/`
 |-----|------|----------------|
 | Central (platform) | `fitfarmhq.com` (+ `www`) | SaaS landing page, gym-owner signup/login, setup wizard, (future) owner dashboard |
 | Admin (gym back-office) | `admin.fitfarmhq.com` | Static export of `apps/admin`. Tenant set via `?tenant=` / owner login redirect |
-| Member portal | `{slug}.fitfarmhq.com` (wildcard) | Static export of `apps/member`. Tenant set via `?tenant=` **or** derived from the subdomain (e.g. `polanfit.fitfarmhq.com` → `polanfit`) |
-| Custom gym domain | `gym.com` etc. | Alternate Host for the same member static app (see `HOSTINGER.md` "custom domain" SOP) |
+| Member portal | `{slug}.fitfarmhq.com` (wildcard) | Static export of `apps/member`, served by the `fitfarm-member` Cloudflare Worker. Tenant derived from the subdomain. |
+| Custom gym domain | `gym.com` etc. | Future: Cloudflare Worker route or Cloudflare for SaaS custom hostname; see `CLOUDFLARE.md`. |
 | API | `api.fitfarmhq.com` | Laravel 13 API, PHP 8.3, document root = `public/` |
 
 ## Repositories
@@ -26,7 +26,8 @@ The Laravel API runs as a normal PHP app with its document root set to `public/`
 
 | Source repo | Workflow | Artifact → server location |
 |-------------|----------|----------------------------|
-| `fitcloud-frontend` | `.github/workflows/deploy-frontend.yml` | `apps/{central,admin,member}` static exports → `domains/fitfarmhq.com/public_html/...` (see workflows) |
+| `fitcloud-frontend` | `.github/workflows/deploy-frontend.yml` | `apps/{central,admin}` static exports → `domains/fitfarmhq.com/public_html/...` |
+| `fitcloud-frontend` | `.github/workflows/deploy-member.yml` | `apps/member` static export → Cloudflare Worker `fitfarm-member` (`*.fitfarmhq.com`) |
 | `fitcloud-api` | `.github/workflows/deploy-api.yml` | Full Laravel tree incl. `vendor/` → `domains/fitfarmhq.com/public_html/api/` |
 
 ## Architecture notes (production-specific)

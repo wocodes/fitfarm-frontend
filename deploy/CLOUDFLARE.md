@@ -65,3 +65,84 @@ Notes:
 - **API webhooks/Paystack**: keep `api` DNS-only; Paystack sends webhooks to
   `https://api.fitfarmhq.com/api/v1/webhooks/paystack` from their servers — no CF IP allowlist needed
   when DNS-only.
+
+## 5. Member portal on Cloudflare Workers
+
+The member app is a static Next.js export and is served by a Worker instead of the Hostinger wildcard.
+
+### Create bypass routes first
+
+The wildcard route would otherwise catch `admin` and `api` too. Create these routes **without a Worker script** so they continue to Hostinger:
+
+```bash
+ZONE_ID="<fitfarmhq.com zone id>"
+CF_TOKEN="<cloudflare api token>"
+
+for pattern in \
+  "admin.fitfarmhq.com/*" \
+  "api.fitfarmhq.com/*" \
+  "www.fitfarmhq.com/*"
+do
+  curl -s -X POST \
+    "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/workers/routes" \
+    -H "Authorization: Bearer $CF_TOKEN" \
+    -H "Content-Type: application/json" \
+    --data "{\"pattern\":\"$pattern\"}"
+done
+```
+
+No `script` field means those routes bypass the wildcard Worker. Cloudflare matches the most specific route first.
+
+The same command is available as:
+
+```bash
+cd fitcloud-frontend/deploy
+CLOUDFLARE_API_TOKEN="..." CLOUDFLARE_ZONE_ID="..." ./setup-cloudflare-routes.sh
+```
+
+### GitHub secrets
+
+Add these to the frontend repository:
+
+```text
+CLOUDFLARE_API_TOKEN
+CLOUDFLARE_ACCOUNT_ID
+```
+
+The token needs:
+
+```text
+Account → Workers Scripts → Edit
+Zone    → Workers Routes   → Edit
+Zone    → Zone             → Read
+```
+
+### Deployment
+
+The member Worker config is `apps/member/wrangler.jsonc`. The workflow is
+`.github/workflows/deploy-member.yml`.
+
+Deploy manually once with:
+
+```bash
+cd fitcloud-frontend/apps/member
+npm run build
+CLOUDFLARE_API_TOKEN="..." CLOUDFLARE_ACCOUNT_ID="..." npx wrangler@4 deploy
+```
+
+The Worker pattern is:
+
+```text
+*.fitfarmhq.com/*
+```
+
+Verify:
+
+```bash
+curl -I https://polanfit.fitfarmhq.com
+curl -I https://admin.fitfarmhq.com
+curl -I https://api.fitfarmhq.com/up
+```
+
+Custom domains are not covered by this wildcard. They need a Worker route in the
+customer’s Cloudflare zone or Cloudflare for SaaS custom hostnames.

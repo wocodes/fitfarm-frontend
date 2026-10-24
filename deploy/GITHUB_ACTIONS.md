@@ -52,15 +52,31 @@ GitHub → repo → **Settings → Secrets and variables → Actions → New rep
 | `SUPER_ADMIN_EMAIL` / `SUPER_ADMIN_PASSWORD` | your private values | only used when you run `php artisan db:seed` once |
 | `MAIL_*` | SMTP/Resend keys once email is configured | see below |
 
+## Cloudflare member Worker secrets
+
+Add to the frontend repository:
+
+| Secret | Notes |
+|---|---|
+| `CLOUDFLARE_API_TOKEN` | Workers Scripts: Edit, Workers Routes: Edit, Zone: Read |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account ID |
+
+The wildcard Worker route must be accompanied by no-script bypass routes for
+`admin.fitfarmhq.com/*`, `api.fitfarmhq.com/*`, and `www.fitfarmhq.com/*`.
+See `CLOUDFLARE.md`.
+
 ## What the workflows do
 
-**`deploy-frontend.yml`** — one job per app (`central`, `admin`, `member`):
+**`deploy-frontend.yml`** — one job per Hostinger app (`central`, `admin`):
 
 ```
 checkout → setup-node 22 → npm ci (in apps/<app>) → next build (static export → out/)
 → rsync -az --delete out/ → ${SSH_TARGET_ROOT}/<central|admin|member>
   (the Central deploy excludes admin/ and member/)
 ```
+
+**`deploy-member.yml`** — builds `apps/member` and deploys it to the
+`fitfarm-member` Cloudflare Worker with route `*.fitfarmhq.com/*`.
 
 **`deploy-api.yml`**:
 

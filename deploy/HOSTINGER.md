@@ -53,11 +53,11 @@ Create these and note the path each resolves to (File Manager will show it):
 |-----------|--------------------------------------|---------|
 | `api.fitfarmhq.com` | `domains/fitfarmhq.com/public_html/api` | Laravel app; `.htaccess` rewrites to `public/` |
 | `admin.fitfarmhq.com` | `domains/fitfarmhq.com/public_html/admin` | static export of `apps/admin` |
-| `*.fitfarmhq.com` | `domains/fitfarmhq.com/public_html/member` | static export of `apps/member` |
+| `*.fitfarmhq.com` | none | served by the `fitfarm-member` Cloudflare Worker; see `CLOUDFLARE.md` |
 | `fitfarmhq.com` | `domains/fitfarmhq.com/public_html` | static export of `apps/central` |
 
-- For `*.fitfarmhq.com`, choose "wildcard" when creating the subdomain, and set its **document
-  root** to the member folder so every tenant subdomain serves the same member app.
+- The `*.fitfarmhq.com` hostnames are served by Cloudflare Workers, not a Hostinger document
+  root. The old `public_html/member` folder can remain as a fallback but is not used.
 - PHP version: hPanel → **PHP Configuration (per subdomain)** → set **8.3** for `api.fitfarmhq.com`.
 - Set the API subdomain's **document root to `public/`** via hPanel → the subdomain's
   **Websites → Document Root / "Public directory"** setting (or via an `.htaccess` rewrite —
