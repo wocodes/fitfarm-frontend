@@ -98,7 +98,7 @@ export default function EmailBlastCampaignPage() {
   const loadLogs = useCallback(async () => {
     setLogsLoading(true);
     try {
-      const res = await apiFetch('/campaigns/logs');
+      const res = await apiFetch('/admin/campaigns/logs');
       if (res.success && res.data) {
         const logs = Array.isArray(res.data.content)
           ? res.data.content
@@ -192,7 +192,7 @@ export default function EmailBlastCampaignPage() {
     setStatusMessage(null);
 
     try {
-      const res = await apiFetch('/campaigns/email-blast', {
+      const res = await apiFetch('/admin/campaigns/email-blast', {
         method: 'POST',
         body: JSON.stringify({
           subject,
@@ -229,7 +229,7 @@ export default function EmailBlastCampaignPage() {
   // Auto/Manual Sync Log Status
   const handleSyncLog = async (logUid: string) => {
     try {
-      const res = await apiFetch(`/campaigns/logs/${logUid}/sync`, { method: 'POST' });
+      const res = await apiFetch(`/admin/campaigns/logs/${logUid}/sync`, { method: 'POST' });
       if (res.success) {
         loadLogs();
       }

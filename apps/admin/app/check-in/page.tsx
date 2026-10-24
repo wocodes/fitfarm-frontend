@@ -104,7 +104,7 @@ export default function CheckInKioskPage() {
     setStatus('Verifying biometric identity against member register...');
 
     try {
-      const res = await apiFetch('/checkins/simulate-fingerprint', {
+      const res = await apiFetch('/admin/checkins/simulate-fingerprint', {
         method: 'POST',
         body: JSON.stringify({ memberUid: targetUid }),
       });
@@ -157,7 +157,7 @@ export default function CheckInKioskPage() {
     setStatus('Processing hardware biometrics...');
 
     try {
-      const res = await apiFetch('/check-in/identify-fingerprint', {
+      const res = await apiFetch('/admin/checkins/simulate-fingerprint', {
         method: 'POST',
         body: JSON.stringify({ fingerprintData: base64Hash }),
       });

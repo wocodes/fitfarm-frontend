@@ -42,7 +42,11 @@ Notes:
    certificates; "Full" encrypts the whole path without needing Cloudflare to trust a
    custom origin cert).
 2. Confirm **Always Use HTTPS** is ON, and optionally enable **Automatic HTTPS Rewrites**.
-3. The free **Universal SSL** covers `fitfarmhq.com` **and** `*.fitfarmhq.com` — no extra cert to buy.
+3. The free **Universal SSL** covers `fitfarmhq.com` **and** `*.fitfarmhq.com` at the edge.
+   It does **not** install a certificate on the Hostinger origin. If a tenant subdomain returns
+   **525 SSL handshake failed**, install a Cloudflare Origin CA certificate for
+   `*.fitfarmhq.com` (or use a Cloudflare Tunnel) before relying on the wildcard. A proxied
+   wildcard without an origin certificate will keep failing with 525.
 
 ## 4. Recommended extras (free plan)
 
@@ -59,5 +63,5 @@ Notes:
 - **Wildcard subdomain not resolving**: confirm the `*` A record is present and the wildcard
   subdomain `*.fitfarmhq.com` was also created in Hostinger hPanel (origin must accept the host).
 - **API webhooks/Paystack**: keep `api` DNS-only; Paystack sends webhooks to
-  `https://api.fitfarmhq.com/webhooks/paystack` from their servers — no CF IP allowlist needed
+  `https://api.fitfarmhq.com/api/v1/webhooks/paystack` from their servers — no CF IP allowlist needed
   when DNS-only.

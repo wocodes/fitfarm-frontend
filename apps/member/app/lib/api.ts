@@ -1,5 +1,7 @@
 'use client';
 
+import { resolveTenantSlug } from './tenantResolver';
+
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
 const TOKEN_KEY = 'fitcloud_member_token';
@@ -48,6 +50,7 @@ export async function memberApiFetch<T = any>(
   const token = getMemberToken();
   const headers: Record<string, string> = {
     'Accept': 'application/json',
+    'X-Tenant-Slug': resolveTenantSlug(),
     ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
     ...(options.headers as Record<string, string> || {}),
   };

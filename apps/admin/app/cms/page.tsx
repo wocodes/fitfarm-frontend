@@ -40,7 +40,7 @@ export default function WebsiteCmsPage() {
   const fetchCmsData = async () => {
     setLoading(true);
     try {
-      const res = await apiFetch('/cms');
+      const res = await apiFetch('/admin/cms');
       if (res.success && res.data && res.data.sections) {
         const s = res.data.sections;
         if (s.section_visibility) {
@@ -77,7 +77,7 @@ export default function WebsiteCmsPage() {
     };
     setSectionVisibility(updated);
     try {
-      const res = await apiFetch('/cms/section_visibility', {
+      const res = await apiFetch('/admin/cms/section_visibility', {
         method: 'POST',
         body: JSON.stringify(updated),
       });
@@ -93,7 +93,7 @@ export default function WebsiteCmsPage() {
   const handleSaveSection = async (sectionKey: string, payload: any) => {
     setSaving(true);
     try {
-      const res = await apiFetch(`/cms/${sectionKey}`, {
+      const res = await apiFetch(`/admin/cms/${sectionKey}`, {
         method: 'POST',
         body: JSON.stringify(payload),
       });
@@ -119,7 +119,7 @@ export default function WebsiteCmsPage() {
     try {
       showToast('Uploading image asset...');
       const token = localStorage.getItem('fitcloud_token') || '';
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/cms/upload`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/admin/cms/upload`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -237,7 +237,7 @@ export default function WebsiteCmsPage() {
                           const allOn: Record<string, boolean> = {};
                           Object.keys(sectionVisibility).forEach((k) => (allOn[k] = true));
                           setSectionVisibility(allOn);
-                          await apiFetch('/cms/section_visibility', { method: 'POST', body: JSON.stringify(allOn) });
+                          await apiFetch('/admin/cms/section_visibility', { method: 'POST', body: JSON.stringify(allOn) });
                           showToast('🟢 All homepage sections activated!');
                         }}
                         className="px-3 py-1.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-xs font-bold text-gray-300 hover:text-white transition"

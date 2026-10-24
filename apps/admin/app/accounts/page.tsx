@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { apiFetch } from '../lib/apiClient';
+import { downloadApiFile } from '../lib/apiClient';
 
 interface BankAccount {
   id: number;
@@ -588,14 +589,13 @@ export default function AccountsPage() {
                   </p>
                 </div>
 
-                <a
-                  href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/audit-logs/export`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  type="button"
+                  onClick={() => downloadApiFile('/admin/audit-logs/export').catch((err) => alert(err.message || 'Export failed.'))}
                   className="px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 font-extrabold text-black text-xs flex items-center justify-center gap-1.5 transition shadow-lg shadow-orange-500/10"
                 >
                   📥 Export Audit Trail (CSV)
-                </a>
+                </button>
               </div>
 
               <div className="overflow-x-auto">

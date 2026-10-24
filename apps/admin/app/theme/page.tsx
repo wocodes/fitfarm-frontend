@@ -78,7 +78,7 @@ export default function ThemeSettingsPage() {
       try {
         let res;
         try {
-          res = await apiClient.get('/theme');
+          res = await apiClient.get('/admin/theme');
         } catch {
           res = await apiClient.get('/admin/theme');
         }
@@ -167,7 +167,7 @@ export default function ThemeSettingsPage() {
 
       // Try root /theme first, then /admin/theme fallback
       try {
-        const res = await apiClient.post('/theme', payload);
+        const res = await apiClient.post('/admin/theme', payload);
         if (res?.data?.success) {
           saved = true;
           respData = res.data;

@@ -32,7 +32,7 @@ export default function CampaignSettingsPage() {
   const loadLeaderboard = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await apiFetch('/campaigns/active/leaderboard');
+      const res = await apiFetch('/admin/campaigns/active/leaderboard');
       if (res.success && res.data) {
         const camp = res.data.campaign;
         if (camp) {
@@ -65,7 +65,7 @@ export default function CampaignSettingsPage() {
     setErrorMessage('');
 
     try {
-      const res = await apiFetch('/campaigns', {
+      const res = await apiFetch('/admin/campaigns', {
         method: 'POST',
         body: JSON.stringify({
           title: campaignTitle,

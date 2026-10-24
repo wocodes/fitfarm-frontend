@@ -38,7 +38,7 @@ export default function ContactSocialsPage() {
   const fetchContactSettings = async () => {
     setLoading(true);
     try {
-      const res = await apiFetch('/settings');
+      const res = await apiFetch('/admin/settings');
       if (res.success && res.data) {
         const d = res.data;
         if (d.contact_socials) {
@@ -75,7 +75,7 @@ export default function ContactSocialsPage() {
     setSaving(true);
     setToastMsg('');
     try {
-      const res = await apiFetch('/settings', {
+      const res = await apiFetch('/admin/settings', {
         method: 'POST',
         body: JSON.stringify({
           phone,

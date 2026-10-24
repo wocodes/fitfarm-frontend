@@ -12,7 +12,7 @@ export function getAuthToken(): string | null {
 
 export function getTenantSlug(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('fitcloud_tenant_slug') || localStorage.getItem('polanfit_tenant_slug') || 'polanfit';
+  return localStorage.getItem('fitcloud_tenant_slug') || localStorage.getItem('polanfit_tenant_slug');
 }
 
 export function handleUnauthorized() {
@@ -20,12 +20,11 @@ export function handleUnauthorized() {
     localStorage.removeItem('fitcloud_token');
     localStorage.removeItem('polanfit_token');
     localStorage.removeItem('fitcloud_user');
-    window.location.href = `${CENTRAL_URL}/setup`;
+    window.location.href = CENTRAL_URL;
   }
 }
 
-export function handleLogout() {
-  if (typeof window !== 'undefined') {
+export function handleLogout() {  if (typeof window !== 'undefined') {
     const token = getAuthToken();
     if (token) {
       fetch(`${API_URL}/central/auth/logout`, {
@@ -40,7 +39,7 @@ export function handleLogout() {
     localStorage.removeItem('polanfit_token');
     localStorage.removeItem('fitcloud_user');
     localStorage.removeItem('fitcloud_tenant_slug');
-    window.location.href = `${CENTRAL_URL}/setup`;
+    window.location.href = CENTRAL_URL;
   }
 }
 
@@ -223,6 +222,52 @@ export async function apiFetch<T = any>(endpoint: string, options: ApiFetchOptio
   }
 
   return await fetchPromise;
+}
+
+export async function downloadApiFile(endpoint: string): Promise<void> {
+  const token = getAuthToken();
+
+  if (!token) {
+    handleUnauthorized();
+    throw new Error('Unauthenticated');
+  }
+
+  const tenantSlug = getTenantSlug();
+  const url = endpoint.startsWith('http')
+    ? endpoint
+    : `${API_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+
+  const response = await fetch(url, {
+    headers: {
+      'Accept': '*/*',
+      'Authorization': `Bearer ${token}`,
+      ...(tenantSlug ? { 'X-Tenant-Slug': tenantSlug } : {}),
+    },
+  });
+
+  if (response.status === 401) {
+    handleUnauthorized();
+    throw new Error('Unauthenticated (401)');
+  }
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: response.statusText }));
+    throw new Error(error.message || `HTTP ${response.status}`);
+  }
+
+  const disposition = response.headers.get('content-disposition') || '';
+  const match = disposition.match(/filename="?([^";]+)"?/i);
+  const filename = match?.[1] || endpoint.split('/').pop() || 'download';
+
+  const blob = await response.blob();
+  const objectUrl = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = objectUrl;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(objectUrl);
 }
 
 const apiClient = {

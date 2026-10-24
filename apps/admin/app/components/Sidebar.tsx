@@ -51,8 +51,8 @@ const navGroups: NavGroup[] = [
     id: 'growth',
     title: 'Growth & Marketing',
     items: [
-      { label: 'Campaigns & Ranks', href: '/campaigns', icon: '🏆', prefetchUrl: '/campaigns/active/leaderboard' },
-      { label: 'Email Broadcast', href: '/campaigns/email-blast', icon: '📧', prefetchUrl: '/campaigns/logs' },
+      { label: 'Campaigns & Ranks', href: '/campaigns', icon: '🏆', prefetchUrl: '/admin/campaigns/active/leaderboard' },
+      { label: 'Email Broadcast', href: '/campaigns/email-blast', icon: '📧', prefetchUrl: '/admin/campaigns/logs' },
     ],
   },
   {
@@ -61,11 +61,11 @@ const navGroups: NavGroup[] = [
     items: [
       { label: 'Staff Attendance', href: '/staff-attendance', icon: '⏰', prefetchUrl: '/admin/staff-attendance' },
       { label: 'Manage Admins', href: '/admins', icon: '🛡️', prefetchUrl: '/admin/staff' },
-      { label: 'Website CMS & Portal', href: '/cms', icon: '💻', prefetchUrl: '/cms' },
-      { label: 'Theme & Branding', href: '/theme', icon: '🎨', prefetchUrl: '/theme' },
-      { label: 'Gym Settings', href: '/settings', icon: '⚙️', prefetchUrl: '/settings' },
-      { label: 'Contact & Socials', href: '/contact', icon: '🌐', prefetchUrl: '/settings' },
-      { label: 'Legal & Policies', href: '/legal', icon: '⚖️', prefetchUrl: '/settings' },
+      { label: 'Website CMS & Portal', href: '/cms', icon: '💻', prefetchUrl: '/admin/cms' },
+      { label: 'Theme & Branding', href: '/theme', icon: '🎨', prefetchUrl: '/admin/theme' },
+      { label: 'Gym Settings', href: '/settings', icon: '⚙️', prefetchUrl: '/admin/settings' },
+      { label: 'Contact & Socials', href: '/contact', icon: '🌐', prefetchUrl: '/admin/settings' },
+      { label: 'Legal & Policies', href: '/legal', icon: '⚖️', prefetchUrl: '/admin/settings' },
     ],
   },
 ];
