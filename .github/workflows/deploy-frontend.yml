@@ -4,7 +4,8 @@ on:
   push:
     branches: [main]
     paths:
-      - 'apps/**'
+      - 'apps/central/**'
+      - 'apps/admin/**'
       - '.github/workflows/deploy-frontend.yml'
   workflow_dispatch:
 
@@ -19,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [central, admin, member]
+        app: [central, admin]
     env:
       NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'https://api.fitfarmhq.com/api/v1' }}
       NEXT_PUBLIC_PLATFORM_DOMAIN: ${{ secrets.NEXT_PUBLIC_PLATFORM_DOMAIN || 'fitfarmhq.com' }}
@@ -84,7 +85,8 @@ jobs:
 
           EXCLUDES=""
           if [ "${{ matrix.app }}" = "central" ]; then
-            # Central shares its document root with the API and the admin/member exports.
+            # Central shares its document root with the API and admin app.
+            # The member app is served by Cloudflare Workers, but keep the stale folder excluded.
             EXCLUDES="--exclude api --exclude admin --exclude member"
           fi
 
