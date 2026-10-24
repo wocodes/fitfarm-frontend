@@ -108,7 +108,7 @@ export default function AdminsPage() {
   // 1. Fetch system permissions strictly from backend database API
   const loadPermissionsFromDatabase = async () => {
     try {
-      const json = await apiFetch('/permissions');
+      const json = await apiFetch('/admin/permissions');
       if (json.data && Array.isArray(json.data)) {
         const mapped: PermissionItem[] = json.data.map((p: any) => ({
           id: p.key || p.id,

@@ -15,18 +15,19 @@ Next.js exports** (plain files, no Node runtime needed).
 - Verify from your Mac:
 
   ```sh
-  ssh <user>@<host>
+  ssh -p 65002 <user>@<host>
   ```
 
   Once you confirm login, generate a dedicated **deploy key** (used by CI only):
 
   ```sh
-  ssh-keygen -t ed25519 -f ~/.ssh/fitcloud_deploy -C "fitcloud-ci" -N ""
-  ssh-copy-id -i ~/.ssh/fitcloud_deploy.pub <user>@<host>
+  ssh-keygen -t ed25519 -f ~/.ssh/fitfarm_deploy -C "fitfarm-ci" -N ""
+  # Add ~/.ssh/fitfarm_deploy.pub in hPanel → SSH Access, or:
+  ssh-copy-id -p 65002 -i ~/.ssh/fitfarm_deploy.pub <user>@<host>
   ```
 
   Keep the **private** key (`~/.ssh/fitcloud_deploy`) — it becomes the
-  `SSH_PRIVATE_KEY` GitHub secret. Never commit it.
+  `SSH_PRIVATE_KEY` GitHub secret (use the private key only, never the `.pub` file). Never commit it.
 
 ## 2. DNS entries at Hostinger (only if NOT moving to Cloudflare)
 
@@ -50,7 +51,7 @@ Create these and note the path each resolves to (File Manager will show it):
 
 | Subdomain | Intended doc root (under your home) | Content |
 |-----------|--------------------------------------|---------|
-| `api.fitfarmhq.com` | `domains/api.fitfarmhq.com/public_html` | Laravel (docroot = `public/`, set in PHP options) |
+| `api.fitfarmhq.com` | `domains/fitfarmhq.com/public_html/api` | Laravel app; `.htaccess` rewrites to `public/` |
 | `admin.fitfarmhq.com` | `domains/fitfarmhq.com/public_html/admin` | static export of `apps/admin` |
 | `*.fitfarmhq.com` | `domains/fitfarmhq.com/public_html/member` | static export of `apps/member` |
 | `fitfarmhq.com` | `domains/fitfarmhq.com/public_html` | static export of `apps/central` |
@@ -64,7 +65,7 @@ Create these and note the path each resolves to (File Manager will show it):
 
 ### `.htaccess` fallback (if hPanel can't set docroot to `public/`)
 
-Drop this at `domains/api.fitfarmhq.com/public_html/.htaccess`:
+Drop this at the API app root's `.htaccess` (for example `domains/api.fitfarmhq.com/.htaccess`):
 
 ```apache
 <IfModule mod_rewrite.c>
@@ -84,22 +85,23 @@ Drop this at `domains/api.fitfarmhq.com/public_html/.htaccess`:
 
 - hPanel → **Websites → the subdomain → SSL** → issue the free Let's Encrypt/Sectigo cert for
   `fitfarmhq.com`, `api.fitfarmhq.com`, `admin.fitfarmhq.com`.
-- The literal wildcard `*.fitfarmhq.com` cannot get free origin certs here — that's fine:
-  Cloudflare terminates TLS on the wildcard at the edge (Full mode) and forwards to the origin
-  on the account's main-domain cert / HTTP.
+- The literal wildcard `*.fitfarmhq.com` cannot get free origin certs here. Cloudflare's edge
+  certificate alone is not enough: the origin must also present a certificate for the requested
+  hostname. Install a Cloudflare Origin CA wildcard certificate on the account/domain (or use a
+  Cloudflare Tunnel). Without it, tenant subdomains fail with Cloudflare **525**.
 
 ## 6. First deploy attestation (what CI expects)
 
 1. `.github/workflows` rsync directly to `domains/fitfarmhq.com/public_html/...` (frontend) and
-   `domains/api.fitfarmhq.com/` (API) over SSH.
-2. After the API lands, run once on the server (or it is automated in the workflow):
+   `domains/fitfarmhq.com/public_html/api/` (API) over SSH. That is the confirmed path on
+   this account; the `api` directory already contains the rewrite to `public/`.
+2. After the API lands, the workflow runs migrations and caches. Run the one-time seed manually:
 
    ```sh
-   cd domains/api.fitfarmhq.com
-   php artisan migrate --force
-   php artisan db:seed --force   # first time only
-   php artisan storage:link
-   php artisan optimize
+   cd domains/fitfarmhq.com/public_html/api
+   /opt/alt/php83/usr/bin/php artisan migrate --force
+   # Set SUPER_ADMIN_EMAIL and SUPER_ADMIN_PASSWORD first, then:
+   /opt/alt/php83/usr/bin/php artisan db:seed --force   # first time only
    ```
 
 ## 7. Custom gym domain SOP (repeatable onboarding)

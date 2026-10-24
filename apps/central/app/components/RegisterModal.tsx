@@ -66,9 +66,12 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToSignIn }: Reg
       licenseKey = data.data?.license_key || '';
 
       if (!licenseKey) {
-        const rand = () => Math.random().toString(36).substring(2, 6).toUpperCase();
-        licenseKey = `FC-TRL-${rand()}-${rand()}`;
+        setError('Registration succeeded but no trial license was returned. Please contact support.');
+        setLoading(false);
+        return;
       }
+
+      const token = data.data?.token;
 
       // Native browser alert displaying trial key & expiration mode
       alert(
@@ -90,6 +93,10 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToSignIn }: Reg
       if (typeof window !== 'undefined') {
         localStorage.setItem('fitcloud_pending_admin', JSON.stringify(registrationData));
         localStorage.setItem('fitcloud_pending_license_key', licenseKey);
+        if (token) {
+          localStorage.setItem('fitcloud_token', token);
+          localStorage.setItem('polanfit_token', token);
+        }
       }
 
       const params = new URLSearchParams({

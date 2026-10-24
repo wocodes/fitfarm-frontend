@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { apiFetch } from '../lib/apiClient';
+import { downloadApiFile } from '../lib/apiClient';
 import {
   getTerminalToken,
   getTerminalMeta,
@@ -68,7 +69,7 @@ export default function SettingsPage() {
 
   const fetchBackups = async () => {
     try {
-      const res = await apiFetch('/backups');
+      const res = await apiFetch('/admin/backups');
       if (res.success && Array.isArray(res.data)) {
         setBackups(res.data);
       }
@@ -80,7 +81,7 @@ export default function SettingsPage() {
   const fetchSettings = async () => {
     setLoading(true);
     try {
-      const json = await apiFetch('/settings');
+      const json = await apiFetch('/admin/settings');
       if (json.success && json.data) {
         const d = json.data;
         if (d.tenant) {
@@ -130,7 +131,7 @@ export default function SettingsPage() {
     e.preventDefault();
     setSaveSuccessMsg('');
     try {
-      const json = await apiFetch('/settings', {
+      const json = await apiFetch('/admin/settings', {
         method: 'POST',
         body: JSON.stringify({
           name: gymName,
@@ -181,7 +182,7 @@ export default function SettingsPage() {
     setCreatingBackup(true);
     setBackupSuccessMsg('');
     try {
-      const res = await apiFetch('/backups/create', { method: 'POST' });
+      const res = await apiFetch('/admin/backups/create', { method: 'POST' });
       if (res.success) {
         setBackupSuccessMsg('🎉 Full system database backup snapshot generated successfully!');
         fetchBackups();
@@ -193,22 +194,11 @@ export default function SettingsPage() {
     }
   };
 
-  const handleRestoreBackup = async (id: number, filename: string) => {
-    if (!confirm(`Are you sure you want to restore system state from snapshot "${filename}"?`)) return;
-    try {
-      const res = await apiFetch(`/backups/${id}/restore`, { method: 'POST' });
-      if (res.success) {
-        alert(`✅ System backup point successfully verified and restored!\nSnapshot: ${filename}`);
-      }
-    } catch (err: any) {
-      alert(err.message || 'Failed to restore backup snapshot');
-    }
-  };
 
   const handleDeleteBackup = async (id: number) => {
     if (!confirm('Are you sure you want to delete this backup snapshot?')) return;
     try {
-      const res = await apiFetch(`/backups/${id}`, { method: 'DELETE' });
+      const res = await apiFetch(`/admin/backups/${id}`, { method: 'DELETE' });
       if (res.success) {
         fetchBackups();
       }
@@ -1087,20 +1077,12 @@ export default function SettingsPage() {
                               <td className="py-3 px-3 text-gray-400 font-mono">{(b.file_size / (1024 * 1024)).toFixed(2)} MB</td>
                               <td className="py-3 px-3 text-gray-300">{b.created_by || 'System'}</td>
                               <td className="py-3 px-3 text-right space-x-2">
-                                <a
-                                  href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/backups/download/${b.id}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
+                                <button
+                                  type="button"
+                                  onClick={() => downloadApiFile(`/admin/backups/download/${b.id}`).catch((err) => alert(err.message || 'Download failed.'))}
                                   className="px-2.5 py-1 rounded bg-gray-800 hover:bg-gray-700 text-xs font-bold text-orange-400 transition"
                                 >
                                   ⬇ Download
-                                </a>
-                                <button
-                                  type="button"
-                                  onClick={() => handleRestoreBackup(b.id, b.filename)}
-                                  className="px-2.5 py-1 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-xs font-bold text-emerald-400 border border-emerald-500/30 transition"
-                                >
-                                  🔄 Restore
                                 </button>
                                 <button
                                   type="button"

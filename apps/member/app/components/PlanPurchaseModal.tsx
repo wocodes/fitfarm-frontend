@@ -82,8 +82,21 @@ export default function PlanPurchaseModal({
 
     setLoading(true);
 
-    const paystackKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_test_8a8a1076a2f968a7cd2a8e28d87d79bb74ec97b1';
-    const amountInKobo = Math.round(Number(chosenPlan.price || 25000) * 100);
+    const paystackKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
+
+    if (!paystackKey) {
+      setStatusMsg({ type: 'error', text: 'Online payments are not configured. Please contact the gym.' });
+      setLoading(false);
+      return;
+    }
+
+    if (!window.PaystackPop) {
+      setStatusMsg({ type: 'error', text: 'The payment provider could not be loaded. Please refresh and try again.' });
+      setLoading(false);
+      return;
+    }
+
+    const amountInKobo = Math.round(Number(chosenPlan.price || 0) * 100);
     const reference = 'FCM_' + Date.now() + '_' + Math.floor(Math.random() * 1000000);
 
     const recordPurchase = async (ref: string) => {
@@ -93,7 +106,7 @@ export default function PlanPurchaseModal({
           body: JSON.stringify({
             pricing_plan_id: chosenPlan.id,
             payment_reference: ref,
-            amount: Number(chosenPlan.price || 25000),
+            amount: Number(chosenPlan.price || 0),
             channel: 'paystack',
           }),
         });
@@ -135,13 +148,10 @@ export default function PlanPurchaseModal({
           },
         });
         handler.openIframe();
-      } catch (err) {
-        // If popup blocker occurs or in development mode, fallback to direct record
-        await recordPurchase(reference);
+      } catch (err: any) {
+        setStatusMsg({ type: 'error', text: err?.message || 'Unable to open the payment window.' });
+        setLoading(false);
       }
-    } else {
-      // In case Paystack script failed or offline sandbox, simulate approval
-      await recordPurchase(reference);
     }
   };
 

@@ -11,7 +11,7 @@ export default function ThemeInitializer() {
 
     // 2. Fetch fresh theme settings from backend
     apiClient
-      .get('/theme')
+      .get('/admin/theme')
       .then((res) => {
         if (res.data?.success && res.data?.data) {
           applyTheme(res.data.data);

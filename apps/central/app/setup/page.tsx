@@ -67,7 +67,8 @@ export default function IntegratedTenantDashboardSetupPage() {
           .then((json) => {
             if (json.success && json.data && (json.data.tenant || json.data.tenant_id)) {
               const adminAppUrl = process.env.NEXT_PUBLIC_ADMIN_APP_URL || 'http://localhost:3001';
-              window.location.href = adminAppUrl;
+              const tenantSlug = json.data?.tenant?.slug || '';
+              window.location.href = `${adminAppUrl}#token=${encodeURIComponent(token)}&tenant=${encodeURIComponent(tenantSlug)}`;
             }
           })
           .catch(() => {});
@@ -86,9 +87,21 @@ export default function IntegratedTenantDashboardSetupPage() {
     setError(null);
 
     try {
+      const token = localStorage.getItem('fitcloud_token') || localStorage.getItem('polanfit_token');
+
+      if (!token) {
+        setError('Please sign in or create an account before verifying a license key.');
+        setLoading(false);
+        return;
+      }
+
       const res = await fetch(`${apiBase}/setup/verify-license`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify({ key: licenseKey }),
       });
 
@@ -114,9 +127,21 @@ export default function IntegratedTenantDashboardSetupPage() {
     setError(null);
 
     try {
+      const token = localStorage.getItem('fitcloud_token') || localStorage.getItem('polanfit_token');
+
+      if (!token) {
+        setError('Please sign in before completing setup.');
+        setLoading(false);
+        return;
+      }
+
       const res = await fetch(`${apiBase}/setup/complete`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify({
           license_key: licenseKey,
           gym_name: gymName,
@@ -138,7 +163,23 @@ export default function IntegratedTenantDashboardSetupPage() {
         return;
       }
 
-      setResultData(data.data);
+      const result = data.data;
+      const launchToken = result?.token || localStorage.getItem('fitcloud_token') || '';
+
+      if (launchToken) {
+        localStorage.setItem('fitcloud_token', launchToken);
+        localStorage.setItem('polanfit_token', launchToken);
+      }
+
+      const adminBase = (result?.urls?.admin_app || '').split('?')[0];
+
+      setResultData({
+        ...result,
+        urls: {
+          ...result.urls,
+          admin_app: `${adminBase}#token=${encodeURIComponent(launchToken)}&tenant=${encodeURIComponent(result?.tenant?.slug || '')}`,
+        },
+      });
       setStep(5);
     } catch (err: any) {
       setError('Failed to provision gym tenant. ' + err.message);

@@ -22,7 +22,7 @@ export default function LegalDocsPage() {
   const fetchLegalDocs = async () => {
     setLoading(true);
     try {
-      const res = await apiFetch('/settings');
+      const res = await apiFetch('/admin/settings');
       if (res.success && res.data) {
         const d = res.data;
         if (d.legal_docs) {
@@ -52,7 +52,7 @@ export default function LegalDocsPage() {
     setSaving(true);
     setToastMsg('');
     try {
-      const res = await apiFetch('/settings', {
+      const res = await apiFetch('/admin/settings', {
         method: 'POST',
         body: JSON.stringify({
           terms_conditions: terms,

@@ -54,7 +54,7 @@ export default function SignInModal({ isOpen, onClose, onSwitchToRegister }: Sig
         if (user?.tenant || user?.tenant_id) {
           const adminAppUrl = process.env.NEXT_PUBLIC_ADMIN_APP_URL || 'http://localhost:3001';
           const tenantSlug = user?.tenant?.slug || 'polanfit-fitness';
-          window.location.href = `${adminAppUrl}?token=${encodeURIComponent(token)}&tenant=${encodeURIComponent(tenantSlug)}`;
+          window.location.href = `${adminAppUrl}#token=${encodeURIComponent(token)}&tenant=${encodeURIComponent(tenantSlug)}`;
         } else if (user?.role === 'super_admin' || user?.role === 'ROLE_SUPER_ADMIN' || email.includes('superadmin')) {
           router.push('/super-admin');
         } else {
