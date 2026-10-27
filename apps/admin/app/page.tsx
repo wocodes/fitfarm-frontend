@@ -263,7 +263,7 @@ export default function AdminDashboardPage() {
       <div className="flex-1 flex flex-col min-w-0">
         <Header title="Dashboard Overview" subtitle="Real-time gym performance, active sessions, and attendance metrics" />
 
-        <main className="flex-1 p-6 md:p-8 space-y-6 max-w-7xl">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 space-y-6 max-w-7xl">
 
           {/* Member Inbox Top Collapsible Banner (Only shown if active messages exist) */}
           {inboxMessages.length > 0 && (
@@ -487,7 +487,7 @@ export default function AdminDashboardPage() {
 
             {/* Expiring Sessions Table */}
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full min-w-[760px] text-left text-xs">
                 <thead className="border-b border-gray-800 text-gray-400 font-bold uppercase tracking-wider">
                   <tr>
                     <th className="py-3 px-4">MEMBER</th>
@@ -1090,7 +1090,7 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+                <table className="w-full min-w-[760px] text-left text-xs">
                   <thead className="bg-[#0a0a0c] border-b border-gray-800 text-gray-400 font-semibold uppercase tracking-wider">
                     <tr>
                       <th className="py-3 px-4">Rank</th>
@@ -1140,7 +1140,7 @@ export default function AdminDashboardPage() {
       {/* Record Gym Payment Modal */}
       {showPaymentModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-          <div className="relative w-full max-w-2xl bg-[#121217] border border-gray-800 rounded-3xl p-6 md:p-8 shadow-2xl text-white space-y-6 max-h-[90vh] overflow-y-auto">
+          <div className="relative w-full max-w-2xl bg-[#121217] border border-gray-800 rounded-3xl p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 shadow-2xl text-white space-y-6 max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setShowPaymentModal(false)}
               className="absolute top-5 right-5 w-8 h-8 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-gray-400 hover:text-white transition text-xs"

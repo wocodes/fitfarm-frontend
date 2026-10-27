@@ -220,7 +220,7 @@ export default function SubscriptionTypesPage() {
       <div className="flex-1 flex flex-col min-w-0">
         <Header title="Membership Pricing Plans" subtitle="Configure gym plan tiers, prices, subscription fees, and access durations" />
 
-        <main className="flex-1 p-6 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 space-y-6 max-w-7xl mx-auto w-full">
           {/* Top Actions Header */}
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-6 rounded-2xl bg-[#0f0f13] border border-gray-800">
             <div>
@@ -295,7 +295,7 @@ export default function SubscriptionTypesPage() {
                   </p>
                 </div>
               ) : (
-                <table className="w-full text-left text-xs">
+                <table className="w-full min-w-[760px] text-left text-xs">
                   <thead className="bg-[#070709] border-b border-gray-800 text-gray-400 font-semibold uppercase tracking-wider">
                     <tr>
                       <th className="py-3.5 px-4 w-16">S/N</th>

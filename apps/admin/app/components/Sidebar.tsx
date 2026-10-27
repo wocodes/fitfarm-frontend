@@ -75,6 +75,7 @@ export default function Sidebar() {
   const [userName, setUserName] = useState('Super Admin');
   const [userRole, setUserRole] = useState('Gym Owner (Active)');
   const [userInitials, setUserInitials] = useState('SA');
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   // Track open/collapsed state for groups (default all open)
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
@@ -86,6 +87,10 @@ export default function Sidebar() {
   });
 
   // Automatically keep the category containing the active route expanded
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
   useEffect(() => {
     navGroups.forEach((group) => {
       const hasActive = group.items.some((item) => pathname === item.href);
@@ -126,9 +131,29 @@ export default function Sidebar() {
   }, []);
 
   return (
-    <aside className="w-64 flex-shrink-0 bg-[#0f0f13] border-r border-gray-800/80 flex flex-col h-screen sticky top-0 select-none z-30">
+    <>
+      {mobileOpen && (
+        <button
+          type="button"
+          aria-label="Close navigation"
+          onClick={() => setMobileOpen(false)}
+          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm lg:hidden"
+        />
+      )}
+
+      <button
+        type="button"
+        onClick={() => setMobileOpen(true)}
+        className="fixed bottom-5 right-5 z-[60] lg:hidden w-14 h-14 rounded-2xl bg-orange-500 text-black shadow-2xl shadow-orange-500/30 flex items-center justify-center text-2xl font-black"
+        aria-label="Open navigation menu"
+      >
+        ☰
+      </button>
+
+    <aside className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] flex-shrink-0 bg-[#0f0f13] border-r border-gray-800/80 flex flex-col h-screen select-none transition-transform duration-300 lg:sticky lg:top-0 lg:z-30 lg:w-64 lg:max-w-none lg:translate-x-0 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
       {/* Pinned Brand Header */}
-      <div className="h-20 px-5 border-b border-gray-800/80 flex items-center gap-3 flex-shrink-0 bg-[#0f0f13]">
+      <div className="h-20 px-5 border-b border-gray-800/80 flex items-center justify-between gap-3 flex-shrink-0 bg-[#0f0f13]">
+        <div className="flex items-center gap-3 min-w-0">
         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center font-extrabold text-black text-lg shadow-lg shadow-orange-500/20">
           FC
         </div>
@@ -141,6 +166,15 @@ export default function Sidebar() {
           </div>
           <p className="text-[10px] text-gray-400 font-medium">Gym Management Center</p>
         </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setMobileOpen(false)}
+          className="lg:hidden w-8 h-8 rounded-lg bg-gray-800 text-gray-300 flex items-center justify-center text-sm"
+          aria-label="Close navigation"
+        >
+          ✕
+        </button>
       </div>
 
       {/* Independently Scrollable Grouped Navigation */}
@@ -230,5 +264,6 @@ export default function Sidebar() {
         </button>
       </div>
     </aside>
+    </>
   );
 }

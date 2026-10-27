@@ -2,11 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import RegisterModal from './components/RegisterModal';
 import SignInModal from './components/SignInModal';
 import { ADMIN_APP_URL, API_URL } from './lib/config';
 
 export default function FitFarmHQHomePage() {
+  const router = useRouter();
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isSignInOpen, setIsSignInOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'biometrics' | 'subscriptions' | 'audit' | 'multitenant'>('biometrics');
@@ -87,7 +89,44 @@ export default function FitFarmHQHomePage() {
         }
       })
       .catch(() => {});
+
+    // The setup wizard redirects unauthenticated visitors here. Open the
+    // Create Account modal immediately so the next step is always clear.
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('auth') === 'register') {
+      setIsRegisterOpen(true);
+      window.history.replaceState({}, '', window.location.pathname);
+    }
   }, []);
+
+  const handleSetupWizard = () => {
+    const token = localStorage.getItem('fitcloud_token') || localStorage.getItem('polanfit_token');
+    if (!token) {
+      setIsRegisterOpen(true);
+      return;
+    }
+    router.push('/setup');
+  };
+
+  const handleAdminConsole = () => {
+    const token = localStorage.getItem('fitcloud_token') || localStorage.getItem('polanfit_token');
+    if (!token) {
+      setIsSignInOpen(true);
+      return;
+    }
+
+    const tenantSlug = localStorage.getItem('fitcloud_tenant_slug') || localStorage.getItem('polanfit_tenant_slug');
+    if (!tenantSlug) {
+      router.push('/super-admin');
+      return;
+    }
+
+    window.open(
+      `${ADMIN_APP_URL}#token=${encodeURIComponent(token)}&tenant=${encodeURIComponent(tenantSlug)}`,
+      '_blank',
+      'noopener,noreferrer'
+    );
+  };
 
   const grossMonthly = memberVolume * averagePlanPrice;
   const saasSplit1Pct = Math.round(grossMonthly * 0.01);
@@ -141,7 +180,7 @@ export default function FitFarmHQHomePage() {
     },
     {
       q: 'Can every gym tenant have their own logo, theme colors, and custom domain?',
-      a: 'Yes! Every gym tenant gets an isolated admin dashboard and public member portal. You can upload custom logos, set primary brand colors, adjust custom fonts, and run on your own custom subdomain (e.g. yourgym.fitcloud.io or yourgym.com).',
+      a: 'Yes! Every gym tenant gets an isolated admin dashboard and public member portal. You can upload custom logos, set primary brand colors, adjust custom fonts, and run on your own custom subdomain (e.g. yourgym.fitfarmhq.com or yourgym.com).',
     },
     {
       q: 'Does FitFarmHQ automatically extend membership expiration when a plan is paused?',
@@ -189,8 +228,40 @@ export default function FitFarmHQHomePage() {
   const trialDays = Number(platformContent?.trial_days || 90);
   const currencySymbol = currency === 'NGN' ? '₦' : '$';
 
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        name: 'FitFarmHQ',
+        url: 'https://fitfarmhq.com',
+        logo: 'https://fitfarmhq.com/og-image.png',
+        description: 'Gym management and access-control software for modern fitness businesses.',
+      },
+      {
+        '@type': 'SoftwareApplication',
+        name: 'FitFarmHQ',
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Web',
+        url: 'https://fitfarmhq.com',
+        description:
+          'Manage gym members, subscriptions, access gates, staff, payments, and branded member portals from one dashboard.',
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'NGN',
+          description: 'Free setup tier with a 1% transaction fee and no monthly base subscription.',
+        },
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-[#070709] text-white font-sans selection:bg-orange-500 selection:text-black relative noise-overlay">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       {/* Background Ambient Radial Glow & Matrix Grid */}
       <div className="fixed inset-0 bg-tech-grid pointer-events-none opacity-30 z-0" />
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[700px] bg-radial-gradient pointer-events-none z-0" />
@@ -201,8 +272,8 @@ export default function FitFarmHQHomePage() {
       <div className="fixed bottom-[20%] left-[20%] w-[300px] h-[300px] rounded-full bg-emerald-500/[0.025] blur-[100px] pointer-events-none z-0 animate-float-orb-fast" />
 
       {/* 1. Modern Floating Header Dock */}
-      <header className="sticky top-4 z-50 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="rounded-3xl backdrop-blur-2xl bg-[#0a0a0c]/85 border border-white/[0.08] shadow-2xl px-5 py-3 flex items-center justify-between transition-all">
+      <header className="sticky top-2 sm:top-4 z-50 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="rounded-2xl sm:rounded-3xl backdrop-blur-2xl bg-[#0a0a0c]/90 border border-white/[0.08] shadow-2xl px-2.5 sm:px-5 py-2.5 sm:py-3 flex items-center justify-between gap-1.5 sm:gap-2 transition-all">
           {/* Brand Logo & Telemetry Indicator */}
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-3 group">
@@ -211,14 +282,14 @@ export default function FitFarmHQHomePage() {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-heading font-black text-xl tracking-tight bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
+                  <span className="font-heading font-black text-lg sm:text-xl tracking-tight bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent whitespace-nowrap">
                     FitFarmHQ
                   </span>
-                  <span className="text-[10px] font-mono font-extrabold uppercase px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/30">
+                  <span className="hidden sm:inline-flex text-[10px] font-mono font-extrabold uppercase px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/30">
                     CLOUD
                   </span>
                 </div>
-                <p className="text-[10px] text-gray-400 font-mono">Gym operations, simplified</p>
+                <p className="hidden sm:block text-[10px] text-gray-400 font-mono">Gym operations, simplified</p>
               </div>
             </Link>
 
@@ -234,22 +305,34 @@ export default function FitFarmHQHomePage() {
           </nav>
 
           {/* Action Hub */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <button
               onClick={() => setIsSignInOpen(true)}
-              className="text-xs font-bold text-gray-300 hover:text-white px-3.5 py-2 rounded-xl hover:bg-white/[0.06] transition"
+              className="text-[11px] sm:text-xs font-bold text-gray-300 hover:text-white px-2.5 sm:px-3.5 py-2 rounded-xl hover:bg-white/[0.06] transition whitespace-nowrap"
             >
               Sign In
             </button>
             <button
               onClick={() => setIsRegisterOpen(true)}
-              className="text-xs font-extrabold text-black px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 transition shadow-lg shadow-orange-500/20 transform hover:-translate-y-0.5 active:translate-y-0"
+              className="text-[11px] sm:text-xs font-extrabold text-black px-3 sm:px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 transition shadow-lg shadow-orange-500/20 transform hover:-translate-y-0.5 active:translate-y-0 whitespace-nowrap"
             >
-              Get Started Free →
+              <span className="sm:hidden">Get Started</span>
+              <span className="hidden sm:inline">Get Started Free →</span>
             </button>
           </div>
         </div>
       </header>
+
+      {/* Mobile-only navigation */}
+      <nav className="md:hidden max-w-7xl w-full mx-auto px-3 sm:px-6 mt-3 relative z-40">
+        <div className="flex items-center gap-5 overflow-x-auto whitespace-nowrap text-[11px] font-bold text-gray-300 rounded-2xl border border-white/[0.08] bg-[#0a0a0c]/90 backdrop-blur-xl px-4 py-2.5 shadow-lg">
+          <a href="#hardware" className="hover:text-orange-400 transition-colors">Hardware</a>
+          <a href="#demo" className="hover:text-orange-400 transition-colors">Demo</a>
+          <a href="#calculator" className="hover:text-orange-400 transition-colors">Calculator</a>
+          <a href="#pricing" className="hover:text-orange-400 transition-colors">Pricing</a>
+          <a href="#faq" className="hover:text-orange-400 transition-colors">FAQs</a>
+        </div>
+      </nav>
 
       {/* 2. Hero Section */}
       <section className="relative pt-24 pb-20 overflow-hidden z-10">
@@ -292,18 +375,19 @@ export default function FitFarmHQHomePage() {
             >
               <span>🖐️ {hero?.secondary_cta || 'Test Gate Simulator'}</span>
             </a>
-            <Link
-              href="/setup"
+            <button
+              onClick={handleSetupWizard}
               className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-white/[0.02] hover:bg-white/[0.06] text-gray-400 hover:text-white border border-white/[0.06] font-semibold text-sm transition-all duration-300 flex items-center justify-center gap-1.5 hover:-translate-y-0.5"
             >
               <span>⚡ Setup Wizard</span>
-            </Link>
+            </button>
           </div>
 
           <div className="reveal-up delay-300 mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] text-gray-500 font-mono">
             <span>✓ No credit card required</span>
             <span>✓ {trialDays}-day trial</span>
             <span>✓ Cancel anytime</span>
+            <span>✓ Fully mobile responsive</span>
           </div>
 
           {/* 3. HERO CENTERPIECE: Live Hardware Terminal & Biometric Gate Simulator */}
@@ -320,7 +404,7 @@ export default function FitFarmHQHomePage() {
                       <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
                       <div className="w-3 h-3 rounded-full bg-green-500/80" />
                     </div>
-                    <span className="text-xs font-mono text-gray-400">terminal.fitcloud.io/gate-01-optical</span>
+                    <span className="text-xs font-mono text-gray-400">terminal.fitfarmhq.com/gate-01-optical</span>
                     <span className="px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400 text-[10px] font-mono font-bold uppercase">
                       Hardware Active
                     </span>
@@ -897,14 +981,12 @@ export default function FitFarmHQHomePage() {
               >
                 Get Started Free in 2 Minutes →
               </button>
-              <a
-                href={ADMIN_APP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={handleAdminConsole}
                 className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#121217] hover:bg-[#181820] text-gray-200 border border-white/[0.1] font-bold text-base transition"
               >
                 Owner Sign In ↗
-              </a>
+              </button>
             </div>
           </div>
         </div>
@@ -922,8 +1004,8 @@ export default function FitFarmHQHomePage() {
           </div>
 
           <div className="flex items-center gap-6 text-gray-400">
-            <Link href="/setup" className="hover:text-white transition">Setup Wizard</Link>
-            <a href={ADMIN_APP_URL} target="_blank" rel="noopener noreferrer" className="hover:text-white transition">Admin Console</a>
+            <button onClick={handleSetupWizard} className="hover:text-white transition">Setup Wizard</button>
+            <button onClick={handleAdminConsole} className="hover:text-white transition">Admin Console</button>
           </div>
         </div>
       </footer>

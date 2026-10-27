@@ -124,7 +124,7 @@ export default function ContactSocialsPage() {
           subtitle="Manage official facility contacts, social media channels, support numbers, operating hours, and Google Maps embed"
         />
 
-        <main className="flex-1 p-6 md:p-8 space-y-6 max-w-5xl">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 space-y-6 max-w-5xl">
           {/* Notification Toast */}
           {toastMsg && (
             <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-extrabold flex items-center justify-between shadow-lg shadow-emerald-500/10 animate-fadeIn">

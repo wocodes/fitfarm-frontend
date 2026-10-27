@@ -201,7 +201,7 @@ export default function StaffAttendancePage() {
           subtitle="Track staff shift clock-ins, generate staff check-in QR codes, and audit daily reception duty"
         />
 
-        <main className="flex-1 p-6 md:p-8 space-y-6 max-w-[1600px] mx-auto w-full">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 space-y-6 max-w-[1600px] mx-auto w-full">
           {/* Quick Clock-in / Clock-out Banner Card */}
           <div className="p-6 rounded-2xl bg-[#0f0f13] border border-gray-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
@@ -285,7 +285,7 @@ export default function StaffAttendancePage() {
                   </p>
                 </div>
               ) : (
-                <table className="w-full text-left text-xs">
+                <table className="w-full min-w-[760px] text-left text-xs">
                   <thead className="bg-[#070709] border-b border-gray-800 text-gray-400 font-semibold uppercase tracking-wider">
                     <tr>
                       <th className="py-3 px-4 w-12">S/N</th>
@@ -300,7 +300,7 @@ export default function StaffAttendancePage() {
                   <tbody className="divide-y divide-gray-800/60 font-medium">
                     {records.map((r, index) => {
                       const name = r.staffName || r.staff_name || 'Staff Member';
-                      const email = r.username || r.email || 'staff@fitcloud.io';
+                      const email = r.username || r.email || 'staff@fitfarmhq.com';
                       const clockInStr = r.clock_in || r.checkedInAt;
                       const clockOutStr = r.clock_out;
                       const isActive = r.status === 'active';

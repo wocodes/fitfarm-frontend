@@ -148,7 +148,7 @@ export default function WebsiteCmsPage() {
           subtitle="Control landing page copy, photos, schedules, and reviews"
         />
 
-        <main className="flex-1 p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 max-w-7xl w-full mx-auto space-y-6">
           {/* Header Title */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-800/80 pb-6">
             <div>

@@ -321,7 +321,7 @@ export default function AccountsPage() {
           subtitle="Manage corporate bank accounts, payment categories, and view system audit trail logs"
         />
 
-        <main className="flex-1 p-6 md:p-8 space-y-6 max-w-[1600px] mx-auto w-full">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 space-y-6 max-w-[1600px] mx-auto w-full">
           {/* Top Control & Tabs Bar */}
           <div className="p-6 rounded-2xl bg-[#0f0f13] border border-gray-800 space-y-4">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -424,7 +424,7 @@ export default function AccountsPage() {
                     <p className="text-xs text-gray-500">Click "+ Add Bank Account" to configure official collection accounts.</p>
                   </div>
                 ) : (
-                  <table className="w-full text-left text-xs">
+                  <table className="w-full min-w-[760px] text-left text-xs">
                     <thead className="bg-[#070709] border-b border-gray-800 text-gray-400 font-semibold uppercase tracking-wider">
                       <tr>
                         <th className="py-3 px-4 w-12">S/N</th>
@@ -510,7 +510,7 @@ export default function AccountsPage() {
                     <p className="text-xs text-gray-500">Click "+ Add Payment Type" to add new fee categories.</p>
                   </div>
                 ) : (
-                  <table className="w-full text-left text-xs">
+                  <table className="w-full min-w-[760px] text-left text-xs">
                     <thead className="bg-[#070709] border-b border-gray-800 text-gray-400 font-semibold uppercase tracking-wider">
                       <tr>
                         <th className="py-3 px-4 w-12">S/N</th>
@@ -599,7 +599,7 @@ export default function AccountsPage() {
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+                <table className="w-full min-w-[760px] text-left text-xs">
                   <thead className="bg-[#070709] border-b border-gray-800 text-gray-400 font-semibold uppercase tracking-wider">
                     <tr>
                       <th className="py-3 px-4">Action Event</th>

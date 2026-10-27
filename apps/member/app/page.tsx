@@ -329,8 +329,8 @@ export default function MemberPortalPage() {
         )}
 
         {/* Top Sticky Navigation Bar Floating on Top of Hero Slider (Transparent) */}
-        <header className="relative px-6 py-4 flex items-center justify-between bg-gradient-to-b from-black/80 via-black/40 to-transparent backdrop-blur-[2px] transition-all">
-          <div className="flex items-center gap-3">
+        <header className="relative px-4 sm:px-6 py-3 sm:py-4 flex flex-wrap items-center justify-between gap-2 bg-gradient-to-b from-black/80 via-black/40 to-transparent backdrop-blur-[2px] transition-all">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             {tenantInfo?.tenant?.logo_url ? (
               <img
                 src={tenantInfo.tenant.logo_url}
@@ -343,26 +343,26 @@ export default function MemberPortalPage() {
               </div>
             )}
             <div>
-              <h1 className="font-extrabold text-white leading-tight text-base tracking-tight">{tenantName}</h1>
-              <span className="text-xs text-orange-400 font-mono">Member Web Portal</span>
+              <h1 className="font-extrabold text-white leading-tight text-sm sm:text-base tracking-tight truncate max-w-[150px] sm:max-w-none">{tenantName}</h1>
+              <span className="text-[10px] sm:text-xs text-orange-400 font-mono">Member Web Portal</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 flex-wrap justify-end">
             {isAuthenticated ? (
               <>
                 <button
                   onClick={() => setShowPassModal(true)}
-                  className="px-4 py-2 brand-btn-gradient font-extrabold text-black text-xs rounded-xl shadow-lg shadow-orange-500/20 transition flex items-center gap-1.5"
+                  className="px-3 sm:px-4 py-2 brand-btn-gradient font-extrabold text-black text-xs rounded-xl shadow-lg shadow-orange-500/20 transition flex items-center gap-1.5"
                 >
                   <span>📱</span>
-                  <span>Digital Pass</span>
+                  <span className="hidden sm:inline">Digital Pass</span>
                 </button>
                 <button
                   onClick={() => setShowDashboard(true)}
-                  className="px-3.5 py-2 bg-gray-800/90 hover:bg-gray-700 font-bold text-white text-xs rounded-xl border border-gray-700/60 transition"
+                  className="px-2.5 sm:px-3.5 py-2 bg-gray-800/90 hover:bg-gray-700 font-bold text-white text-xs rounded-xl border border-gray-700/60 transition"
                 >
-                  My Profile
+                  <span>👤</span><span className="hidden sm:inline ml-1">My Profile</span>
                 </button>
                 <button
                   onClick={handleLogout}
@@ -376,13 +376,13 @@ export default function MemberPortalPage() {
               <>
                 <button
                   onClick={() => setShowLoginModal(true)}
-                  className="px-4 py-2 bg-gray-900 border border-gray-800 hover:bg-gray-800 font-bold text-gray-200 text-xs rounded-xl transition"
+                  className="px-3 sm:px-4 py-2 bg-gray-900 border border-gray-800 hover:bg-gray-800 font-bold text-gray-200 text-[11px] sm:text-xs rounded-xl transition"
                 >
                   Sign In
                 </button>
                 <button
                   onClick={() => setShowRegisterModal(true)}
-                  className="px-4 py-2 brand-btn-gradient font-extrabold text-black text-xs rounded-xl shadow-lg shadow-orange-500/20 transition"
+                  className="px-3 sm:px-4 py-2 brand-btn-gradient font-extrabold text-black text-[11px] sm:text-xs rounded-xl shadow-lg shadow-orange-500/20 transition"
                 >
                   Join Gym
                 </button>

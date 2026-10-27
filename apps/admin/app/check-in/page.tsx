@@ -334,9 +334,9 @@ export default function CheckInKioskPage() {
           subtitle="Hardware fingerprint biometric check-in & automated gate access control"
         />
 
-        <main className="flex-1 p-6 md:p-10 flex flex-col items-center justify-center max-w-5xl mx-auto w-full">
+        <main className="flex-1 p-4 sm:p-6 lg:p-10 pb-24 lg:pb-8 flex flex-col items-center justify-center max-w-5xl mx-auto w-full">
           {/* Main Modern Kiosk Terminal Frame */}
-          <div className="w-full bg-[#0d0d12] border border-gray-800 rounded-3xl p-8 md:p-12 shadow-2xl space-y-8 relative overflow-hidden">
+          <div className="w-full bg-[#0d0d12] border border-gray-800 rounded-3xl p-5 sm:p-8 lg:p-12 shadow-2xl space-y-8 relative overflow-hidden">
             {/* Background Ambient Glow */}
             <div
               className={`absolute -top-32 -left-32 w-96 h-96 rounded-full filter blur-[120px] transition-all duration-700 opacity-20 pointer-events-none ${

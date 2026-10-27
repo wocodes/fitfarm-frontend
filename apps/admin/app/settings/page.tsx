@@ -348,7 +348,7 @@ export default function SettingsPage() {
           subtitle="Manage gym operating profile, brand colors, biometric entrance hardware, membership rules, and data backups"
         />
 
-        <main className="flex-1 p-6 md:p-8 space-y-6 max-w-5xl">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 space-y-6 max-w-5xl">
           {/* Top Status Notification Banner */}
           {saveSuccessMsg && (
             <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-extrabold flex items-center justify-between shadow-lg shadow-emerald-500/10 animate-fadeIn">
@@ -977,7 +977,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="overflow-x-auto rounded-xl border border-gray-800/80">
-                    <table className="w-full text-left text-xs">
+                    <table className="w-full min-w-[760px] text-left text-xs">
                       <thead className="bg-[#070709] border-b border-gray-800 text-gray-400 font-semibold uppercase">
                         <tr>
                           <th className="py-2.5 px-3">Terminal Name</th>
@@ -1102,7 +1102,7 @@ export default function SettingsPage() {
                 <div className="pt-2">
                   <h3 className="text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">Available System Snapshots</h3>
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs">
+                    <table className="w-full min-w-[760px] text-left text-xs">
                       <thead className="bg-[#070709] border-b border-gray-800 text-gray-400 font-semibold uppercase">
                         <tr>
                           <th className="py-2.5 px-3">Snapshot Filename</th>
@@ -1174,7 +1174,7 @@ export default function SettingsPage() {
       {/* Authorize Terminal Modal */}
       {showEnrollModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-          <div className="relative w-full max-w-md bg-[#121217] border border-gray-800 rounded-3xl p-6 md:p-8 shadow-2xl text-white">
+          <div className="relative w-full max-w-md bg-[#121217] border border-gray-800 rounded-3xl p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 shadow-2xl text-white">
             <button
               onClick={() => setShowEnrollModal(false)}
               className="absolute top-5 right-5 w-8 h-8 rounded-full bg-gray-800/60 hover:bg-gray-700 flex items-center justify-center text-gray-400 hover:text-white transition"

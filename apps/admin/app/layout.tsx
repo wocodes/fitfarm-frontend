@@ -6,7 +6,11 @@ import ThemeInitializer from "./components/ThemeInitializer";
 
 export const metadata: Metadata = {
   title: "FitFarmHQ Admin Center",
-  description: "Gym Management Admin Center Dashboard",
+  description: "Secure gym management console for FitFarmHQ gym owners and staff.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function RootLayout({
@@ -19,8 +23,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-[#0f0f11] text-white">
         <TopProgressBar />
         <ThemeInitializer />
-        <AuthInitializer />
-        {children}
+        <AuthInitializer>{children}</AuthInitializer>
       </body>
     </html>
   );

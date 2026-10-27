@@ -103,7 +103,7 @@ export default function CampaignSettingsPage() {
           subtitle="Configure gym-wide challenge events, points rules, and view live member standings"
         />
 
-        <main className="flex-1 p-6 md:p-10 space-y-8 max-w-7xl mx-auto w-full">
+        <main className="flex-1 p-4 sm:p-6 lg:p-10 pb-24 lg:pb-8 space-y-8 max-w-7xl mx-auto w-full">
           {/* Top Quick Actions Bar */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-2xl bg-[#0d0d12] border border-gray-800">
             <div>
@@ -256,7 +256,7 @@ export default function CampaignSettingsPage() {
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs border-collapse">
+                  <table className="w-full min-w-[760px] text-left text-xs border-collapse">
                     <thead>
                       <tr className="border-b border-gray-800 text-gray-400 uppercase tracking-wider text-[10px]">
                         <th className="py-3 px-4 font-bold">Rank</th>
