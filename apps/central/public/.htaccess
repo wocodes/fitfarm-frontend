@@ -1,0 +1,23 @@
+# FitFarmHQ static export routing
+DirectoryIndex index.html
+Options -MultiViews
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Serve /setup and /super-admin from their static HTML files instead of
+  # exposing the Next.js RSC helper directories as a directory listing.
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME}.html -f
+  RewriteRule ^(.*?)/?$ $1.html [L]
+
+  # Handle trailing-slash variants such as /setup/.
+  RewriteCond %{REQUEST_URI} ^/(.+)/$
+  RewriteCond %{DOCUMENT_ROOT}/%1.html -f
+  RewriteRule ^ /%1.html [L]
+
+  # Leave real files and directories alone.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+</IfModule>
