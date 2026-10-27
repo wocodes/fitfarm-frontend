@@ -3,12 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { memberApiFetch, getMemberToken } from '../lib/api';
 
-declare global {
-  interface Window {
-    PaystackPop?: any;
-  }
-}
-
 interface PlanPurchaseModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -17,6 +11,8 @@ interface PlanPurchaseModalProps {
   initialSelectedPlanId?: number | null;
   onSuccess?: () => void;
   onRequireAuth?: () => void;
+  usdRate?: number;
+  planCurrency?: string;
 }
 
 export default function PlanPurchaseModal({
@@ -27,8 +23,11 @@ export default function PlanPurchaseModal({
   initialSelectedPlanId,
   onSuccess,
   onRequireAuth,
+  usdRate = 1600,
+  planCurrency = 'NGN',
 }: PlanPurchaseModalProps) {
   const [selectedPlanId, setSelectedPlanId] = useState<number | null>(null);
+  const [currency, setCurrency] = useState<'NGN' | 'USD'>('NGN');
   const [loading, setLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -48,21 +47,18 @@ export default function PlanPurchaseModal({
     }
   }, [initialSelectedPlanId, activePlans]);
 
-  // Load Paystack Inline script
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (!document.getElementById('paystack-inline-js')) {
-      const script = document.createElement('script');
-      script.id = 'paystack-inline-js';
-      script.src = 'https://js.paystack.co/v1/inline.js';
-      script.async = true;
-      document.body.appendChild(script);
-    }
-  }, []);
-
   if (!isOpen) return null;
 
   const chosenPlan = activePlans.find((p) => p.id === selectedPlanId) || activePlans[0];
+
+  const priceFor = (plan: any): number => {
+    const base = Number(plan.price || plan.subscription_fee || 0);
+    if (currency === planCurrency) return base;
+    if (currency === 'USD' && planCurrency === 'NGN') return Math.round((base / Math.max(usdRate, 0.0001)) * 100) / 100;
+    if (currency === 'NGN' && planCurrency === 'USD') return Math.round(base * usdRate * 100) / 100;
+    return base;
+  };
+  const currencySymbol = currency === 'NGN' ? '₦' : '$';
 
   const handleCheckout = async () => {
     if (!chosenPlan) return;
@@ -82,76 +78,24 @@ export default function PlanPurchaseModal({
 
     setLoading(true);
 
-    const paystackKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
+    try {
+      const res = await memberApiFetch('/member/plans/initialize', {
+        method: 'POST',
+        body: JSON.stringify({
+          pricing_plan_id: chosenPlan.id,
+          currency,
+        }),
+      });
 
-    if (!paystackKey) {
-      setStatusMsg({ type: 'error', text: 'Online payments are not configured. Please contact the gym.' });
-      setLoading(false);
-      return;
-    }
-
-    if (!window.PaystackPop) {
-      setStatusMsg({ type: 'error', text: 'The payment provider could not be loaded. Please refresh and try again.' });
-      setLoading(false);
-      return;
-    }
-
-    const amountInKobo = Math.round(Number(chosenPlan.price || 0) * 100);
-    const reference = 'FCM_' + Date.now() + '_' + Math.floor(Math.random() * 1000000);
-
-    const recordPurchase = async (ref: string) => {
-      try {
-        const res = await memberApiFetch('/member/plans/purchase', {
-          method: 'POST',
-          body: JSON.stringify({
-            pricing_plan_id: chosenPlan.id,
-            payment_reference: ref,
-            amount: Number(chosenPlan.price || 0),
-            channel: 'paystack',
-          }),
-        });
-
-        if (res.success) {
-          setStatusMsg({ type: 'success', text: `🎉 ${res.message || 'Subscription activated successfully!'}` });
-          if (onSuccess) onSuccess();
-          setTimeout(() => {
-            onClose();
-          }, 2500);
-        } else {
-          setStatusMsg({ type: 'error', text: res.message || 'Could not verify purchase.' });
-        }
-      } catch (err: any) {
-        setStatusMsg({ type: 'error', text: err.message || 'Error activating plan.' });
-      } finally {
-        setLoading(false);
+      if (!res.success || !res.data?.checkout_url) {
+        setStatusMsg({ type: 'error', text: res.message || 'Could not start the payment checkout.' });
+        return;
       }
-    };
 
-    if (window.PaystackPop) {
-      try {
-        const handler = window.PaystackPop.setup({
-          key: paystackKey,
-          email: currentUser.email || 'member@polanfit.com',
-          amount: amountInKobo,
-          currency: chosenPlan.currency || 'NGN',
-          ref: reference,
-          metadata: {
-            member_id: currentUser.id || currentUser.uuid,
-            plan_id: chosenPlan.id,
-            plan_name: chosenPlan.name,
-          },
-          callback: function (response: any) {
-            recordPurchase(response.reference || reference);
-          },
-          onClose: function () {
-            setLoading(false);
-          },
-        });
-        handler.openIframe();
-      } catch (err: any) {
-        setStatusMsg({ type: 'error', text: err?.message || 'Unable to open the payment window.' });
-        setLoading(false);
-      }
+      window.location.href = res.data.checkout_url;
+    } catch (err: any) {
+      setStatusMsg({ type: 'error', text: err.message || 'Could not start the payment checkout.' });
+      setLoading(false);
     }
   };
 
@@ -171,8 +115,25 @@ export default function PlanPurchaseModal({
           </div>
           <h3 className="text-2xl font-extrabold text-white">Select Membership Plan</h3>
           <p className="text-xs text-gray-400 mt-1">
-            Secure checkout via Paystack debit card, bank transfer, or USSD.
+            Secure checkout with card, bank transfer, or USSD.
           </p>
+          <div className="flex items-center gap-2 mt-4">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Currency</span>
+            {(['NGN', 'USD'] as const).map((code) => (
+              <button
+                key={code}
+                type="button"
+                onClick={() => setCurrency(code)}
+                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition ${
+                  currency === code
+                    ? 'bg-orange-500 text-black'
+                    : 'bg-white/[0.04] text-gray-400 border border-white/[0.08]'
+                }`}
+              >
+                {code === 'NGN' ? '₦ NGN' : '$ USD'}
+              </button>
+            ))}
+          </div>
         </div>
 
         {statusMsg && (
@@ -188,7 +149,7 @@ export default function PlanPurchaseModal({
         <div className="space-y-3 max-h-[320px] overflow-y-auto pr-1">
           {activePlans.map((plan) => {
             const isSelected = selectedPlanId === plan.id;
-            const price = Number(plan.price || plan.subscription_fee || 0);
+            const price = priceFor(plan);
             const duration = plan.duration_days ? `${plan.duration_days} Days` : plan.duration || '30 Days';
 
             return (
@@ -217,7 +178,7 @@ export default function PlanPurchaseModal({
 
                 <div className="text-right">
                   <span className="font-black text-sm text-white">
-                    ₦{price.toLocaleString()}
+                    {currencySymbol}{price.toLocaleString()}
                   </span>
                   <p className="text-[10px] text-gray-400 font-mono">/ {duration}</p>
                 </div>
@@ -230,7 +191,7 @@ export default function PlanPurchaseModal({
           <div className="flex items-center justify-between text-xs">
             <span className="text-gray-400">Total Due Today:</span>
             <span className="font-black text-xl text-white">
-              ₦{Number(chosenPlan?.price || 25000).toLocaleString()}
+              {currencySymbol}{Number(chosenPlan ? priceFor(chosenPlan) : 0).toLocaleString()}
             </span>
           </div>
 
@@ -240,7 +201,7 @@ export default function PlanPurchaseModal({
             className="w-full py-3.5 rounded-xl bg-orange-500 hover:bg-orange-600 font-extrabold text-black text-sm transition shadow-xl shadow-orange-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
           >
             <span>🔒</span>
-            <span>{loading ? 'Processing Checkout...' : `Pay ₦${Number(chosenPlan?.price || 25000).toLocaleString()} via Paystack`}</span>
+            <span>{loading ? 'Processing Checkout...' : `Pay ${currencySymbol}${Number(chosenPlan ? priceFor(chosenPlan) : 0).toLocaleString()} Securely`}</span>
           </button>
 
           <p className="text-[10px] text-center text-gray-500 font-medium">

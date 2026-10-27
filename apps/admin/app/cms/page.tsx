@@ -303,7 +303,7 @@ export default function WebsiteCmsPage() {
                         key: 'plans',
                         name: 'Membership Pricing Plans',
                         icon: '💳',
-                        desc: 'Active tiered membership plans, feature checklists, and instant Paystack online checkout.',
+                        desc: 'Active tiered membership plans, feature checklists, and instant online checkout.',
                         editTab: null,
                       },
                       {
@@ -421,7 +421,7 @@ export default function WebsiteCmsPage() {
                             title: 'New Headline Goes Here',
                             subtitle: 'Punchy secondary subtext outlining your fitness experience.',
                             tag: 'Special Feature',
-                            image: '/images/hero/hero-1.webp',
+                            image: '/images/hero/1.webp',
                             cta_text: 'Get Started',
                             cta_action: 'plans',
                             secondary_cta: 'Sign In',

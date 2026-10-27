@@ -55,7 +55,7 @@ const TESTIMONIALS: Testimonial[] = [
     rating: 5,
     achievement: '🧘 Cured Lower Back Stiffness',
     comment:
-      'The combination of intense morning HIIT followed by Elena’s recovery yoga completely healed my posture. Renewing online with Paystack takes 5 seconds flat.',
+      'The combination of intense morning HIIT followed by Elena’s recovery yoga completely healed my posture. Renewing online takes 5 seconds flat.',
     duration: 'Member for 7 Months',
   },
 ];

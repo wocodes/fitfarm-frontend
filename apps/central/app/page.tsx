@@ -4,13 +4,14 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import RegisterModal from './components/RegisterModal';
 import SignInModal from './components/SignInModal';
-import { ADMIN_APP_URL } from './lib/config';
+import { ADMIN_APP_URL, API_URL } from './lib/config';
 
 export default function FitFarmHQHomePage() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isSignInOpen, setIsSignInOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'biometrics' | 'subscriptions' | 'audit' | 'multitenant'>('biometrics');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  const [platformContent, setPlatformContent] = useState<any>(null);
 
   // Scroll-triggered reveal animation observer
   useEffect(() => {
@@ -76,6 +77,18 @@ export default function FitFarmHQHomePage() {
   const [averagePlanPrice, setAveragePlanPrice] = useState<number>(35000); // ₦35,000 / mo
   const [currency, setCurrency] = useState<'NGN' | 'USD'>('NGN');
 
+  useEffect(() => {
+    fetch(`${API_URL}/platform`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && json.data) {
+          setPlatformContent(json.data);
+          if (json.data.default_currency === 'USD') setCurrency('USD');
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const grossMonthly = memberVolume * averagePlanPrice;
   const saasSplit1Pct = Math.round(grossMonthly * 0.01);
   const gymNetPayout = grossMonthly - saasSplit1Pct;
@@ -117,14 +130,14 @@ export default function FitFarmHQHomePage() {
     }, 900);
   };
 
-  const faqs = [
+  const defaultFaqs = [
     {
       q: 'How does physical biometric turnstile integration work?',
       a: 'FitFarmHQ integrates directly with standard IP-networked and USB biometric terminals (ZKTeco, Hikvision, optical speed gates, and RFID readers). When a member scans their finger or dynamic QR pass, our cloud validates their active plan, branch permissions, and remaining sessions in <50ms before pulsing the gate relay to open.',
     },
     {
       q: 'What is the difference between the Free Setup Tier and Annual Enterprise?',
-      a: 'The Free Setup Tier has $0 upfront cost, $0 setup fee, and $0 monthly base subscription—FitFarmHQ automatically splits 1% on incoming member Paystack subscription payments. The Annual Enterprise Plan is a flat $299/year license key with 0% transaction split fee, ideal for large gyms with high membership volume.',
+      a: 'The Free Setup Tier has $0 upfront cost, $0 setup fee, and $0 monthly base subscription—FitFarmHQ automatically splits 1% on incoming member subscription payments. The Annual Enterprise Plan is a flat $299/year license key with 0% transaction split fee, ideal for large gyms with high membership volume.',
     },
     {
       q: 'Can every gym tenant have their own logo, theme colors, and custom domain?',
@@ -139,6 +152,42 @@ export default function FitFarmHQHomePage() {
       a: 'Absolutely. FitFarmHQ maintains an immutable security audit log recording every member plan pause/resume, profile edit, gate override, transaction verification, and staff action—including previous vs new state values, staff user IDs, and timestamps.',
     },
   ];
+
+  const faqs = platformContent?.landing?.faqs?.length
+    ? platformContent.landing.faqs
+    : defaultFaqs;
+
+  const defaultPricing = [
+    {
+      id: 'free', label: 'Option 1', name: 'Free Setup Tier', price_ngn: 0, price_usd: 0,
+      period: 'upfront cost', description: '1% transaction fee. Zero monthly subscription.',
+      features: ['$0 Upfront Setup Cost', 'Unlimited Members & Staff', 'Online Payment Reconciliation', 'Turnstiles & Biometrics Included', 'Audit Logs & Smart Pass Engine'],
+      featured: true, cta: 'Start Free in 2 Minutes',
+    },
+    {
+      id: 'annual', label: 'Option 2', name: 'Annual Enterprise', price_ngn: 450000, price_usd: 299,
+      period: '/ year', description: '0% transaction split fee. Flat annual license for high-volume facilities.',
+      features: ['0% Transaction Split Fee', 'Unlimited Locations & Branches', 'Priority 24/7 Support', 'Custom Domain SSL', 'Dedicated Hardware Engineer'],
+      featured: false, cta: 'Get Enterprise License',
+    },
+  ];
+
+  const pricingPlans = platformContent?.landing?.pricing?.length
+    ? platformContent.landing.pricing
+    : defaultPricing;
+
+  const defaultStats = [
+    { value: '99.99%', label: 'Uptime SLA' },
+    { value: '<35ms', label: 'Access-check latency' },
+    { value: '1%', label: 'Platform fee' },
+    { value: '24/7', label: 'Audit trail & backups' },
+  ];
+  const stats = platformContent?.landing?.stats?.length
+    ? platformContent.landing.stats
+    : defaultStats;
+  const hero = platformContent?.landing?.hero;
+  const trialDays = Number(platformContent?.trial_days || 90);
+  const currencySymbol = currency === 'NGN' ? '₦' : '$';
 
   return (
     <div className="min-h-screen bg-[#070709] text-white font-sans selection:bg-orange-500 selection:text-black relative noise-overlay">
@@ -218,20 +267,20 @@ export default function FitFarmHQHomePage() {
           {/* Glowing Pill Tag */}
           <div className="reveal-up inline-flex items-center gap-2 px-5 py-2 rounded-full bg-orange-500/[0.08] border border-orange-500/25 text-orange-400 text-xs font-bold font-mono mb-10 shadow-lg shadow-orange-500/10">
             <span className="w-1.5 h-1.5 rounded-full bg-orange-400 dot-pulse" />
-            <span>Optical Turnstiles • Smart Passes • Instant Paystack Split</span>
+            <span>{hero?.badge || 'Optical Turnstiles • Smart Passes • Automated Payouts'}</span>
           </div>
 
           {/* Main Headline */}
           <h1 className="reveal-up text-4xl sm:text-6xl lg:text-[5.2rem] font-heading font-black tracking-[-0.03em] leading-[1.06] max-w-5xl mx-auto">
-            The Intelligent Cloud OS for{' '}
+            {hero?.title || 'The Intelligent Cloud OS for'}{' '}
             <span className="text-gradient-animated">
-              Modern Fitness Centers
+              {hero?.highlight || 'Modern Fitness Centers'}
             </span>
           </h1>
 
           {/* Subheadline */}
           <p className="reveal-up delay-100 mt-7 text-base sm:text-xl text-gray-400 max-w-3xl mx-auto font-normal leading-relaxed">
-            Unify high-speed turnstiles, encrypted biometric member entry, automated subscription freeze/resume controls, and Paystack revenue splitting—all from one branded multi-tenant dashboard.
+            {hero?.subtitle || 'Unify high-speed turnstiles, encrypted biometric member entry, automated subscription freeze/resume controls, and automated revenue settlement—all from one branded multi-tenant dashboard.'}
           </p>
 
           {/* CTAs */}
@@ -240,13 +289,13 @@ export default function FitFarmHQHomePage() {
               onClick={() => setIsRegisterOpen(true)}
               className="group w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-black font-extrabold text-sm sm:text-base transition-all duration-300 shadow-xl shadow-orange-500/25 transform hover:-translate-y-1 hover:shadow-2xl hover:shadow-orange-500/30 active:translate-y-0"
             >
-              🚀 Launch Your Gym in 2 Minutes →
+              🚀 {hero?.primary_cta || 'Launch Your Gym in 2 Minutes'} →
             </button>
             <a
               href="#demo"
               className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] text-gray-200 border border-white/[0.1] hover:border-orange-500/40 font-bold text-sm sm:text-base transition-all duration-300 flex items-center justify-center gap-2 hover:-translate-y-0.5"
             >
-              <span>🖐️ Test Turnstile Simulator</span>
+              <span>🖐️ {hero?.secondary_cta || 'Test Turnstile Simulator'}</span>
             </a>
             <Link
               href="/setup"
@@ -258,7 +307,7 @@ export default function FitFarmHQHomePage() {
 
           <div className="reveal-up delay-300 mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] text-gray-500 font-mono">
             <span>✓ No credit card required</span>
-            <span>✓ 30-day trial</span>
+            <span>✓ {trialDays}-day trial</span>
             <span>✓ Cancel anytime</span>
           </div>
 
@@ -318,7 +367,7 @@ export default function FitFarmHQHomePage() {
                   </div>
 
                   <div className="p-4 rounded-2xl bg-[#121217] border border-gray-800">
-                    <span className="text-[11px] text-gray-400 font-medium">Paystack Revenue Split</span>
+                    <span className="text-[11px] text-gray-400 font-medium">Automated Revenue Split</span>
                     <p className="text-2xl font-black text-white mt-1">₦4,850,000</p>
                     <span className="text-[10px] text-emerald-400 font-bold font-mono">1% Automated SaaS Split</span>
                   </div>
@@ -423,22 +472,14 @@ export default function FitFarmHQHomePage() {
       <section className="py-16 bg-[#0a0a0e]/80 backdrop-blur-xl relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div className="reveal-up">
-              <p className="text-3xl sm:text-5xl font-heading font-black text-orange-400">99.99%</p>
-              <p className="text-xs text-gray-400 font-mono font-medium mt-2">Uptime SLA</p>
-            </div>
-            <div className="reveal-up delay-100">
-              <p className="text-3xl sm:text-5xl font-heading font-black text-amber-400">&lt;35ms</p>
-              <p className="text-xs text-gray-400 font-mono font-medium mt-2">Access-check latency</p>
-            </div>
-            <div className="reveal-up delay-200">
-              <p className="text-3xl sm:text-5xl font-heading font-black text-emerald-400">1%</p>
-              <p className="text-xs text-gray-400 font-mono font-medium mt-2">Paystack platform fee</p>
-            </div>
-            <div className="reveal-up delay-300">
-              <p className="text-3xl sm:text-5xl font-heading font-black text-orange-400">24/7</p>
-              <p className="text-xs text-gray-400 font-mono font-medium mt-2">Audit trail & backups</p>
-            </div>
+            {stats.map((stat: any, idx: number) => (
+              <div key={`${stat.label}-${idx}`} className={`reveal-up ${['', 'delay-100', 'delay-200', 'delay-300'][idx] || ''}`}>
+                <p className={`text-3xl sm:text-5xl font-heading font-black ${['text-orange-400', 'text-amber-400', 'text-emerald-400', 'text-orange-400'][idx % 4]}`}>
+                  {stat.value}
+                </p>
+                <p className="text-xs text-gray-400 font-mono font-medium mt-2">{stat.label}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -534,7 +575,7 @@ export default function FitFarmHQHomePage() {
               <span className="text-gradient-animated">Split Calculator</span>
             </p>
             <p className="reveal-up delay-200 text-sm text-gray-400 mt-5 leading-relaxed">
-              Launch with $0 upfront cost. FitFarmHQ only charges a 1% automated transaction split when your members pay for plans through Paystack.
+              Launch with $0 upfront cost. FitFarmHQ only charges a 1% automated transaction split when your members pay for plans online.
             </p>
           </div>
 
@@ -586,7 +627,7 @@ export default function FitFarmHQHomePage() {
               </div>
 
               <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.05] text-xs text-gray-400 space-y-1 font-mono">
-                <p>💡 <span className="text-white font-bold">100% Automated Paystack Settlement:</span> 99% of member fees transfer instantly to your gym bank account. Zero manual invoicing.</p>
+                <p>💡 <span className="text-white font-bold">Automated settlement:</span> member payments are reconciled and your share is tracked automatically. Zero manual invoicing.</p>
               </div>
             </div>
 
@@ -734,85 +775,68 @@ export default function FitFarmHQHomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Option 1: Free Tier */}
-            <div className="reveal-left pricing-featured p-8 sm:p-10 rounded-3xl bg-[#0e0e13] relative flex flex-col justify-between shadow-2xl shadow-orange-500/10">
-              <span className="absolute -top-3.5 right-8 px-4 py-1 rounded-full bg-orange-500 text-black font-extrabold text-xs uppercase tracking-wider font-mono">
-                Most Popular
-              </span>
-              <div>
-                <span className="text-xs font-bold text-orange-400 uppercase tracking-widest font-mono">Option 1</span>
-                <h3 className="text-3xl font-black text-white mt-1 font-heading">Free Setup Tier</h3>
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-5xl font-black text-white font-heading">$0</span>
-                  <span className="text-gray-400 text-sm font-mono">upfront cost</span>
-                </div>
-                <p className="text-xs text-gray-400 mt-2">1% automated transaction split fee via Paystack. Zero monthly subscription.</p>
-
-                <ul className="mt-8 space-y-3.5 text-sm text-gray-300">
-                  <li className="flex items-center gap-3">
-                    <span className="text-emerald-400 font-bold">✓</span> $0 Upfront Hardware Setup Cost
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="text-emerald-400 font-bold">✓</span> Unlimited Members & Staff Accounts
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="text-emerald-400 font-bold">✓</span> Automated Paystack 1% Split Payment
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="text-emerald-400 font-bold">✓</span> Optical Turnstiles & Biometrics Included
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="text-emerald-400 font-bold">✓</span> Full Audit Logs & Smart Pass Engine
-                  </li>
-                </ul>
-              </div>
-
+          <div className="flex items-center justify-center gap-2 mb-10">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 font-mono mr-1">Currency</span>
+            {(['NGN', 'USD'] as const).map((code) => (
               <button
-                onClick={() => setIsRegisterOpen(true)}
-                className="mt-8 w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 font-extrabold text-black transition text-sm shadow-lg shadow-orange-500/20 transform hover:-translate-y-0.5 active:translate-y-0"
+                key={code}
+                type="button"
+                onClick={() => {
+                  setCurrency(code);
+                  if (typeof window !== 'undefined') localStorage.setItem('fitfarmhq_billing_currency', code);
+                }}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
+                  currency === code
+                    ? 'bg-orange-500 text-black shadow-lg shadow-orange-500/20'
+                    : 'bg-white/[0.04] text-gray-400 border border-white/[0.08] hover:text-white'
+                }`}
               >
-                Start Free in 2 Minutes →
+                {code === 'NGN' ? '₦ NGN' : '$ USD'}
               </button>
-            </div>
+            ))}
+          </div>
 
-            {/* Option 2: Annual Enterprise */}
-            <div className="reveal-right p-8 sm:p-10 rounded-3xl bg-[#0e0e13] border border-white/[0.08] flex flex-col justify-between hover:border-gray-600 transition-all duration-400">
-              <div>
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono">Option 2</span>
-                <h3 className="text-3xl font-black text-white mt-1 font-heading">Annual Enterprise</h3>
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-5xl font-black text-white font-heading">$299</span>
-                  <span className="text-gray-400 text-sm font-mono">/ year</span>
+          <div className={`grid grid-cols-1 ${pricingPlans.length > 1 ? 'md:grid-cols-2' : ''} gap-8 max-w-4xl mx-auto`}>
+            {pricingPlans.map((plan: any, idx: number) => {
+              const amount = currency === 'NGN' ? Number(plan.price_ngn || 0) : Number(plan.price_usd || 0);
+              const featured = Boolean(plan.featured);
+
+              return (
+                <div key={plan.id || idx} className={`${featured ? 'reveal-left pricing-featured shadow-2xl shadow-orange-500/10' : 'reveal-right border border-white/[0.08] hover:border-gray-600'} p-8 sm:p-10 rounded-3xl bg-[#0e0e13] relative flex flex-col justify-between transition-all duration-400`}>
+                  {featured && (
+                    <span className="absolute -top-3.5 right-8 px-4 py-1 rounded-full bg-orange-500 text-black font-extrabold text-xs uppercase tracking-wider font-mono">
+                      Most Popular
+                    </span>
+                  )}
+                  <div>
+                    <span className={`text-xs font-bold uppercase tracking-widest font-mono ${featured ? 'text-orange-400' : 'text-gray-400'}`}>{plan.label}</span>
+                    <h3 className="text-3xl font-black text-white mt-1 font-heading">{plan.name}</h3>
+                    <div className="mt-4 flex items-baseline gap-1">
+                      <span className="text-5xl font-black text-white font-heading">{currencySymbol}{amount.toLocaleString()}</span>
+                      <span className="text-gray-400 text-sm font-mono">{plan.period}</span>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-2">{plan.description}</p>
+                    <ul className="mt-8 space-y-3.5 text-sm text-gray-300">
+                      {(plan.features || []).map((feature: string, featureIdx: number) => (
+                        <li key={`${feature}-${featureIdx}`} className="flex items-center gap-3">
+                          <span className="text-emerald-400 font-bold">✓</span> {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <button
+                    onClick={() => setIsRegisterOpen(true)}
+                    className={`mt-8 w-full py-4 rounded-2xl font-extrabold transition text-sm transform hover:-translate-y-0.5 active:translate-y-0 ${
+                      featured
+                        ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-black shadow-lg shadow-orange-500/20'
+                        : 'bg-white/[0.05] hover:bg-white/[0.1] text-white border border-white/[0.1] hover:border-orange-500/40'
+                    }`}
+                  >
+                    {plan.cta || 'Choose Plan'} →
+                  </button>
                 </div>
-                <p className="text-xs text-gray-400 mt-2">0% transaction split fee. Flat annual license key for high-volume facilities.</p>
-
-                <ul className="mt-8 space-y-3.5 text-sm text-gray-300">
-                  <li className="flex items-center gap-3">
-                    <span className="text-emerald-400 font-bold">✓</span> 0% Transaction Split Fee
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="text-emerald-400 font-bold">✓</span> Unlimited Locations & Branches
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="text-emerald-400 font-bold">✓</span> Priority 24/7 Technical Support
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="text-emerald-400 font-bold">✓</span> Custom Domain SSL Configuration
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="text-emerald-400 font-bold">✓</span> Dedicated Turnstile Hardware Engineer
-                  </li>
-                </ul>
-              </div>
-
-              <button
-                onClick={() => setIsRegisterOpen(true)}
-                className="mt-8 w-full py-4 rounded-2xl bg-white/[0.05] hover:bg-white/[0.1] text-white border border-white/[0.1] font-extrabold transition text-sm hover:border-orange-500/40 transform hover:-translate-y-0.5 active:translate-y-0"
-              >
-                Get Enterprise License →
-              </button>
-            </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -832,7 +856,7 @@ export default function FitFarmHQHomePage() {
           </div>
 
           <div className="space-y-4">
-            {faqs.map((faq, idx) => (
+            {faqs.map((faq: any, idx: number) => (
               <div
                 key={idx}
                 className={`reveal-up delay-${idx * 100} rounded-2xl bg-[#0e0e13] border border-white/[0.06] overflow-hidden transition-all duration-300 hover:border-white/[0.12]`}

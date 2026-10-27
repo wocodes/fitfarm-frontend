@@ -278,7 +278,7 @@ export default function FooterSection({
           <p>© 2026 {tenantName}. Powered by FitFarmHQ SaaS Management System.</p>
 
           <div className="flex items-center gap-4 text-[11px] text-gray-500">
-            <span>🔒 Paystack 256-bit SSL Verified</span>
+            <span>🔒 256-bit SSL Verified</span>
             <span>•</span>
             <span>⚡ Biometric Optical Turnstile Protected</span>
           </div>

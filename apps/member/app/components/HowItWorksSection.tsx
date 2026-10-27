@@ -7,7 +7,7 @@ export default function HowItWorksSection() {
     {
       num: '01',
       title: 'Choose Your Plan',
-      desc: 'Pick a registration tier, training pack, or day pass. Secure checkout via Paystack debit card, USSD, or bank transfer.',
+      desc: 'Pick a registration tier, training pack, or day pass. Secure checkout with debit card, USSD, or bank transfer.',
       icon: '💳',
       badge: 'Step 1',
     },

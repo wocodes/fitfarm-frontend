@@ -24,7 +24,6 @@ jobs:
     env:
       NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'https://api.fitfarmhq.com/api/v1' }}
       NEXT_PUBLIC_PLATFORM_DOMAIN: ${{ secrets.NEXT_PUBLIC_PLATFORM_DOMAIN || 'fitfarmhq.com' }}
-      NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: ${{ secrets.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY }}
       NEXT_PUBLIC_ADMIN_APP_URL: ${{ secrets.NEXT_PUBLIC_ADMIN_APP_URL || 'https://admin.fitfarmhq.com' }}
       NEXT_PUBLIC_MEMBER_APP_URL: ${{ secrets.NEXT_PUBLIC_MEMBER_APP_URL || 'https://fitfarmhq.com' }}
     steps:

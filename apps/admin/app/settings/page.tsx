@@ -31,6 +31,8 @@ export default function SettingsPage() {
   const [accentColor, setAccentColor] = useState('#1e293b');
   const [customTagline, setCustomTagline] = useState('Transform Your Fitness Journey');
   const [heroSubtitle, setHeroSubtitle] = useState('Premium Gym & Facility Management System');
+  const [logoUrl, setLogoUrl] = useState('');
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   // Hardware State
   const [deviceIp, setDeviceIp] = useState('192.168.1.120');
@@ -86,9 +88,10 @@ export default function SettingsPage() {
         const d = json.data;
         if (d.tenant) {
           setTenantInfo(d.tenant);
-          setGymName(d.tenant.name || 'PolanFit Fitness');
+          setGymName(d.tenant.name || 'My Gym');
           setTimezone(d.tenant.timezone || 'UTC');
           setCurrency(d.tenant.currency || 'NGN');
+          setLogoUrl(d.tenant.logo_url || '');
         }
         if (d.operating_settings) {
           const op = d.operating_settings;
@@ -126,6 +129,27 @@ export default function SettingsPage() {
     fetchTerminals();
     checkCurrentDeviceStatus();
   }, []);
+
+  const handleLogoUpload = async (file: File) => {
+    setUploadingLogo(true);
+    try {
+      const formData = new FormData();
+      formData.append('logo', file);
+      const res = await apiFetch('/admin/settings/logo', {
+        method: 'POST',
+        body: formData,
+      });
+      if (res.success && res.data?.logo_url) {
+        setLogoUrl(res.data.logo_url);
+        setSaveSuccessMsg('Gym logo updated successfully.');
+        setTimeout(() => setSaveSuccessMsg(''), 4000);
+      }
+    } catch (err: any) {
+      alert(err.message || 'Could not upload logo.');
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -527,7 +551,37 @@ export default function SettingsPage() {
                     <h2 className="text-base font-extrabold text-white flex items-center gap-2">
                       <span>🎨 Brand Theme & Color Scheme</span>
                     </h2>
-                    <p className="text-xs text-gray-400 mt-0.5">Customize your gym color palette, portal header banners, and tagline displayed on member check-in screens.</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Upload your logo, customize your color palette, portal header banners, and tagline displayed on member screens.</p>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-[#070709] border border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 rounded-2xl bg-gray-900 border border-gray-700 flex items-center justify-center overflow-hidden">
+                        {logoUrl ? (
+                          <img src={logoUrl} alt="Gym logo" className="w-full h-full object-contain" />
+                        ) : (
+                          <span className="text-xl font-black text-orange-400">{gymName.charAt(0)}</span>
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-white">Gym Logo</p>
+                        <p className="text-[11px] text-gray-400">PNG, JPG or WebP, up to 4 MB. Shown in your admin header and member portal.</p>
+                      </div>
+                    </div>
+                    <label className={`px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition ${uploadingLogo ? 'bg-gray-700 text-gray-400' : 'bg-orange-500 hover:bg-orange-600 text-black'}`}>
+                      {uploadingLogo ? 'Uploading...' : 'Upload Logo'}
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        className="hidden"
+                        disabled={uploadingLogo}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleLogoUpload(file);
+                          e.target.value = '';
+                        }}
+                      />
+                    </label>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

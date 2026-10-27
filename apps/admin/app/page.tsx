@@ -188,12 +188,12 @@ export default function AdminDashboardPage() {
     }, 800);
   };
 
-  const handlePaystackPayment = () => {
+  const handleOnlinePayment = () => {
     setPaymentLoading(true);
     setTimeout(() => {
       setPaymentLoading(false);
       setShowPaymentModal(false);
-      alert(`💳 Paystack Inline Checkout Initialized!\nAmount: ₦${Number(paymentForm.amount).toLocaleString()}\nProceeding to Paystack secure window...`);
+      alert(`💳 Online checkout initialized!\nAmount: ₦${Number(paymentForm.amount).toLocaleString()}\nProceeding to the secure payment window...`);
     }, 1000);
   };
 
@@ -1179,7 +1179,7 @@ export default function AdminDashboardPage() {
                     <option value="POS">POS Terminal</option>
                     <option value="BANK_TRANSFER">Bank Transfer (Default)</option>
                     <option value="WALLET">Gym Wallet</option>
-                    <option value="ONLINE">Paystack (Online Checkout)</option>
+                    <option value="ONLINE">Online Payment</option>
                   </select>
                 </div>
               </div>
@@ -1273,11 +1273,11 @@ export default function AdminDashboardPage() {
                 {paymentForm.paymentMethod === 'ONLINE' ? (
                   <button
                     type="button"
-                    onClick={handlePaystackPayment}
+                    onClick={handleOnlinePayment}
                     disabled={paymentLoading || !paymentForm.amount}
                     className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 font-extrabold text-black text-xs transition shadow-lg shadow-emerald-500/20"
                   >
-                    {paymentLoading ? 'Initializing...' : `Pay ₦${Number(paymentForm.amount || 0).toLocaleString()} via Paystack`}
+                    {paymentLoading ? 'Initializing...' : `Pay ₦${Number(paymentForm.amount || 0).toLocaleString()} Securely`}
                   </button>
                 ) : (
                   <button
