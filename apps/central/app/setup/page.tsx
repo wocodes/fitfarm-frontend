@@ -364,7 +364,7 @@ export default function IntegratedTenantDashboardSetupPage() {
             {step === 1 && (
               <form onSubmit={handleVerifyLicense} className="space-y-6">
                 <p className="text-xs text-gray-400 leading-relaxed">
-                  Enter your installation license key to authorize system provisioning. Demo license key is pre-filled.
+                  Enter the license key from your FitFarmHQ account to authorize system provisioning.
                 </p>
 
                 <div>
@@ -375,13 +375,10 @@ export default function IntegratedTenantDashboardSetupPage() {
                     type="text"
                     value={licenseKey}
                     onChange={(e) => setLicenseKey(e.target.value)}
-                    placeholder="e.g. FC-DEMO-2026-KEYS"
+                    placeholder="Enter your license key"
                     className="w-full px-4 py-3.5 bg-[#070709] border border-gray-800 rounded-2xl text-white font-mono text-center tracking-widest text-lg focus:outline-none focus:border-orange-500 transition"
                     required
                   />
-                  <p className="text-xs text-gray-500 mt-2">
-                    Demo key <code className="text-orange-400 font-mono">FC-DEMO-2026-KEYS</code> is active.
-                  </p>
                 </div>
 
                 <button
