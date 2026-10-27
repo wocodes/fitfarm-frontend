@@ -149,9 +149,9 @@ export default function EmailBlastCampaignPage() {
   // Quick Template Presets
   const applyPresetTemplate = (type: 'PROMO' | 'RENEWAL' | 'WELCOME') => {
     if (type === 'PROMO') {
-      setSubject('🔥 Exclusive 25% Off Annual Membership Renewal - PolanFit Arena');
+      setSubject('🔥 Exclusive 25% Off Annual Membership Renewal - Your Gym');
       setBody(
-        `<p>Dear Valued Gym Member,</p>\n<p>We are thrilled to announce our special promotional offer! Renew your annual membership this week and enjoy <strong>25% OFF</strong> standard rates plus 5 complimentary personal training sessions.</p>\n<p>Visit the front reception desk or reply to this email to claim your voucher!</p>\n<p>Best regards,<br/><strong>PolanFit Arena Management</strong></p>`
+        `<p>Dear Valued Gym Member,</p>\n<p>We are thrilled to announce our special promotional offer! Renew your annual membership this week and enjoy <strong>25% OFF</strong> standard rates plus 5 complimentary personal training sessions.</p>\n<p>Visit the front reception desk or reply to this email to claim your voucher!</p>\n<p>Best regards,<br/><strong>Your Gym Management</strong></p>`
       );
     } else if (type === 'RENEWAL') {
       setSubject('⚠️ Membership Expiry Notice - Keep Your Access Active');
@@ -511,7 +511,7 @@ export default function EmailBlastCampaignPage() {
                       rows={5}
                       value={customEmailsText}
                       onChange={(e) => setCustomEmailsText(e.target.value)}
-                      placeholder="john@example.com, sarah@example.com&#10;victor@polanfit.com"
+                      placeholder="john@example.com, sarah@example.com&#10;victor@example.com"
                       className="w-full px-3 py-2.5 rounded-xl bg-[#060608] border border-gray-800 text-white font-mono outline-none focus:border-orange-500 transition text-xs"
                     />
                   </div>

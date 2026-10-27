@@ -28,7 +28,7 @@ const DEFAULT_FAQS = [
 ];
 
 export default function FaqLocationSection({
-  tenantName = 'PolanFit Arena',
+  tenantName = 'Your Gym',
   faqs,
   contactSocials,
 }: FaqLocationSectionProps) {
@@ -114,7 +114,7 @@ export default function FaqLocationSection({
 
           <div className="space-y-2 pt-1">
             <a
-              href={contactSocials?.social_wa || 'https://wa.me/?text=Hello%20PolanFit%20Gym%20Desk,%20I%20have%20an%20inquiry%20about%20memberships.'}
+              href={contactSocials?.social_wa || 'https://wa.me/?text=Hello%20Gym%20Desk,%20I%20have%20an%20inquiry%20about%20memberships.'}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 font-extrabold text-black text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"

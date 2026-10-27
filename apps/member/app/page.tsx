@@ -32,7 +32,7 @@ function getInitialPortalCache(): any {
 
 export default function MemberPortalPage() {
   const [cachedData] = useState<any>(() => getInitialPortalCache());
-  const [tenantName, setTenantName] = useState<string>(() => cachedData?.tenant?.name || 'PolanFit Arena');
+  const [tenantName, setTenantName] = useState<string>(() => cachedData?.tenant?.name || 'Your Gym');
   const [tenantSlug, setTenantSlug] = useState('polanfit-fitness');
   const [tenantInfo, setTenantInfo] = useState<any>(() => cachedData || null);
 
@@ -503,7 +503,7 @@ export default function MemberPortalPage() {
         tenantName={tenantName}
         address={tenantInfo?.tenant?.address || '14 Admiralty Way, Lekki Phase 1, Lagos, Nigeria'}
         phone={tenantInfo?.tenant?.phone || '+234 812 345 6789'}
-        email={tenantInfo?.tenant?.email || 'frontdesk@polanfit.com'}
+        email={tenantInfo?.tenant?.email || 'frontdesk@example.com'}
         contactSocials={cmsContent?.contact_socials}
         onOpenPass={() => setShowPassModal(true)}
         onOpenRenew={() => setShowPlanModal(true)}

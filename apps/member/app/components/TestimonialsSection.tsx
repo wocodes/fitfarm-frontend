@@ -66,7 +66,7 @@ interface TestimonialsSectionProps {
 }
 
 export default function TestimonialsSection({
-  tenantName = 'PolanFit Arena',
+  tenantName = 'Your Gym',
   testimonials,
 }: TestimonialsSectionProps) {
   const displayTestimonials = testimonials && testimonials.length > 0 ? testimonials : TESTIMONIALS;

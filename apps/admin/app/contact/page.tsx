@@ -9,22 +9,22 @@ export default function ContactSocialsPage() {
   const [activeTab, setActiveTab] = useState<'contacts' | 'socials' | 'map' | 'preview'>('contacts');
 
   // Contact Info State
-  const [phone, setPhone] = useState('+234 803 123 4567');
-  const [email, setEmail] = useState('support@polanfit.com');
-  const [address, setAddress] = useState('11 Rafiu Ojelowo Street, Victoria Island, Lagos, Nigeria');
+  const [phone, setPhone] = useState('+234 801 122 3322');
+  const [email, setEmail] = useState('hello@example.com');
+  const [address, setAddress] = useState('123 Fitness Avenue, Lagos, Nigeria');
   const [hours, setHours] = useState('Monday - Sunday: 06:00 AM - 11:00 PM');
   const [gymDescription, setGymDescription] = useState(
-    'Transform your lifestyle with PolanFit Gym! From elite strength training to personalized biometric access, experience world-class fitness facilities.'
+    'Transform your lifestyle at our gym! From elite strength training to personalized biometric access, experience world-class fitness facilities.'
   );
 
   // Social Links State
-  const [socialFb, setSocialFb] = useState('https://facebook.com/polanfitgym');
-  const [socialIg, setSocialIg] = useState('https://instagram.com/polanfitgym');
-  const [socialX, setSocialX] = useState('https://x.com/polanfitgym');
-  const [socialYt, setSocialYt] = useState('https://youtube.com/@polanfitgym');
-  const [socialWa, setSocialWa] = useState('https://wa.me/2348031234567');
-  const [socialTk, setSocialTk] = useState('https://tiktok.com/@polanfitgym');
-  const [socialSc, setSocialSc] = useState('https://snapchat.com/add/polanfitgym');
+  const [socialFb, setSocialFb] = useState('');
+  const [socialIg, setSocialIg] = useState('');
+  const [socialX, setSocialX] = useState('');
+  const [socialYt, setSocialYt] = useState('');
+  const [socialWa, setSocialWa] = useState('');
+  const [socialTk, setSocialTk] = useState('');
+  const [socialSc, setSocialSc] = useState('');
 
   // Map Embed
   const [mapEmbed, setMapEmbed] = useState(
@@ -403,7 +403,7 @@ export default function ContactSocialsPage() {
                           FC
                         </div>
                         <div>
-                          <h4 className="font-extrabold text-white text-base">PolanFit Gym</h4>
+                          <h4 className="font-extrabold text-white text-base">Your Gym</h4>
                           <p className="text-xs text-gray-400">Multitenant Fitness Center</p>
                         </div>
                       </div>

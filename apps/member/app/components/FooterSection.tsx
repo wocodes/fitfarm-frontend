@@ -14,13 +14,13 @@ interface FooterSectionProps {
 }
 
 export default function FooterSection({
-  tenantName = 'PolanFit Arena',
+  tenantName = 'Your Gym',
   onOpenPass,
   onOpenRenew,
   onOpenLogin,
   address = '14 Admiralty Way, Lekki Phase 1, Lagos, Nigeria',
   phone = '+234 812 345 6789',
-  email = 'frontdesk@polanfit.com',
+  email = 'frontdesk@example.com',
   contactSocials,
 }: FooterSectionProps) {
   const activeAddress = contactSocials?.address || address;
@@ -32,7 +32,7 @@ export default function FooterSection({
   const socialFb = contactSocials?.social_fb || 'https://facebook.com';
   const socialYt = contactSocials?.social_yt || 'https://youtube.com';
   const socialTk = contactSocials?.social_tk || 'https://tiktok.com';
-  const socialWa = contactSocials?.social_wa || 'https://wa.me/?text=Hello%20PolanFit%20Desk,%20I%20have%20an%20inquiry%20regarding%20memberships.';
+  const socialWa = contactSocials?.social_wa || 'https://wa.me/?text=Hello%20Gym%20Desk,%20I%20have%20an%20inquiry%20regarding%20memberships.';
 
   const hoursWeekday = contactSocials?.hours_weekday || '06:00 – 22:00';
   const hoursWeekend = contactSocials?.hours_weekend || '07:00 – 21:00';

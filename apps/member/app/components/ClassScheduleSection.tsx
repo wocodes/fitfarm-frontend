@@ -342,7 +342,7 @@ interface ClassScheduleSectionProps {
 }
 
 export default function ClassScheduleSection({
-  tenantName = 'PolanFit Arena',
+  tenantName = 'Your Gym',
   schedule,
   onSelectClass,
 }: ClassScheduleSectionProps) {

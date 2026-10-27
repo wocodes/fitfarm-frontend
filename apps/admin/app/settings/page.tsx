@@ -18,10 +18,10 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<'profile' | 'branding' | 'hardware' | 'rules' | 'terminals' | 'backups'>('profile');
 
   // Gym Profile State
-  const [gymName, setGymName] = useState('PolanFit Fitness');
-  const [phone, setPhone] = useState('+234 803 123 4567');
-  const [email, setEmail] = useState('contact@polanfit.com');
-  const [address, setAddress] = useState('12 Fitness Boulevard, Victoria Island, Lagos');
+  const [gymName, setGymName] = useState('Your Gym');
+  const [phone, setPhone] = useState('+234 801 122 3322');
+  const [email, setEmail] = useState('hello@example.com');
+  const [address, setAddress] = useState('123 Fitness Avenue, Lagos');
   const [timezone, setTimezone] = useState('UTC');
   const [currency, setCurrency] = useState('NGN');
   const [taxRate, setTaxRate] = useState('7.5');

@@ -8,7 +8,7 @@ interface GymPulseBarProps {
 }
 
 export default function GymPulseBar({
-  tenantName = 'PolanFit Arena',
+  tenantName = 'Your Gym',
   hours = '06:00 AM – 10:00 PM',
 }: GymPulseBarProps) {
   return (

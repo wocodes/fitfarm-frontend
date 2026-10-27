@@ -14,7 +14,7 @@ export default function DigitalPassModal({
   isOpen,
   onClose,
   memberData,
-  tenantName = 'PolanFit Arena',
+  tenantName = 'Your Gym',
 }: DigitalPassModalProps) {
   const [qrSrc, setQrSrc] = useState<string>('');
 

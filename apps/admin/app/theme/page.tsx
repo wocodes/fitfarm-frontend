@@ -13,7 +13,7 @@ import {
 
 const PRESET_THEMES = [
   {
-    name: 'PolanFit Sunset',
+    name: 'Sunset Orange',
     desc: 'Signature energetic neon orange & charcoal',
     primary: '#fa6a2e',
     accent: '#1e293b',
@@ -406,7 +406,7 @@ export default function ThemeSettingsPage() {
                   Theme Heading Gradient
                 </span>
                 <h4 className="text-lg font-black brand-text-gradient leading-tight">
-                  PolanFit Power & Motion
+                  Strength & Motion
                 </h4>
                 <p className="text-[11px] text-gray-400">
                   Luminous same-color gradient calculated from your brand palette.

@@ -8,7 +8,7 @@ interface BmiCalculatorSectionProps {
 }
 
 export default function BmiCalculatorSection({
-  tenantName = 'PolanFit Arena',
+  tenantName = 'Your Gym',
   onExplorePlans,
 }: BmiCalculatorSectionProps) {
   const [unitSystem, setUnitSystem] = useState<'metric' | 'imperial'>('metric');

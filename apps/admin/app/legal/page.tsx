@@ -81,7 +81,7 @@ export default function LegalDocsPage() {
   const handleLoadTemplate = (docType: 'terms' | 'privacy' | 'waiver' | 'refund') => {
     if (docType === 'terms') {
       setTerms(
-        '<h2>1. Facility Membership & Code of Conduct</h2><p>By entering PolanFit Gym facilities, members agree to adhere to all facility rules, hygiene protocols, and proper equipment operation guidelines.</p><h2>2. Access Controls & Biometric Verification</h2><p>Access is restricted strictly to active subscription holders. Access Gates require valid biometric fingerprint scan or dynamic encrypted QR badge verification at entrance.</p><h2>3. Fees & Membership Renewals</h2><p>Subscription fees are billed according to chosen plan cycles (Monthly, Quarterly, Annual). Expired memberships incur access freeze following a 3-day grace period.</p>'
+        '<h2>1. Facility Membership & Code of Conduct</h2><p>By entering our gym facilities, members agree to adhere to all facility rules, hygiene protocols, and proper equipment operation guidelines.</p><h2>2. Access Controls & Biometric Verification</h2><p>Access is restricted strictly to active subscription holders. Access Gates require valid biometric fingerprint scan or dynamic encrypted QR badge verification at entrance.</p><h2>3. Fees & Membership Renewals</h2><p>Subscription fees are billed according to chosen plan cycles (Monthly, Quarterly, Annual). Expired memberships incur access freeze following a 3-day grace period.</p>'
       );
     } else if (docType === 'privacy') {
       setPrivacy(
@@ -89,7 +89,7 @@ export default function LegalDocsPage() {
       );
     } else if (docType === 'waiver') {
       setWaiver(
-        '<h2>1. Physical Fitness & Medical Clearance</h2><p>Members confirm they are in sound physical health to engage in cardiovascular and resistance weight training activities.</p><h2>2. Assumption of Risk</h2><p>Members participate at their own risk and release PolanFit Fitness Center from liability regarding accidental personal injury occurring during unsupervised workout routines.</p>'
+        '<h2>1. Physical Fitness & Medical Clearance</h2><p>Members confirm they are in sound physical health to engage in cardiovascular and resistance weight training activities.</p><h2>2. Assumption of Risk</h2><p>Members participate at their own risk and release the gym from liability regarding accidental personal injury occurring during unsupervised workout routines.</p>'
       );
     } else if (docType === 'refund') {
       setRefund(

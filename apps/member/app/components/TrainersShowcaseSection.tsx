@@ -68,7 +68,7 @@ interface TrainersShowcaseSectionProps {
 }
 
 export default function TrainersShowcaseSection({
-  tenantName = 'PolanFit Arena',
+  tenantName = 'Your Gym',
   trainers,
   onBookTrainer,
 }: TrainersShowcaseSectionProps) {

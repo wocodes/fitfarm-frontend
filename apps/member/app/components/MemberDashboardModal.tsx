@@ -22,7 +22,7 @@ export default function MemberDashboardModal({
   onOpenRenew,
   onLogout,
   currentUser,
-  tenantName = 'PolanFit Arena',
+  tenantName = 'Your Gym',
   leaderboardStandings: initialStandings,
   leaderboardCampaign: initialCampaign,
 }: MemberDashboardModalProps) {
@@ -62,7 +62,7 @@ export default function MemberDashboardModal({
   const fullName = `${firstName} ${lastName}`.trim() || currentUser?.name || 'Member';
   const initials = `${firstName[0] || ''}${lastName[0] || ''}`.toUpperCase() || 'M';
   const memberUid = currentUser?.uuid || currentUser?.member_number || 'FC-M-99214A';
-  const email = currentUser?.email || 'member@polanfit.com';
+  const email = currentUser?.email || 'member@example.com';
 
   const activePlan = currentUser?.active_plan || currentUser?.activePlan;
   const planName = activePlan?.pricing_plan?.name || activePlan?.pricingPlan?.name || 'Standard Access';
