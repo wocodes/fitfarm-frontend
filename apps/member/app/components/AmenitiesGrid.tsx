@@ -2,6 +2,30 @@
 
 import React from 'react';
 
+const FALLBACK_IMAGES = [
+  '/images/amenities/l1.webp',
+  '/images/amenities/l2.webp',
+  '/images/amenities/l4.webp',
+  '/images/amenities/c1.webp',
+  '/images/amenities/l3.webp',
+  '/images/amenities/c2.webp',
+];
+
+// Older CMS defaults referenced files that were never shipped. Keep those
+// tenants working even if their browser has the old payload cached.
+const LEGACY_IMAGE_MAP: Record<string, string> = {
+  '/images/amenities/strength.webp': '/images/amenities/l1.webp',
+  '/images/amenities/cardio.webp': '/images/amenities/l2.webp',
+  '/images/amenities/boxing.webp': '/images/amenities/l4.webp',
+  '/images/amenities/recovery.webp': '/images/amenities/l3.webp',
+};
+
+const resolveImage = (image: string | undefined, index: number) => {
+  const fallback = FALLBACK_IMAGES[index % FALLBACK_IMAGES.length];
+  if (!image) return fallback;
+  return LEGACY_IMAGE_MAP[image] || image;
+};
+
 const AMENITIES = [
   {
     title: 'Olympic Strength & Free Weights',
@@ -51,7 +75,7 @@ export default function AmenitiesGrid({ items }: AmenitiesGridProps) {
         title: it.title,
         subtitle: it.description || it.subtitle,
         tag: it.category || it.tag || 'Facility',
-        image: it.image || `/images/amenities/${(idx % 6) + 1}.webp`,
+        image: resolveImage(it.image, idx),
       }))
     : AMENITIES;
 
@@ -80,6 +104,13 @@ export default function AmenitiesGrid({ items }: AmenitiesGridProps) {
               <img
                 src={item.image}
                 alt={item.title}
+                loading="lazy"
+                decoding="async"
+                onError={(event) => {
+                  const fallback = FALLBACK_IMAGES[idx % FALLBACK_IMAGES.length];
+                  if (event.currentTarget.src.endsWith(fallback)) return;
+                  event.currentTarget.src = fallback;
+                }}
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0c] via-[#0a0a0c]/65 to-transparent" />
