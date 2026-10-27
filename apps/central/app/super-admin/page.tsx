@@ -199,9 +199,34 @@ export default function SuperAdminPage() {
     setGeneratedKey(key);
   };
 
-  const handleToggleStatus = (uuid: string, currentStatus: string) => {
+  const handleToggleStatus = async (uuid: string, currentStatus: string) => {
+    const token = localStorage.getItem('fitcloud_token') || localStorage.getItem('polanfit_token');
+    if (!token) return;
+
     const newStatus = currentStatus === 'active' ? 'suspended' : 'active';
-    setTenants(tenants.map(t => t.uuid === uuid ? { ...t, status: newStatus } : t));
+
+    try {
+      const res = await fetch(`${API_URL}/super-admin/tenants/${uuid}/status`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const json = await res.json().catch(() => ({}));
+
+      if (!res.ok || !json.success) {
+        throw new Error(json.message || 'Could not update the tenant status.');
+      }
+
+      setTenants(tenants.map((tenant) => (
+        tenant.uuid === uuid ? { ...tenant, status: newStatus } : tenant
+      )));
+    } catch (err: any) {
+      alert(err.message || 'Could not update the tenant status.');
+    }
   };
 
   if (authorizing) {
@@ -334,7 +359,14 @@ export default function SuperAdminPage() {
                   {tenants.map((t) => (
                     <tr key={t.uuid} className="hover:bg-gray-800/30 transition">
                       <td className="py-3.5 px-4">
-                        <div className="font-bold text-white">{t.name}</div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-white">{t.name}</span>
+                          {t.is_demo && (
+                            <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-amber-300">
+                              Demo
+                            </span>
+                          )}
+                        </div>
                         <div className="text-xs text-gray-500">{t.owner_email}</div>
                       </td>
                       <td className="py-3.5 px-4 font-mono text-xs text-orange-400">
