@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "FitFarmHQ Gym Portal",
-  description: "Member Gym Portal and Digital Turnstile Access",
+  description: "Member Gym Portal and Digital Gate Access",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

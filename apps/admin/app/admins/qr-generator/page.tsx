@@ -269,7 +269,7 @@ export default function QRGeneratorPage() {
                       <div>
                         <div className="font-bold text-white">Permanent (Printed Gym Poster)</div>
                         <div className="text-[11px] text-gray-400 mt-0.5">
-                          Fixed QR code for framed wall posters and turnstile kiosk stands.
+                          Fixed QR code for framed wall posters and access gate kiosk stands.
                         </div>
                       </div>
                     </label>

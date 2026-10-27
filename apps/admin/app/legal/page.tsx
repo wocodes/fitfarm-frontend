@@ -81,7 +81,7 @@ export default function LegalDocsPage() {
   const handleLoadTemplate = (docType: 'terms' | 'privacy' | 'waiver' | 'refund') => {
     if (docType === 'terms') {
       setTerms(
-        '<h2>1. Facility Membership & Code of Conduct</h2><p>By entering PolanFit Gym facilities, members agree to adhere to all facility rules, hygiene protocols, and proper equipment operation guidelines.</p><h2>2. Access Controls & Biometric Verification</h2><p>Access is restricted strictly to active subscription holders. Turnstiles require valid biometric fingerprint scan or dynamic encrypted QR badge verification at entrance.</p><h2>3. Fees & Membership Renewals</h2><p>Subscription fees are billed according to chosen plan cycles (Monthly, Quarterly, Annual). Expired memberships incur access freeze following a 3-day grace period.</p>'
+        '<h2>1. Facility Membership & Code of Conduct</h2><p>By entering PolanFit Gym facilities, members agree to adhere to all facility rules, hygiene protocols, and proper equipment operation guidelines.</p><h2>2. Access Controls & Biometric Verification</h2><p>Access is restricted strictly to active subscription holders. Access Gates require valid biometric fingerprint scan or dynamic encrypted QR badge verification at entrance.</p><h2>3. Fees & Membership Renewals</h2><p>Subscription fees are billed according to chosen plan cycles (Monthly, Quarterly, Annual). Expired memberships incur access freeze following a 3-day grace period.</p>'
       );
     } else if (docType === 'privacy') {
       setPrivacy(

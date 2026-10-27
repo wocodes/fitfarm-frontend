@@ -39,29 +39,29 @@ export default function FitFarmHQHomePage() {
   const [simulatedLogs, setSimulatedLogs] = useState([
     {
       id: 1,
-      member: 'Emmanuel Chinazaekpere',
+      member: 'Emmanuel John',
       gender: 'm',
       plan: 'Quarterly Diamond VIP',
       expiry: 'Dec 18, 2026',
-      gate: 'Turnstile 01 (Left)',
+      gate: 'Gate 01 (Left)',
       time: 'Just now',
       latency: '34ms',
       status: 'GRANTED',
     },
     {
       id: 2,
-      member: 'Opetemi Afolabi',
+      member: 'Grace Williams',
       gender: 'f',
       plan: 'Annual Unlimited Access',
       expiry: 'Jan 25, 2027',
-      gate: 'Turnstile 02 (Center)',
+      gate: 'Gate 02 (Center)',
       time: '2 mins ago',
       latency: '28ms',
       status: 'GRANTED',
     },
     {
       id: 3,
-      member: 'Kelechi Sunday',
+      member: 'Sunday Ade',
       gender: 'm',
       plan: 'Monthly Standard Pass',
       expiry: 'Nov 30, 2026',
@@ -102,7 +102,7 @@ export default function FitFarmHQHomePage() {
       const demoMembers = [
         { name: 'Dr. Chinedu Okafor', plan: 'Executive VIP All-Access', gate: 'Gate 01 (Optical)', expiry: 'Mar 14, 2027' },
         { name: 'Amina Bello', plan: 'Strength & Conditioning Pass', gate: 'Gate 02 (Flap)', expiry: 'Oct 02, 2026' },
-        { name: 'Tunde Bakare', plan: 'Morning Peak Unlimited', gate: 'Turnstile 03', expiry: 'Jan 10, 2027' },
+        { name: 'David Musa', plan: 'Morning Peak Unlimited', gate: 'Gate 03', expiry: 'Jan 10, 2027' },
         { name: 'Fatima Aliyu', plan: 'Pilates & Boxing Bundle', gate: 'Gate 01 (Optical)', expiry: 'Dec 05, 2026' },
       ];
 
@@ -132,7 +132,7 @@ export default function FitFarmHQHomePage() {
 
   const defaultFaqs = [
     {
-      q: 'How does physical biometric turnstile integration work?',
+      q: 'How does physical biometric access gate integration work?',
       a: 'FitFarmHQ integrates directly with standard IP-networked and USB biometric terminals (ZKTeco, Hikvision, optical speed gates, and RFID readers). When a member scans their finger or dynamic QR pass, our cloud validates their active plan, branch permissions, and remaining sessions in <50ms before pulsing the gate relay to open.',
     },
     {
@@ -161,7 +161,7 @@ export default function FitFarmHQHomePage() {
     {
       id: 'free', label: 'Option 1', name: 'Free Setup Tier', price_ngn: 0, price_usd: 0,
       period: 'upfront cost', description: '1% transaction fee. Zero monthly subscription.',
-      features: ['$0 Upfront Setup Cost', 'Unlimited Members & Staff', 'Online Payment Reconciliation', 'Turnstiles & Biometrics Included', 'Audit Logs & Smart Pass Engine'],
+      features: ['$0 Upfront Setup Cost', 'Unlimited Members & Staff', 'Online Payment Reconciliation', 'Access Gates & Biometrics Included', 'Audit Logs & Smart Pass Engine'],
       featured: true, cta: 'Start Free in 2 Minutes',
     },
     {
@@ -222,18 +222,13 @@ export default function FitFarmHQHomePage() {
               </div>
             </Link>
 
-            {/* Edge Gateway Status Pill */}
-            <div className="hidden xl:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-mono font-semibold">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Cloud hosted • Secure by default</span>
-            </div>
           </div>
 
           {/* Nav Links */}
           <nav className="hidden md:flex items-center gap-7 text-xs font-bold text-gray-300">
-            <a href="#hardware" className="hover:text-orange-400 transition-colors">Turnstiles & Hardware</a>
-            <a href="#demo" className="hover:text-orange-400 transition-colors">Live Simulation</a>
-            <a href="#calculator" className="hover:text-orange-400 transition-colors">Revenue Calculator</a>
+            <a href="#hardware" className="hover:text-orange-400 transition-colors">Hardware</a>
+            <a href="#demo" className="hover:text-orange-400 transition-colors">Demo</a>
+            <a href="#calculator" className="hover:text-orange-400 transition-colors">Calculator</a>
             <a href="#pricing" className="hover:text-orange-400 transition-colors">Pricing</a>
             <a href="#faq" className="hover:text-orange-400 transition-colors">FAQs</a>
           </nav>
@@ -267,7 +262,7 @@ export default function FitFarmHQHomePage() {
           {/* Glowing Pill Tag */}
           <div className="reveal-up inline-flex items-center gap-2 px-5 py-2 rounded-full bg-orange-500/[0.08] border border-orange-500/25 text-orange-400 text-xs font-bold font-mono mb-10 shadow-lg shadow-orange-500/10">
             <span className="w-1.5 h-1.5 rounded-full bg-orange-400 dot-pulse" />
-            <span>{hero?.badge || 'Optical Turnstiles • Smart Passes • Automated Payouts'}</span>
+            <span>{hero?.badge || 'Optical Access Gates • Smart Passes • Automated Payouts'}</span>
           </div>
 
           {/* Main Headline */}
@@ -280,7 +275,7 @@ export default function FitFarmHQHomePage() {
 
           {/* Subheadline */}
           <p className="reveal-up delay-100 mt-7 text-base sm:text-xl text-gray-400 max-w-3xl mx-auto font-normal leading-relaxed">
-            {hero?.subtitle || 'Unify high-speed turnstiles, encrypted biometric member entry, automated subscription freeze/resume controls, and automated revenue settlement—all from one branded multi-tenant dashboard.'}
+            {hero?.subtitle || 'Unify high-speed access gates, encrypted biometric member entry, automated subscription freeze/resume controls, and automated revenue settlement—all from one branded multi-tenant dashboard.'}
           </p>
 
           {/* CTAs */}
@@ -295,7 +290,7 @@ export default function FitFarmHQHomePage() {
               href="#demo"
               className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] text-gray-200 border border-white/[0.1] hover:border-orange-500/40 font-bold text-sm sm:text-base transition-all duration-300 flex items-center justify-center gap-2 hover:-translate-y-0.5"
             >
-              <span>🖐️ {hero?.secondary_cta || 'Test Turnstile Simulator'}</span>
+              <span>🖐️ {hero?.secondary_cta || 'Test Gate Simulator'}</span>
             </a>
             <Link
               href="/setup"
@@ -361,7 +356,7 @@ export default function FitFarmHQHomePage() {
                   </div>
 
                   <div className="p-4 rounded-2xl bg-[#121217] border border-gray-800">
-                    <span className="text-[11px] text-gray-400 font-medium">Turnstile Gate Response</span>
+                    <span className="text-[11px] text-gray-400 font-medium">Gate Response</span>
                     <p className="text-2xl font-black text-emerald-400 mt-1 font-mono">28 ms</p>
                     <span className="text-[10px] text-gray-400 font-mono">Sub-50ms Optical Relay</span>
                   </div>
@@ -404,12 +399,12 @@ export default function FitFarmHQHomePage() {
                               : 'bg-gray-800 text-gray-400'
                           }`}
                         >
-                          {isScanning ? 'Reading Biometrics...' : scanResult ? 'Turnstile Unlocked' : 'Standby For Tap'}
+                          {isScanning ? 'Reading Biometrics...' : scanResult ? 'Gate Unlocked' : 'Standby For Tap'}
                         </span>
                       </div>
                     </div>
 
-                    <h4 className="text-xs font-bold text-white mt-2">ZKTeco Optical Turnstile 01</h4>
+                    <h4 className="text-xs font-bold text-white mt-2">ZKTeco Optical Gate 01</h4>
                     <p className="text-[10px] text-gray-400 mt-1">Tap the green button above to trigger an optical gate relay.</p>
                   </div>
 
@@ -498,7 +493,7 @@ export default function FitFarmHQHomePage() {
               <span className="text-gradient-animated">Physical Access Gate</span>
             </p>
             <p className="reveal-up delay-200 text-sm text-gray-400 mt-5 leading-relaxed">
-              No proprietary lock-in. FitFarmHQ pairs natively with industry-standard turnstiles, biometric fingerprint units, optical laser barcode readers, and RFID keycards.
+              No proprietary lock-in. FitFarmHQ pairs natively with industry-standard access gates, biometric fingerprint units, optical laser barcode readers, and RFID keycards.
             </p>
           </div>
 
@@ -506,7 +501,7 @@ export default function FitFarmHQHomePage() {
             {[
               {
                 icon: '🚀',
-                title: 'High-Speed Optical Turnstiles',
+                title: 'High-Speed Optical Access Gates',
                 desc: 'Flap barriers, tripod barriers, and swing speed gates with dual-direction optical sensors and dry contact relay triggers.',
                 badge: 'TCP/IP & Relay',
               },
@@ -531,7 +526,7 @@ export default function FitFarmHQHomePage() {
               {
                 icon: '🔒',
                 title: 'Automated Smart Locker Suites',
-                desc: 'Automatically allocate a digital locker cabinet on successful turnstile entry and release it on gym checkout.',
+                desc: 'Automatically allocate a digital locker cabinet on successful access gate entry and release it on gym checkout.',
                 badge: 'Relay Controller',
               },
               {
@@ -722,7 +717,7 @@ export default function FitFarmHQHomePage() {
                   When a member pauses their membership (travel, injury, or medical leave), their access pass is instantly locked. Upon resuming, FitFarmHQ calculates the exact paused duration and shifts their expiration date forward.
                 </p>
                 <div className="p-4 rounded-2xl bg-black/60 border border-orange-500/30 text-orange-400 text-xs font-mono">
-                  [PLAN-RESUME] Member: Opetemi Afolabi | Paused Delta: 14 Days | Expiration extended from Dec 01 to Dec 15, 2026
+                  [PLAN-RESUME] Member: Grace Williams | Paused Delta: 14 Days | Expiration extended from Dec 01 to Dec 15, 2026
                 </div>
               </div>
             )}
@@ -737,7 +732,7 @@ export default function FitFarmHQHomePage() {
                   Every single administrative action is immutably recorded—capturing the staff admin username, affected member name, member UID, previous value/state, and new value.
                 </p>
                 <div className="p-4 rounded-2xl bg-black/60 border border-gray-700 text-gray-300 text-xs font-mono">
-                  [AUDIT-LOG] Admin: Kelechi Sunday | Action: UPDATE_MEMBER | Member: Javier Abiodun (ID: fc-m-012) | Diff: phone: &apos;08011112222&apos; -&gt; &apos;08139291535&apos;
+                  [AUDIT-LOG] Admin: Sunday Ade | Action: UPDATE_MEMBER | Member: John Doe (ID: fc-m-012) | Diff: phone: &apos;08011223322&apos; -&gt; &apos;08011223344&apos;
                 </div>
               </div>
             )}
@@ -928,7 +923,6 @@ export default function FitFarmHQHomePage() {
 
           <div className="flex items-center gap-6 text-gray-400">
             <Link href="/setup" className="hover:text-white transition">Setup Wizard</Link>
-            <Link href="/super-admin" className="hover:text-white transition">Super Admin</Link>
             <a href={ADMIN_APP_URL} target="_blank" rel="noopener noreferrer" className="hover:text-white transition">Admin Console</a>
           </div>
         </div>

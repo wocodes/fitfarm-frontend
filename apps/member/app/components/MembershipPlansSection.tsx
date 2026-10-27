@@ -207,7 +207,7 @@ export default function MembershipPlansSection({
                 <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">
                   {plan.description || (
                     isRegistration
-                      ? 'One-time biometric fingerprint enrollment & digital turnstile gate access setup.'
+                      ? 'One-time biometric fingerprint enrollment & digital access gate access setup.'
                       : `Includes full gym facilities, gate check-in telemetry, and locker access for ${duration}.`
                   )}
                 </p>

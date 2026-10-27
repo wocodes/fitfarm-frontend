@@ -55,7 +55,7 @@ export default function DigitalPassModal({
         <div className="space-y-1">
           <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] uppercase font-bold tracking-wider">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-            <span>Turnstile Ready</span>
+            <span>Gate Ready</span>
           </div>
           <h3 className="text-xl font-extrabold text-white">{tenantName}</h3>
           <p className="text-xs text-gray-400">Digital Gate Pass</p>
@@ -105,7 +105,7 @@ export default function DigitalPassModal({
         </div>
 
         <div className="text-[10px] text-gray-400 font-medium space-y-1">
-          <p>💡 Hold phone screen 10–15cm from turnstile optical scanner.</p>
+          <p>💡 Hold phone screen 10–15cm from access gate optical scanner.</p>
           <p className="text-gray-500">Auto-refreshes for security on every entry.</p>
         </div>
       </div>

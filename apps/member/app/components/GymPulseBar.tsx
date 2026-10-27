@@ -37,13 +37,13 @@ export default function GymPulseBar({
           </div>
         </div>
 
-        {/* Turnstile Access Speed */}
+        {/* Gate Access Speed */}
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-sm">
             📱
           </div>
           <div>
-            <span className="font-extrabold text-white block">Fast-Track Turnstiles</span>
+            <span className="font-extrabold text-white block">Fast-Track Access</span>
             <span className="text-gray-400 text-[11px]">Optical QR & Fingerprint Active</span>
           </div>
         </div>

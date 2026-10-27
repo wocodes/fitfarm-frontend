@@ -64,13 +64,13 @@ export default function FooterSection({
             </div>
 
             <p className="text-xs text-gray-400 leading-relaxed">
-              High-performance fitness backed by biometric turnstile telemetry, Olympic strength gear, and instant cloud-verified passes.
+              High-performance fitness backed by biometric access gate telemetry, Olympic strength gear, and instant cloud-verified passes.
             </p>
 
             {/* Operating Live Status */}
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>Facility Open • Live Optical Turnstiles Online</span>
+              <span>Facility Open • Live Optical Access Gates Online</span>
             </div>
 
             {/* Social Icons Bar */}
@@ -280,7 +280,7 @@ export default function FooterSection({
           <div className="flex items-center gap-4 text-[11px] text-gray-500">
             <span>🔒 256-bit SSL Verified</span>
             <span>•</span>
-            <span>⚡ Biometric Optical Turnstile Protected</span>
+            <span>⚡ Biometric Optical Access Gate Protected</span>
           </div>
         </div>
       </div>

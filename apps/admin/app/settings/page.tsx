@@ -679,9 +679,9 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between border-b border-gray-800/80 pb-4">
                   <div>
                     <h2 className="text-base font-extrabold text-white flex items-center gap-2">
-                      <span>🚪 Biometric Fingerprint Reader & Turnstile Gate Relay</span>
+                      <span>🚪 Biometric Fingerprint Reader & Access Gate Relay</span>
                     </h2>
-                    <p className="text-xs text-gray-400 mt-0.5">Configure TCP/IP socket parameters, USB serial connections, and turnstile unlock duration.</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Configure TCP/IP socket parameters, USB serial connections, and access gate unlock duration.</p>
                   </div>
 
                   <span

@@ -431,7 +431,7 @@ export default function ThemeSettingsPage() {
                   className="w-full py-3 rounded-xl brand-btn-gradient text-black font-extrabold text-xs shadow-lg flex items-center justify-center gap-2 transition"
                 >
                   <span>📱</span>
-                  <span>Scan QR at Turnstile</span>
+                  <span>Scan QR at Access Gate</span>
                 </button>
               </div>
 

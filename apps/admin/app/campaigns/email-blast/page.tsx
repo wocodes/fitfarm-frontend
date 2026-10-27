@@ -156,12 +156,12 @@ export default function EmailBlastCampaignPage() {
     } else if (type === 'RENEWAL') {
       setSubject('⚠️ Membership Expiry Notice - Keep Your Access Active');
       setBody(
-        `<p>Hi Member,</p>\n<p>Your subscription plan is approaching its expiration date. To maintain uninterrupted access to our gym floor and biometric turnstiles, please extend your plan.</p>\n<p>Click below or drop by reception to renew today!</p>`
+        `<p>Hi Member,</p>\n<p>Your subscription plan is approaching its expiration date. To maintain uninterrupted access to our gym floor and biometric access gates, please extend your plan.</p>\n<p>Click below or drop by reception to renew today!</p>`
       );
     } else if (type === 'WELCOME') {
       setSubject('🎉 Welcome to FitFarmHQ Arena - Your Fitness Journey Begins!');
       setBody(
-        `<p>Welcome to our fitness community!</p>\n<p>Your biometric fingerprint profile is registered and ready for turnstile access. Feel free to reach out to our trainers if you need a customized workout schedule.</p>`
+        `<p>Welcome to our fitness community!</p>\n<p>Your biometric fingerprint profile is registered and ready for access gate access. Feel free to reach out to our trainers if you need a customized workout schedule.</p>`
       );
     }
   };

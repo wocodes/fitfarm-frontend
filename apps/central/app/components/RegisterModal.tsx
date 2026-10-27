@@ -159,7 +159,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToSignIn }: Reg
               required
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              placeholder="e.g. Gabriel Omokpo"
+              placeholder="e.g. John Doe"
               className="w-full px-4 py-3 bg-[#0a0a0c] border border-gray-800 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition"
             />
           </div>
