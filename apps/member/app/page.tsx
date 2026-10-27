@@ -56,6 +56,13 @@ export default function MemberPortalPage() {
   const [cmsContent, setCmsContent] = useState<any>(() => cachedData?.cms || null);
   const [isColdLoading, setIsColdLoading] = useState<boolean>(() => !cachedData);
 
+  // Keep the browser tab branded to the active gym, not the platform.
+  useEffect(() => {
+    if (tenantName && tenantName !== 'Your Gym') {
+      document.title = `${tenantName} — Member Portal`;
+    }
+  }, [tenantName]);
+
   // 1. Fetch Tenant Public Info & Active Plans
   const fetchTenantData = useCallback(async (slug: string) => {
     try {

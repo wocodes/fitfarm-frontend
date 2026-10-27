@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FitFarmHQ Gym Portal",
+  title: "Member Portal",
   description: "Member Gym Portal and Digital Gate Access",
 };
 
@@ -51,14 +51,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   }
                   try { localStorage.setItem('fitcloud_member_tenant', slug); } catch (e) {}
                   
-                  if (!rawTheme) {
-                    var portalCache = localStorage.getItem('fitcloud_portal_info_' + slug);
-                    if (portalCache) {
-                      var parsedPortal = JSON.parse(portalCache);
-                      if (parsedPortal && parsedPortal.theme) {
-                        rawTheme = JSON.stringify(parsedPortal.theme);
-                      }
-                    }
+                  var portalCache = localStorage.getItem('fitcloud_portal_info_' + slug);
+                  var parsedPortal = null;
+                  if (portalCache) {
+                    try { parsedPortal = JSON.parse(portalCache); } catch (e) {}
+                  }
+
+                  if (parsedPortal && parsedPortal.tenant && parsedPortal.tenant.name) {
+                    document.title = parsedPortal.tenant.name + ' — Member Portal';
+                  }
+
+                  if (!rawTheme && parsedPortal && parsedPortal.theme) {
+                    rawTheme = JSON.stringify(parsedPortal.theme);
                   }
 
                   if (rawTheme) {
