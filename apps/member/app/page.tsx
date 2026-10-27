@@ -350,7 +350,14 @@ export default function MemberPortalPage() {
               </div>
             )}
             <div>
-              <h1 className="font-extrabold text-white leading-tight text-sm sm:text-base tracking-tight truncate max-w-[150px] sm:max-w-none">{tenantName}</h1>
+              <div className="flex items-center gap-1.5">
+                <h1 className="font-extrabold text-white leading-tight text-sm sm:text-base tracking-tight truncate max-w-[150px] sm:max-w-none">{tenantName}</h1>
+                {tenantInfo?.tenant?.is_demo && (
+                  <span className="rounded-full border border-amber-400/40 bg-amber-400/15 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider text-amber-300">
+                    Demo
+                  </span>
+                )}
+              </div>
               <span className="text-[10px] sm:text-xs text-orange-400 font-mono">Member Web Portal</span>
             </div>
           </div>

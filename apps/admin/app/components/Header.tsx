@@ -11,6 +11,7 @@ interface HeaderProps {
 export default function Header({ title, subtitle }: HeaderProps) {
   const [tenantName, setTenantName] = useState('My Gym');
   const [logoUrl, setLogoUrl] = useState('');
+  const [isDemo, setIsDemo] = useState(false);
 
   useEffect(() => {
     const slug = getTenantSlug();
@@ -23,6 +24,7 @@ export default function Header({ title, subtitle }: HeaderProps) {
         if (res.success && res.data?.tenant) {
           setTenantName(res.data.tenant.name || 'My Gym');
           setLogoUrl(res.data.tenant.logo_url || '');
+          setIsDemo(Boolean(res.data.tenant.is_demo));
         }
       })
       .catch(() => {});
@@ -44,6 +46,11 @@ export default function Header({ title, subtitle }: HeaderProps) {
             <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse shrink-0" />
           )}
           <span className="truncate">{tenantName}</span>
+          {isDemo && (
+            <span className="shrink-0 rounded-full border border-amber-400/40 bg-amber-400/15 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider text-amber-300">
+              Demo
+            </span>
+          )}
         </div>
 
         {/* Quick Kiosk Link Button */}

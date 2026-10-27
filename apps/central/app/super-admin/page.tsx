@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { API_URL } from '../lib/config';
+import DemoTenantsPanel from '../components/DemoTenantsPanel';
 
 export default function SuperAdminPage() {
   const [stats, setStats] = useState({
@@ -259,6 +260,8 @@ export default function SuperAdminPage() {
             <div className="text-3xl font-extrabold text-blue-400 mt-1">{stats.total_licenses}</div>
           </div>
         </div>
+
+        <DemoTenantsPanel />
 
         {/* License Generator & Gym Management Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
