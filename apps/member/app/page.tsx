@@ -501,8 +501,8 @@ export default function MemberPortalPage() {
       {/* Modern Gym Footer with Socials, Physical Address, Operating Hours & Links */}
       <FooterSection
         tenantName={tenantName}
-        address={tenantInfo?.tenant?.address || '14 Admiralty Way, Lekki Phase 1, Lagos, Nigeria'}
-        phone={tenantInfo?.tenant?.phone || '+234 812 345 6789'}
+        address={tenantInfo?.tenant?.address || '123 Fitness Avenue, Lagos, Nigeria'}
+        phone={tenantInfo?.tenant?.phone || '+234 801 122 3322'}
         email={tenantInfo?.tenant?.email || 'frontdesk@example.com'}
         contactSocials={cmsContent?.contact_socials}
         onOpenPass={() => setShowPassModal(true)}

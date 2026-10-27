@@ -51,6 +51,7 @@ export default function SettingsPage() {
   const [tenantInfo, setTenantInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState('');
+  const [saveMessageType, setSaveMessageType] = useState<'success' | 'error'>('success');
 
   // Backups State
   const [backups, setBackups] = useState<any[]>([]);
@@ -141,6 +142,7 @@ export default function SettingsPage() {
       });
       if (res.success && res.data?.logo_url) {
         setLogoUrl(res.data.logo_url);
+        setSaveMessageType('success');
         setSaveSuccessMsg('Gym logo updated successfully.');
         setTimeout(() => setSaveSuccessMsg(''), 4000);
       }
@@ -180,16 +182,19 @@ export default function SettingsPage() {
       });
 
       if (json.success) {
-        setSaveSuccessMsg('🎉 Gym Operating Settings & Branding saved successfully!');
+        setSaveMessageType('success');
+        setSaveSuccessMsg('Gym operating settings and branding saved successfully.');
         setTimeout(() => setSaveSuccessMsg(''), 4000);
         fetchSettings();
       } else {
-        setSaveSuccessMsg('🎉 Settings updated successfully!');
-        setTimeout(() => setSaveSuccessMsg(''), 4000);
+        setSaveMessageType('error');
+        setSaveSuccessMsg(json.message || 'Could not save gym settings.');
+        setTimeout(() => setSaveSuccessMsg(''), 5000);
       }
-    } catch (err) {
-      setSaveSuccessMsg('🎉 Operating settings configuration saved!');
-      setTimeout(() => setSaveSuccessMsg(''), 4000);
+    } catch (err: any) {
+      setSaveMessageType('error');
+      setSaveSuccessMsg(err.message || 'Could not save gym settings. Please try again.');
+      setTimeout(() => setSaveSuccessMsg(''), 5000);
     }
   };
 
@@ -351,12 +356,16 @@ export default function SettingsPage() {
         <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 space-y-6 max-w-5xl">
           {/* Top Status Notification Banner */}
           {saveSuccessMsg && (
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-extrabold flex items-center justify-between shadow-lg shadow-emerald-500/10 animate-fadeIn">
+            <div className={`p-4 rounded-2xl border text-xs font-extrabold flex items-center justify-between shadow-lg animate-fadeIn ${
+              saveMessageType === 'success'
+                ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-500/30 text-emerald-400 shadow-emerald-500/10'
+                : 'bg-gradient-to-r from-red-500/20 to-rose-500/20 border-red-500/30 text-red-400 shadow-red-500/10'
+            }`}>
               <span className="flex items-center gap-2">
-                <span>✅</span>
+                <span>{saveMessageType === 'success' ? '✅' : '⚠️'}</span>
                 <span>{saveSuccessMsg}</span>
               </span>
-              <button onClick={() => setSaveSuccessMsg('')} className="text-emerald-400 hover:text-white font-mono">✕</button>
+              <button onClick={() => setSaveSuccessMsg('')} className="hover:text-white font-mono">✕</button>
             </div>
           )}
 

@@ -17,6 +17,7 @@ export default function LegalDocsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
   const [previewMode, setPreviewMode] = useState(false);
 
   const fetchLegalDocs = async () => {
@@ -63,16 +64,19 @@ export default function LegalDocsPage() {
       });
 
       if (res.success) {
-        setToastMsg('🎉 Facility legal agreements and privacy documents updated successfully!');
+        setToastType('success');
+        setToastMsg('Facility legal agreements and privacy documents updated successfully.');
         setTimeout(() => setToastMsg(''), 4000);
         fetchLegalDocs();
       } else {
-        setToastMsg('🎉 Legal documents updated!');
-        setTimeout(() => setToastMsg(''), 4000);
+        setToastType('error');
+        setToastMsg(res.message || 'Could not save legal documents.');
+        setTimeout(() => setToastMsg(''), 5000);
       }
-    } catch (err) {
-      setToastMsg('🎉 Legal documents saved!');
-      setTimeout(() => setToastMsg(''), 4000);
+    } catch (err: any) {
+      setToastType('error');
+      setToastMsg(err.message || 'Could not save legal documents. Please try again.');
+      setTimeout(() => setToastMsg(''), 5000);
     } finally {
       setSaving(false);
     }
@@ -127,12 +131,16 @@ export default function LegalDocsPage() {
         <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 space-y-6 max-w-5xl">
           {/* Notification Toast */}
           {toastMsg && (
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-extrabold flex items-center justify-between shadow-lg shadow-emerald-500/10 animate-fadeIn">
+            <div className={`p-4 rounded-2xl border text-xs font-extrabold flex items-center justify-between shadow-lg animate-fadeIn ${
+              toastType === 'success'
+                ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-500/30 text-emerald-400 shadow-emerald-500/10'
+                : 'bg-gradient-to-r from-red-500/20 to-rose-500/20 border-red-500/30 text-red-400 shadow-red-500/10'
+            }`}>
               <span className="flex items-center gap-2">
-                <span>⚖️</span>
+                <span>{toastType === 'success' ? '⚖️' : '⚠️'}</span>
                 <span>{toastMsg}</span>
               </span>
-              <button onClick={() => setToastMsg('')} className="text-emerald-400 hover:text-white font-mono">✕</button>
+              <button onClick={() => setToastMsg('')} className="hover:text-white font-mono">✕</button>
             </div>
           )}
 

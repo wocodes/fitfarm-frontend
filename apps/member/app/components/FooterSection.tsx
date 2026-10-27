@@ -18,8 +18,8 @@ export default function FooterSection({
   onOpenPass,
   onOpenRenew,
   onOpenLogin,
-  address = '14 Admiralty Way, Lekki Phase 1, Lagos, Nigeria',
-  phone = '+234 812 345 6789',
+  address = '123 Fitness Avenue, Lagos, Nigeria',
+  phone = '+234 801 122 3322',
   email = 'frontdesk@example.com',
   contactSocials,
 }: FooterSectionProps) {

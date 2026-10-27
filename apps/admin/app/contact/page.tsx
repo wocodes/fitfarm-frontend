@@ -34,6 +34,7 @@ export default function ContactSocialsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
 
   const fetchContactSettings = async () => {
     setLoading(true);
@@ -43,10 +44,15 @@ export default function ContactSocialsPage() {
         const d = res.data;
         if (d.contact_socials) {
           const cs = d.contact_socials;
-          if (cs.contact_phone) setPhone(cs.contact_phone);
-          if (cs.contact_email) setEmail(cs.contact_email);
-          if (cs.contact_address) setAddress(cs.contact_address);
-          if (cs.contact_hours) setHours(cs.contact_hours);
+          const contactPhone = cs.phone || cs.contact_phone;
+          const contactEmail = cs.email || cs.contact_email;
+          const contactAddress = cs.address || cs.contact_address;
+          const contactHours = cs.hours_weekday || cs.contact_hours;
+
+          if (contactPhone) setPhone(contactPhone);
+          if (contactEmail) setEmail(contactEmail);
+          if (contactAddress) setAddress(contactAddress);
+          if (contactHours) setHours(contactHours);
           if (cs.gym_description) setGymDescription(cs.gym_description);
           if (cs.google_maps_embed) setMapEmbed(cs.google_maps_embed);
 
@@ -95,16 +101,19 @@ export default function ContactSocialsPage() {
       });
 
       if (res.success) {
-        setToastMsg('🎉 Contact channels and social handles saved successfully!');
+        setToastType('success');
+        setToastMsg('Contact channels and social handles saved successfully.');
         setTimeout(() => setToastMsg(''), 4000);
         fetchContactSettings();
       } else {
-        setToastMsg('🎉 Contact info updated successfully!');
-        setTimeout(() => setToastMsg(''), 4000);
+        setToastType('error');
+        setToastMsg(res.message || 'Could not save contact details.');
+        setTimeout(() => setToastMsg(''), 5000);
       }
-    } catch (err) {
-      setToastMsg('🎉 Contact channels saved!');
-      setTimeout(() => setToastMsg(''), 4000);
+    } catch (err: any) {
+      setToastType('error');
+      setToastMsg(err.message || 'Could not save contact details. Please try again.');
+      setTimeout(() => setToastMsg(''), 5000);
     } finally {
       setSaving(false);
     }
@@ -127,12 +136,16 @@ export default function ContactSocialsPage() {
         <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 space-y-6 max-w-5xl">
           {/* Notification Toast */}
           {toastMsg && (
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-extrabold flex items-center justify-between shadow-lg shadow-emerald-500/10 animate-fadeIn">
+            <div className={`p-4 rounded-2xl border text-xs font-extrabold flex items-center justify-between shadow-lg animate-fadeIn ${
+              toastType === 'success'
+                ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-500/30 text-emerald-400 shadow-emerald-500/10'
+                : 'bg-gradient-to-r from-red-500/20 to-rose-500/20 border-red-500/30 text-red-400 shadow-red-500/10'
+            }`}>
               <span className="flex items-center gap-2">
-                <span>🌐</span>
+                <span>{toastType === 'success' ? '🌐' : '⚠️'}</span>
                 <span>{toastMsg}</span>
               </span>
-              <button onClick={() => setToastMsg('')} className="text-emerald-400 hover:text-white font-mono">✕</button>
+              <button onClick={() => setToastMsg('')} className="hover:text-white font-mono">✕</button>
             </div>
           )}
 
