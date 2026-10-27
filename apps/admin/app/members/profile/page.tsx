@@ -54,7 +54,7 @@ function MemberProfileContent() {
       </header>
 
       {/* Main Container */}
-      <main className="max-w-6xl w-full mx-auto p-6 md:p-8 space-y-8">
+      <main className="max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 space-y-8">
         {/* Member Profile Banner */}
         <div className="p-6 rounded-3xl bg-[#18181b] border border-gray-800 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
           <div className="flex items-center gap-5">

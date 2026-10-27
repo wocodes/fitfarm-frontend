@@ -248,7 +248,7 @@ export default function EmailBlastCampaignPage() {
           subtitle="Compose HTML marketing campaigns, target member lists, and monitor live delivery dispatch"
         />
 
-        <main className="flex-1 p-6 md:p-10 space-y-8 max-w-7xl mx-auto w-full">
+        <main className="flex-1 p-4 sm:p-6 lg:p-10 pb-24 lg:pb-8 space-y-8 max-w-7xl mx-auto w-full">
           {/* Breadcrumb & Navigation */}
           <div className="flex items-center justify-between">
             <Link
@@ -266,7 +266,7 @@ export default function EmailBlastCampaignPage() {
           {/* Email Composer & Target Config Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left 2-Cols: Composer */}
-            <div className="lg:col-span-2 p-6 md:p-8 rounded-3xl bg-[#0d0d12] border border-gray-800 space-y-6 shadow-xl">
+            <div className="lg:col-span-2 p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 rounded-3xl bg-[#0d0d12] border border-gray-800 space-y-6 shadow-xl">
               <div className="flex items-center justify-between border-b border-gray-800 pb-4">
                 <div>
                   <h2 className="text-xl font-bold text-white">Compose Broadcast Message</h2>
@@ -521,7 +521,7 @@ export default function EmailBlastCampaignPage() {
           </div>
 
           {/* Bottom Table: Past Email Campaign Broadcast Logs */}
-          <div className="p-6 md:p-8 rounded-3xl bg-[#0d0d12] border border-gray-800 space-y-6 shadow-xl">
+          <div className="p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 rounded-3xl bg-[#0d0d12] border border-gray-800 space-y-6 shadow-xl">
             <div className="flex items-center justify-between border-b border-gray-800 pb-4">
               <div>
                 <h3 className="text-lg font-bold text-white">📜 Email Campaign Broadcast History</h3>
@@ -544,7 +544,7 @@ export default function EmailBlastCampaignPage() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
+                <table className="w-full min-w-[760px] text-left text-xs border-collapse">
                   <thead>
                     <tr className="border-b border-gray-800 text-gray-400 uppercase tracking-wider text-[10px]">
                       <th className="py-3 px-4 font-bold">Subject Line</th>

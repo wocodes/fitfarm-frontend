@@ -439,7 +439,7 @@ export default function AdminsPage() {
           subtitle="Control administrator accounts, roles, access levels, and granular database permissions"
         />
 
-        <main className="flex-1 p-6 md:p-8 space-y-6 max-w-7xl">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 space-y-6 max-w-7xl">
           {/* Notification Toast */}
           {notification && (
             <div
@@ -627,7 +627,7 @@ export default function AdminsPage() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
+                <table className="w-full min-w-[760px] text-left text-xs border-collapse">
                   <thead className="bg-[#070709] border-b border-gray-800 text-[11px] font-extrabold text-gray-400 uppercase tracking-wider">
                     <tr>
                       <th className="py-4 px-4 w-12 text-center">#</th>

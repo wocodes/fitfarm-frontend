@@ -7,6 +7,7 @@ import { API_URL, ADMIN_APP_URL, PLATFORM_DOMAIN } from '../lib/config';
 export default function IntegratedTenantDashboardSetupPage() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showOperatingModelModal, setShowOperatingModelModal] = useState(false);
   const [trialDays, setTrialDays] = useState(90);
@@ -62,26 +63,48 @@ export default function IntegratedTenantDashboardSetupPage() {
         })
         .catch(() => {});
 
-      // Check if logged in user already has an active tenant provisioned
+      // The setup wizard is only available to registered owners. If there is
+      // no session, send visitors back to the landing page with the Create
+      // Account modal already open instead of showing an unusable form.
       const token = localStorage.getItem('fitcloud_token') || localStorage.getItem('polanfit_token');
-      if (token) {
-        const apiBase = API_URL;
-        fetch(`${apiBase}/central/auth/profile`, {
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-        })
-          .then((res) => res.json())
-          .then((json) => {
-            if (json.success && json.data && (json.data.tenant || json.data.tenant_id)) {
-              const adminAppUrl = ADMIN_APP_URL;
-              const tenantSlug = json.data?.tenant?.slug || '';
-              window.location.href = `${adminAppUrl}#token=${encodeURIComponent(token)}&tenant=${encodeURIComponent(tenantSlug)}`;
-            }
-          })
-          .catch(() => {});
+      if (!token) {
+        window.location.replace('/?auth=register');
+        return;
       }
+
+      const apiBase = API_URL;
+      fetch(`${apiBase}/central/auth/profile`, {
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+        .then(async (res) => {
+          if (!res.ok) {
+            localStorage.removeItem('fitcloud_token');
+            localStorage.removeItem('polanfit_token');
+            window.location.replace('/?auth=register');
+            return;
+          }
+
+          const json = await res.json();
+          if (!json.success || !json.data) {
+            window.location.replace('/?auth=register');
+            return;
+          }
+
+          // Existing owners should go straight to the console rather than
+          // provisioning a second gym.
+          if (json.data.tenant || json.data.tenant_id) {
+            const adminAppUrl = ADMIN_APP_URL;
+            const tenantSlug = json.data?.tenant?.slug || '';
+            window.location.href = `${adminAppUrl}#token=${encodeURIComponent(token)}&tenant=${encodeURIComponent(tenantSlug)}`;
+            return;
+          }
+
+          setAuthReady(true);
+        })
+        .catch(() => setAuthReady(true));
     }
   }, []);
 
@@ -207,6 +230,17 @@ export default function IntegratedTenantDashboardSetupPage() {
     { id: 5, label: 'Launch Console', icon: '🚀', desc: 'Tenant Provisioning' },
   ];
 
+  if (!authReady) {
+    return (
+      <div className="min-h-screen bg-[#070709] text-white flex flex-col items-center justify-center">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center font-black text-black text-lg shadow-lg shadow-orange-500/20 animate-pulse">
+          FF
+        </div>
+        <p className="mt-4 text-xs font-semibold text-gray-400">Checking your account…</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#070709] text-white flex flex-col font-sans selection:bg-orange-500 selection:text-black">
       {/* 1. Top Integrated Dashboard Header */}
@@ -217,13 +251,13 @@ export default function IntegratedTenantDashboardSetupPage() {
             FF
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="font-extrabold text-base tracking-tight text-white">FitFarmHQ Setup</h1>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+            <div className="flex items-center gap-2 min-w-0">
+              <h1 className="font-extrabold text-sm sm:text-base tracking-tight text-white whitespace-nowrap">FitFarmHQ Setup</h1>
+              <span className="hidden sm:inline-flex text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
                 SYSTEM ONLINE
               </span>
             </div>
-            <p className="text-[10px] text-gray-400">Tenant Configuration & System Provisioning Console</p>
+            <p className="hidden sm:block text-[10px] text-gray-400">Tenant Configuration & System Provisioning Console</p>
           </div>
         </div>
 
@@ -302,7 +336,7 @@ export default function IntegratedTenantDashboardSetupPage() {
         </aside>
 
         {/* MIDDLE WORKSPACE (Form Container) */}
-        <main className="flex-1 bg-[#0f0f13] border border-gray-800 rounded-3xl p-6 md:p-8 shadow-2xl flex flex-col justify-between">
+        <main className="flex-1 bg-[#0f0f13] border border-gray-800 rounded-3xl p-4 sm:p-6 lg:p-8 shadow-2xl flex flex-col justify-between">
           <div>
             {/* Top Workspace Header */}
             <div className="pb-6 mb-6 border-b border-gray-800 flex items-center justify-between">
@@ -377,7 +411,7 @@ export default function IntegratedTenantDashboardSetupPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1.5">
                         Timezone
@@ -434,7 +468,7 @@ export default function IntegratedTenantDashboardSetupPage() {
             {/* STEP 3: Theme Customization */}
             {step === 3 && (
               <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">
                       Primary Accent Color
@@ -684,7 +718,7 @@ export default function IntegratedTenantDashboardSetupPage() {
       {/* Operating Model Preview Modal (Triggered when trial conclusions are near) */}
       {showOperatingModelModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="relative w-full max-w-2xl bg-[#121217] border border-gray-800 rounded-3xl p-6 md:p-8 shadow-2xl text-white space-y-6">
+          <div className="relative w-full max-w-2xl bg-[#121217] border border-gray-800 rounded-3xl p-4 sm:p-6 lg:p-8 shadow-2xl text-white space-y-6">
             <button
               onClick={() => setShowOperatingModelModal(false)}
               className="absolute top-5 right-5 w-8 h-8 rounded-full bg-gray-800/60 hover:bg-gray-700 flex items-center justify-center text-gray-400 hover:text-white transition"

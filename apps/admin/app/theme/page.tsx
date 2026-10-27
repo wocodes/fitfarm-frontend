@@ -226,10 +226,10 @@ export default function ThemeSettingsPage() {
       </header>
 
       {/* Main Container */}
-      <main className="flex-1 max-w-6xl w-full mx-auto p-6 md:p-8 space-y-8">
+      <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column: Palette & Typography Controls */}
-          <div className="lg:col-span-2 p-6 md:p-8 rounded-3xl bg-[#18181b] border border-gray-800 space-y-8 shadow-2xl">
+          <div className="lg:col-span-2 p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 rounded-3xl bg-[#18181b] border border-gray-800 space-y-8 shadow-2xl">
             <div className="flex items-center justify-between pb-4 border-b border-gray-800">
               <div>
                 <h2 className="text-xl font-bold text-white">Brand Palette & Typography</h2>

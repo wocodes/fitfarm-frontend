@@ -190,7 +190,7 @@ export default function QRGeneratorPage() {
           />
         </div>
 
-        <main className="flex-1 p-6 md:p-8 space-y-6 max-w-[1600px] mx-auto w-full">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 space-y-6 max-w-[1600px] mx-auto w-full">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             {/* Configuration Column */}
             <div className="lg:col-span-4 space-y-6 no-print">

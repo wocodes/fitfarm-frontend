@@ -274,7 +274,7 @@ export default function CheckInsPage() {
           subtitle="Real-time entrance verification, live session countdown, biometric simulations, and check-in history"
         />
 
-        <main className="flex-1 p-6 md:p-8 space-y-6 max-w-[1600px] mx-auto w-full">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 space-y-6 max-w-[1600px] mx-auto w-full">
           {/* Top Banner & Control Actions */}
           <div className="p-6 rounded-2xl bg-[#0f0f13] border border-gray-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
@@ -395,7 +395,7 @@ export default function CheckInsPage() {
                   <p className="text-xs text-gray-500">Try adjusting your search criteria or trigger a simulated check-in.</p>
                 </div>
               ) : (
-                <table className="w-full text-left text-xs">
+                <table className="w-full min-w-[760px] text-left text-xs">
                   <thead className="bg-[#070709] border-b border-gray-800 text-gray-400 font-semibold uppercase tracking-wider">
                     <tr>
                       <th className="py-3 px-4 w-12">S/N</th>

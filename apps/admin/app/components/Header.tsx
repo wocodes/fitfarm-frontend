@@ -29,15 +29,15 @@ export default function Header({ title, subtitle }: HeaderProps) {
   }, []);
 
   return (
-    <header className="h-20 px-8 border-b border-gray-800/80 bg-[#0a0a0c]/80 backdrop-blur-xl flex items-center justify-between sticky top-0 z-30">
-      <div>
-        <h1 className="text-xl font-extrabold tracking-tight text-white">{title}</h1>
-        {subtitle && <p className="text-xs text-gray-400 font-medium">{subtitle}</p>}
+    <header className="min-h-20 px-4 sm:px-6 lg:px-8 py-3 border-b border-gray-800/80 bg-[#0a0a0c]/80 backdrop-blur-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 sticky top-0 z-30">
+      <div className="min-w-0 w-full sm:flex-1">
+        <h1 className="text-lg sm:text-xl font-extrabold tracking-tight text-white truncate">{title}</h1>
+        {subtitle && <p className="text-[11px] sm:text-xs text-gray-400 font-medium line-clamp-2">{subtitle}</p>}
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-between sm:justify-end w-full sm:w-auto">
         {/* Active Gym Tenant Badge */}
-        <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-orange-500/10 border border-orange-500/30 text-xs text-orange-400 font-bold max-w-[260px]">
+        <div className="flex items-center gap-2.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-orange-500/10 border border-orange-500/30 text-xs text-orange-400 font-bold max-w-[135px] sm:max-w-[260px]">
           {logoUrl ? (
             <img src={logoUrl} alt={`${tenantName} logo`} className="w-6 h-6 rounded-md object-contain bg-black/20" />
           ) : (
@@ -49,9 +49,9 @@ export default function Header({ title, subtitle }: HeaderProps) {
         {/* Quick Kiosk Link Button */}
         <a
           href="/check-in"
-          className="px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-black font-extrabold text-xs transition shadow-lg shadow-orange-500/20"
+          className="px-3 sm:px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-black font-extrabold text-xs transition shadow-lg shadow-orange-500/20"
         >
-          🚪 Open Entrance Kiosk
+          🚪 <span className="hidden sm:inline">Open Entrance Kiosk</span><span className="sm:hidden">Kiosk</span>
         </a>
 
         {/* Sign Out Button */}
@@ -61,7 +61,7 @@ export default function Header({ title, subtitle }: HeaderProps) {
           title="Sign Out of Admin Portal"
         >
           <span>🚪</span>
-          <span>Sign Out</span>
+          <span className="hidden sm:inline">Sign Out</span>
         </button>
       </div>
     </header>

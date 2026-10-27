@@ -217,20 +217,20 @@ export default function SuperAdminPage() {
   if (!authorized) return null;
 
   return (
-    <div className="min-h-screen bg-[#0f0f11] text-white flex flex-col font-sans p-6 md:p-10 space-y-8">
+    <div className="min-h-screen bg-[#0f0f11] text-white flex flex-col font-sans p-4 sm:p-6 lg:p-10 space-y-8">
       {/* Super Admin Top Header */}
-      <header className="max-w-7xl w-full mx-auto flex items-center justify-between border-b border-gray-800 pb-6">
-        <div className="flex items-center gap-3">
+      <header className="max-w-7xl w-full mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-800 pb-6">
+        <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-2xl bg-red-500/20 border border-red-500/40 flex items-center justify-center font-bold text-red-400 text-lg shadow-lg">
             👑
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold text-white">FitFarmHQ Super Admin Center</h1>
-            <p className="text-xs text-gray-400">Platform administration • fitfarmhq.com/super-admin</p>
+            <h1 className="text-xl sm:text-2xl font-extrabold text-white">FitFarmHQ Super Admin Center</h1>
+            <p className="text-[11px] sm:text-xs text-gray-400">Platform administration • fitfarmhq.com/super-admin</p>
           </div>
         </div>
 
-        <Link href="/setup" className="px-4 py-2 bg-orange-500 hover:bg-orange-600 font-bold text-black text-xs rounded-xl transition">
+        <Link href="/setup" className="self-start sm:self-auto px-4 py-2 bg-orange-500 hover:bg-orange-600 font-bold text-black text-xs rounded-xl transition whitespace-nowrap">
           + Launch Setup Wizard
         </Link>
       </header>

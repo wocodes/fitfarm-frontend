@@ -405,7 +405,7 @@ export default function MemberDirectoryPage() {
       <div className="flex-1 flex flex-col min-w-0">
         <Header title="Manage Users" subtitle="Dashboard / Manage Users" />
 
-        <main className="flex-1 p-6 md:p-8 space-y-6 max-w-[1400px]">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 space-y-6 max-w-[1400px]">
           {/* Header Card & Filter Bar matching exact design spec */}
           <div className="p-6 rounded-3xl bg-[#18181b] border border-gray-800 shadow-xl space-y-6">
 
@@ -497,8 +497,20 @@ export default function MemberDirectoryPage() {
 
           {/* Members Table Card matching screenshot exact columns */}
           <div className="rounded-3xl bg-[#18181b] border border-gray-800 overflow-visible shadow-2xl relative">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-gray-300 border-collapse">
+            {!loading && paginatedMembers.length === 0 && (
+              <div className="md:hidden py-12 px-6 text-center text-gray-400">
+                <div className="text-2xl mb-2">🔎</div>
+                <p className="text-sm font-bold text-white">No members found</p>
+                <p className="mt-1 text-xs">Try adjusting your search or filters.</p>
+              </div>
+            )}
+            {!loading && paginatedMembers.length > 0 && (
+              <p className="md:hidden px-4 pt-3 text-[10px] font-semibold text-gray-500">
+                Swipe sideways to view all columns →
+              </p>
+            )}
+            <div className={`overflow-x-auto ${!loading && paginatedMembers.length === 0 ? 'hidden md:block' : ''}`}>
+              <table className="w-full min-w-[760px] text-left text-xs text-gray-300 border-collapse">
                 <thead className="bg-[#121217] text-[11px] font-extrabold text-gray-400 uppercase tracking-wider border-b border-gray-800 select-none">
                   <tr>
                     <th className="px-4 py-4 w-10 text-center">
