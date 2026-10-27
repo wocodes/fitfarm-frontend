@@ -15,7 +15,7 @@ const DEFAULT_FAQS = [
   },
   {
     q: 'How do I renew or upgrade my membership plan?',
-    a: 'Simply click "Renew / Upgrade Online" on your dashboard or select any plan on this page. Payments are verified instantly via Paystack (card, bank transfer, USSD) and your turnstile access extends immediately.',
+    a: 'Simply click "Renew / Upgrade Online" on your dashboard or select any plan on this page. Payments are verified instantly (card, bank transfer, USSD) and your turnstile access extends immediately.',
   },
   {
     q: 'Can I pause or freeze my membership if I travel?',

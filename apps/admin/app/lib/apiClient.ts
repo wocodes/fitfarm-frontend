@@ -22,13 +22,44 @@ export function getMemberPortalUrl(): string {
   return slug ? `https://${slug}.${platform}` : `https://${platform}`;
 }
 
+let authBootstrapped = false;
+
+/**
+ * Persist the one-time handoff token before any page effect runs.
+ * Central sends the token in the URL fragment so it never reaches server logs.
+ */
+function bootstrapAuthFromUrl(): void {
+  if (typeof window === 'undefined' || authBootstrapped) return;
+  authBootstrapped = true;
+
+  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  const query = new URLSearchParams(window.location.search);
+  const token = hash.get('token') || query.get('token');
+  const tenant = hash.get('tenant') || query.get('tenant');
+
+  if (!token && !tenant) return;
+
+  if (token) {
+    localStorage.setItem('fitcloud_token', token);
+    localStorage.setItem('polanfit_token', token);
+  }
+  if (tenant) {
+    localStorage.setItem('fitcloud_tenant_slug', tenant);
+    localStorage.setItem('polanfit_tenant_slug', tenant);
+  }
+
+  window.history.replaceState({}, '', window.location.pathname);
+}
+
 export function getAuthToken(): string | null {
   if (typeof window === 'undefined') return null;
+  bootstrapAuthFromUrl();
   return localStorage.getItem('fitcloud_token') || localStorage.getItem('polanfit_token');
 }
 
 export function getTenantSlug(): string | null {
   if (typeof window === 'undefined') return null;
+  bootstrapAuthFromUrl();
   return localStorage.getItem('fitcloud_tenant_slug') || localStorage.getItem('polanfit_tenant_slug');
 }
 
@@ -41,7 +72,8 @@ export function handleUnauthorized() {
   }
 }
 
-export function handleLogout() {  if (typeof window !== 'undefined') {
+export function handleLogout() {
+  if (typeof window !== 'undefined') {
     const token = getAuthToken();
     if (token) {
       fetch(`${API_URL}/central/auth/logout`, {

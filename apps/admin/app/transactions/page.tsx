@@ -586,7 +586,7 @@ export default function TransactionsPage() {
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <Header title="Financial Transactions Ledger" subtitle="Complete audit ledger of member payments, bank transfers, POS receipts, and online Paystack transactions" />
+        <Header title="Financial Transactions Ledger" subtitle="Complete audit ledger of member payments, bank transfers, POS receipts, and online transactions" />
 
         <main className="flex-1 p-6 md:p-8 space-y-6 max-w-[1600px] mx-auto w-full">
           {/* Summary Cards */}
@@ -613,7 +613,7 @@ export default function TransactionsPage() {
             </div>
 
             <div className="p-5 rounded-2xl bg-[#0f0f13] border border-gray-800 flex flex-col justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Paystack Online</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Online Payments</span>
               <div className="text-2xl font-black text-orange-400 mt-1 font-mono">
                 ₦{summary.paystackVolume.toLocaleString()}
               </div>
@@ -717,7 +717,7 @@ export default function TransactionsPage() {
                 <option value="BANK_TRANSFER">Bank Transfer</option>
                 <option value="POS">POS Terminal</option>
                 <option value="CASH">Cash</option>
-                <option value="PAYSTACK">Paystack Online</option>
+                <option value="PAYSTACK">Online Payments</option>
               </select>
 
               {/* Date Filters */}
@@ -1035,7 +1035,7 @@ export default function TransactionsPage() {
                     <option value="BANK_TRANSFER">Bank Transfer</option>
                     <option value="POS">POS Terminal</option>
                     <option value="CASH">Cash</option>
-                    <option value="PAYSTACK">Paystack Online</option>
+                    <option value="PAYSTACK">Online Payments</option>
                   </select>
                 </div>
               </div>

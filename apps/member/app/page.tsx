@@ -150,6 +150,60 @@ export default function MemberPortalPage() {
     fetchMemberProfile();
   }, [fetchTenantData, fetchLeaderboard, fetchMemberProfile]);
 
+  // Confirm a returning online checkout exactly once.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const params = new URLSearchParams(window.location.search);
+    const checkoutId = params.get('checkout_id');
+    const paymentState = params.get('payment');
+
+    if (!checkoutId && !paymentState) return;
+
+    window.history.replaceState({}, '', window.location.pathname);
+
+    if (paymentState === 'cancelled') {
+      setNotificationMsg('Payment cancelled. Your plan was not changed.');
+      setTimeout(() => setNotificationMsg(''), 5000);
+      return;
+    }
+
+    if (!checkoutId || !getMemberToken()) return;
+
+    const confirm = async (attempt = 0) => {
+      try {
+        const res = await memberApiFetch('/member/plans/purchase', {
+          method: 'POST',
+          body: JSON.stringify({ checkout_id: checkoutId }),
+        });
+
+        if (res.success) {
+          setNotificationMsg(`🎉 ${res.message || 'Membership activated successfully!'}`);
+          fetchMemberProfile();
+          setTimeout(() => setNotificationMsg(''), 6000);
+          return;
+        }
+
+        if (attempt < 4) {
+          setTimeout(() => confirm(attempt + 1), 2500);
+          return;
+        }
+
+        setNotificationMsg(res.message || 'Payment is still processing. Refresh in a moment.');
+        setTimeout(() => setNotificationMsg(''), 7000);
+      } catch (err: any) {
+        if (attempt < 4) {
+          setTimeout(() => confirm(attempt + 1), 2500);
+          return;
+        }
+        setNotificationMsg(err.message || 'Could not confirm the payment.');
+        setTimeout(() => setNotificationMsg(''), 7000);
+      }
+    };
+
+    confirm();
+  }, [fetchMemberProfile]);
+
   // Live Workout Timer
   useEffect(() => {
     if (!activeSession || !activeSession.check_in_time) {
@@ -277,9 +331,17 @@ export default function MemberPortalPage() {
         {/* Top Sticky Navigation Bar Floating on Top of Hero Slider (Transparent) */}
         <header className="relative px-6 py-4 flex items-center justify-between bg-gradient-to-b from-black/80 via-black/40 to-transparent backdrop-blur-[2px] transition-all">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center font-black text-black text-lg shadow-lg shadow-orange-500/20">
-              {tenantName.charAt(0)}
-            </div>
+            {tenantInfo?.tenant?.logo_url ? (
+              <img
+                src={tenantInfo.tenant.logo_url}
+                alt={`${tenantName} logo`}
+                className="w-10 h-10 rounded-xl object-contain bg-black/20 border border-white/10"
+              />
+            ) : (
+              <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center font-black text-black text-lg shadow-lg shadow-orange-500/20">
+                {tenantName.charAt(0)}
+              </div>
+            )}
             <div>
               <h1 className="font-extrabold text-white leading-tight text-base tracking-tight">{tenantName}</h1>
               <span className="text-xs text-orange-400 font-mono">Member Web Portal</span>
@@ -480,6 +542,8 @@ export default function MemberPortalPage() {
         onRequireAuth={() => {
           setShowLoginModal(true);
         }}
+        usdRate={Number(tenantInfo?.platform?.usd_rate || 1600)}
+        planCurrency={tenantInfo?.tenant?.currency || 'NGN'}
       />
 
       <MemberAuthModals

@@ -924,7 +924,7 @@ export default function SubscriptionsPage() {
                   <option value="BANK_TRANSFER">Bank Transfer (Default)</option>
                   <option value="POS">POS Terminal</option>
                   <option value="CASH">Cash</option>
-                  <option value="PAYSTACK">Paystack Online</option>
+                  <option value="PAYSTACK">Online Payment</option>
                 </select>
               </div>
 
@@ -1029,7 +1029,7 @@ export default function SubscriptionsPage() {
                   <option value="BANK_TRANSFER">Bank Transfer</option>
                   <option value="POS">POS Terminal</option>
                   <option value="CASH">Cash</option>
-                  <option value="PAYSTACK">Paystack Online</option>
+                  <option value="PAYSTACK">Online Payment</option>
                 </select>
               </div>
 

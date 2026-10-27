@@ -9,6 +9,7 @@ export default function IntegratedTenantDashboardSetupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showOperatingModelModal, setShowOperatingModelModal] = useState(false);
+  const [trialDays, setTrialDays] = useState(90);
 
   // Form State
   const [licenseKey, setLicenseKey] = useState('');
@@ -53,6 +54,13 @@ export default function IntegratedTenantDashboardSetupPage() {
           // Ignore parse errors
         }
       }
+
+      fetch(`${API_URL}/platform`)
+        .then((res) => res.json())
+        .then((json) => {
+          if (json.success && json.data?.trial_days) setTrialDays(Number(json.data.trial_days));
+        })
+        .catch(() => {});
 
       // Check if logged in user already has an active tenant provisioned
       const token = localStorage.getItem('fitcloud_token') || localStorage.getItem('polanfit_token');
@@ -178,7 +186,7 @@ export default function IntegratedTenantDashboardSetupPage() {
         ...result,
         urls: {
           ...result.urls,
-          admin_app: `${adminBase}#token=${encodeURIComponent(launchToken)}&tenant=${encodeURIComponent(result?.tenant?.slug || '')}`,
+          admin_launch_url: `${adminBase}#token=${encodeURIComponent(launchToken)}&tenant=${encodeURIComponent(result?.tenant?.slug || '')}`,
         },
       });
       setStep(5);
@@ -202,10 +210,11 @@ export default function IntegratedTenantDashboardSetupPage() {
   return (
     <div className="min-h-screen bg-[#070709] text-white flex flex-col font-sans selection:bg-orange-500 selection:text-black">
       {/* 1. Top Integrated Dashboard Header */}
-      <header className="h-16 border-b border-gray-800/80 bg-[#0c0c10] px-4 md:px-8 flex items-center justify-between sticky top-0 z-30 backdrop-blur-md">
+      <header className="h-16 border-b border-gray-800/80 bg-[#0c0c10] px-4 md:px-8 sticky top-0 z-30 backdrop-blur-md">
+        <div className="max-w-7xl w-full h-full mx-auto flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center font-extrabold text-black text-lg shadow-md shadow-orange-500/20">
-            FC
+            FF
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -239,6 +248,7 @@ export default function IntegratedTenantDashboardSetupPage() {
             Exit Console
           </Link>
         </div>
+        </div>
       </header>
 
       {/* 2. Main Layout (Sidebar + Form Workspace + Live Preview Panel) */}
@@ -249,7 +259,7 @@ export default function IntegratedTenantDashboardSetupPage() {
           <div>
             <div className="pb-4 mb-4 border-b border-gray-800">
               <span className="text-[10px] font-bold uppercase tracking-widest text-orange-400">Config Sections</span>
-              <p className="text-xs text-gray-400 font-medium mt-0.5">30-Day Trial Setup</p>
+              <p className="text-xs text-gray-400 font-medium mt-0.5">{trialDays}-Day Trial Setup</p>
             </div>
 
             <nav className="space-y-1.5">
@@ -286,7 +296,7 @@ export default function IntegratedTenantDashboardSetupPage() {
           {/* System Status Pill Footer */}
           <div className="pt-4 mt-6 border-t border-gray-800 text-[11px] font-mono text-gray-400 space-y-2">
             <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px]">
-              🎁 30-Day Trial Active. Billing model selection triggers near trial conclusion.
+              🎁 {trialDays}-Day Trial Active. Billing model selection triggers near trial conclusion.
             </div>
           </div>
         </aside>
@@ -557,7 +567,7 @@ export default function IntegratedTenantDashboardSetupPage() {
                   <div>
                     <h3 className="font-extrabold text-lg text-white">System Provisioned Successfully!</h3>
                     <p className="text-xs text-gray-300 mt-0.5">
-                      {resultData.tenant.name} is now live on <code className="text-emerald-400 font-mono">FitFarmHQ</code> with a 30-Day Unlimited Trial!
+                      {resultData.tenant.name} is now live on <code className="text-emerald-400 font-mono">FitFarmHQ</code> with a {trialDays}-Day Unlimited Trial!
                     </p>
                   </div>
                 </div>
@@ -569,7 +579,7 @@ export default function IntegratedTenantDashboardSetupPage() {
                       <p className="text-xs text-orange-400 font-mono">{resultData.urls.admin_app}</p>
                     </div>
                     <a
-                      href={resultData.urls.admin_app}
+                      href={resultData.urls.admin_launch_url || resultData.urls.admin_app}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="px-4 py-2 bg-orange-500 hover:bg-orange-600 font-extrabold text-black text-xs rounded-xl transition"
@@ -651,7 +661,7 @@ export default function IntegratedTenantDashboardSetupPage() {
             <div className="mt-5 space-y-2 text-[11px] text-gray-400">
               <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Active System Stack</span>
               <div className="flex items-center justify-between p-2 rounded-lg bg-gray-900/60">
-                <span>🎁 30-Day Trial</span>
+                <span>🎁 {trialDays}-Day Trial</span>
                 <span className="text-emerald-400 font-bold">ACTIVE</span>
               </div>
               <div className="flex items-center justify-between p-2 rounded-lg bg-gray-900/60">
@@ -686,7 +696,7 @@ export default function IntegratedTenantDashboardSetupPage() {
               <span className="text-xs font-bold text-orange-400 uppercase tracking-widest">Post-Trial Billing Configuration</span>
               <h2 className="text-2xl font-black text-white mt-1">Choose Operating Model</h2>
               <p className="text-xs text-gray-400 mt-1">
-                This selection is automatically triggered towards the end of your 30-day trial period.
+                This selection is automatically triggered towards the end of your {trialDays}-day trial period.
               </p>
             </div>
 
@@ -702,7 +712,7 @@ export default function IntegratedTenantDashboardSetupPage() {
                 <span className="text-[10px] font-bold text-orange-400 uppercase tracking-widest">Option 1</span>
                 <h3 className="text-lg font-bold text-white mt-1">Free Setup (1% Split)</h3>
                 <p className="text-xs text-gray-400 mt-1">
-                  $0 upfront cost. 1% transaction split on Paystack member payments.
+                  $0 upfront cost. 1% transaction split on member payments.
                 </p>
               </div>
 

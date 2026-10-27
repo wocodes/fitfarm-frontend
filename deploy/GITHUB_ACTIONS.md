@@ -25,7 +25,6 @@ GitHub → repo → **Settings → Secrets and variables → Actions → New rep
 | `SSH_TARGET_ROOT` | `domains/fitfarmhq.com/public_html` | relative to server home |
 | `NEXT_PUBLIC_API_URL` | `https://api.fitfarmhq.com/api/v1` | used by all three apps |
 | `NEXT_PUBLIC_PLATFORM_DOMAIN` | `fitfarmhq.com` | member app subdomain slug resolution |
-| `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` | `pk_test_...` | member portal checkout (test mode now) |
 | `NEXT_PUBLIC_ADMIN_APP_URL` | `https://admin.fitfarmhq.com` | central redirects owners here |
 | `NEXT_PUBLIC_MEMBER_APP_URL` | `https://fitfarmhq.com` | central fallback link (member is per-slug on the wildcard) |
 
@@ -44,8 +43,10 @@ GitHub → repo → **Settings → Secrets and variables → Actions → New rep
 | `DB_PORT` | `3306` | |
 | `DB_DATABASE` | `fitcloud` | hPanel DB name |
 | `DB_USERNAME` / `DB_PASSWORD` | your DB user | |
-| `PAYSTACK_SECRET_KEY` | `sk_test_...` | test mode currently |
-| `PAYSTACK_VERIFY_REFERENCES` | `true` | must be `true` in production; the API rejects unverified purchases |
+| `BACHS_SECRET_KEY` | `sk_sandbox_...` or `sk_live_...` | server-side checkout creation and verification |
+| `BACHS_WEBHOOK_SECRET` | webhook signing secret | required; webhook signatures are verified |
+| `BACHS_BASE_URL` | `https://api.bachs.io` | use `https://sandbox-api.bachs.io` for sandbox |
+| `BACHS_CURRENCY` | `NGN` | checkout pricing currency |
 | `PLATFORM_DOMAIN` | `fitfarmhq.com` | per-gym subdomain URL generation |
 | `CORS_ALLOWED_ORIGINS` | `https://fitfarmhq.com,https://admin.fitfarmhq.com` | exact origins, including any customer domains |
 | `CORS_ALLOWED_ORIGIN_PATTERNS` | *(optional)* | comma-separated regexes for many custom domains |
@@ -109,3 +110,46 @@ tests (PHPUnit) → setup-php 8.3 + composer → composer install --no-dev
 App currently uses `MAIL_MAILER=log`. Before going live with owner notifications / member email:
 choose a provider (Resend, Mailgun, Brevo, or Hostinger MX/SMTP) and set `MAIL_*` secrets,
 then redeploy once. Update `MAIL_FROM_ADDRESS` to `no-reply@fitfarmhq.com`.
+
+## Environment-scoped secrets (staging vs production)
+
+Use GitHub **Environments** instead of suffixing secret names. Create two environments in both repositories:
+
+```text
+staging
+production
+```
+
+Use the same secret names inside each environment:
+
+| Secret | Staging | Production |
+|---|---|---|
+| `BACHS_SECRET_KEY` | `sk_sandbox_...` | `sk_live_...` |
+| `BACHS_WEBHOOK_SECRET` | staging webhook signing secret | live webhook signing secret |
+| `BACHS_BASE_URL` | `https://sandbox-api.bachs.io` | `https://api.bachs.io` |
+| `BACHS_CURRENCY` | `NGN` | `NGN` |
+| `API_PUBLIC_URL` | `https://staging-api.fitfarmhq.com` | `https://api.fitfarmhq.com` |
+| `APP_URL` | staging API URL | production API URL |
+| `APP_ENV` | `staging` | `production` |
+| `API_SSH_TARGET_ROOT` | staging app path | production app path |
+
+The API workflow selects the `staging` environment when the branch is `staging`, and
+`production` otherwise. Manual runs can choose the environment in the workflow form.
+Do not keep fallback repository-level values for these secrets; otherwise a missing
+staging environment secret can silently fall back to production credentials.
+
+Bachs API key scopes for this integration:
+
+```text
+payments:write   # create checkout sessions and read them (write includes read)
+```
+
+Optional only if you automate webhook endpoint management:
+
+```text
+webhooks:read    # read webhook endpoints/signing secrets
+webhooks:write   # create/update/rotate webhook endpoints
+```
+
+Do not grant payouts, refunds, products, customers, or connected-account scopes unless
+those features are implemented later.

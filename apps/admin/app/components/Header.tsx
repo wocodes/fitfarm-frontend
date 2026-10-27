@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { handleLogout } from '../lib/apiClient';
+import { apiFetch, getTenantSlug, handleLogout } from '../lib/apiClient';
 
 interface HeaderProps {
   title: string;
@@ -9,16 +9,23 @@ interface HeaderProps {
 }
 
 export default function Header({ title, subtitle }: HeaderProps) {
-  const [tenantName, setTenantName] = useState('PolanFit Arena');
+  const [tenantName, setTenantName] = useState('My Gym');
+  const [logoUrl, setLogoUrl] = useState('');
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const searchParams = new URLSearchParams(window.location.search);
-      const tenant = searchParams.get('tenant');
-      if (tenant) {
-        setTenantName(tenant.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
-      }
+    const slug = getTenantSlug();
+    if (slug) {
+      setTenantName(slug.split('-').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' '));
     }
+
+    apiFetch('/admin/settings')
+      .then((res) => {
+        if (res.success && res.data?.tenant) {
+          setTenantName(res.data.tenant.name || 'My Gym');
+          setLogoUrl(res.data.tenant.logo_url || '');
+        }
+      })
+      .catch(() => {});
   }, []);
 
   return (
@@ -30,9 +37,13 @@ export default function Header({ title, subtitle }: HeaderProps) {
 
       <div className="flex items-center gap-3">
         {/* Active Gym Tenant Badge */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-orange-500/10 border border-orange-500/30 text-xs text-orange-400 font-bold">
-          <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
-          <span>{tenantName}</span>
+        <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-orange-500/10 border border-orange-500/30 text-xs text-orange-400 font-bold max-w-[260px]">
+          {logoUrl ? (
+            <img src={logoUrl} alt={`${tenantName} logo`} className="w-6 h-6 rounded-md object-contain bg-black/20" />
+          ) : (
+            <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse shrink-0" />
+          )}
+          <span className="truncate">{tenantName}</span>
         </div>
 
         {/* Quick Kiosk Link Button */}

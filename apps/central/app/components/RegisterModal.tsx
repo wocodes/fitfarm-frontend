@@ -74,11 +74,16 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToSignIn }: Reg
 
       const token = data.data?.token;
 
+      const expiresAt = data.data?.license_expires_at;
+      const trialDays = expiresAt
+        ? Math.max(1, Math.round((new Date(expiresAt).getTime() - Date.now()) / 86400000))
+        : null;
+
       // Native browser alert displaying trial key & expiration mode
       alert(
         `🎉 Account Created Successfully!\n\n` +
-        `Your 30-Day Trial License Key is:\n${licenseKey}\n\n` +
-        `Mode: TRIAL (Expires in 30 days)\n\n` +
+        `Your Trial License Key is:\n${licenseKey}\n\n` +
+        `Mode: TRIAL${trialDays ? ` (Expires in ${trialDays} days)` : ''}\n\n` +
         `Please click OK to proceed to setup and validate your license key.`
       );
 

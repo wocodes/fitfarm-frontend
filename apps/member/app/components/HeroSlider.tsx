@@ -53,7 +53,7 @@ export default function HeroSlider({
 }: HeroSliderProps) {
   const effectiveSlides: SlideItem[] = slides && slides.length > 0
     ? slides.map((s, i) => ({
-        src: s.image || s.src || `/images/hero/${(i % 5) + 1}.webp`,
+        src: (s.image || s.src || `/images/hero/${(i % 5) + 1}.webp`).replace('/images/hero/hero-', '/images/hero/'),
         tagline: s.tag || s.tagline || 'High-Performance Training Arena',
         title: s.title,
         subtitle: s.subtitle,

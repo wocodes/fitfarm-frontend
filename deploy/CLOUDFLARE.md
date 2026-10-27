@@ -62,8 +62,8 @@ Notes:
 - **"Too many redirects"**: SSL mode should be **Full**, not "Flexible".
 - **Wildcard subdomain not resolving**: confirm the `*` A record is present and the wildcard
   subdomain `*.fitfarmhq.com` was also created in Hostinger hPanel (origin must accept the host).
-- **API webhooks/Paystack**: keep `api` DNS-only; Paystack sends webhooks to
-  `https://api.fitfarmhq.com/api/v1/webhooks/paystack` from their servers — no CF IP allowlist needed
+- **API webhooks**: keep `api` DNS-only; the payment provider sends webhooks to
+  `https://api.fitfarmhq.com/api/v1/webhooks/bachs` from their servers — no CF IP allowlist needed
   when DNS-only.
 
 ## 5. Member portal on Cloudflare Workers
