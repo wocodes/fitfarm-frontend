@@ -14,13 +14,13 @@ export default function HowItWorksSection() {
     {
       num: '02',
       title: 'Get Digital Gate Pass',
-      desc: 'Your dynamic turnstile QR pass is generated immediately in your member wallet. No plastic cards needed.',
+      desc: 'Your dynamic access gate QR pass is generated immediately in your member wallet. No plastic cards needed.',
       icon: '📱',
       badge: 'Step 2',
     },
     {
       num: '03',
-      title: 'Scan Turnstile & Train',
+      title: 'Scan & Train',
       desc: 'Hold your pass to the optical scanner or touch the biometric reader. Gates unlock in 0.3s as your workout timer starts.',
       icon: '⚡',
       badge: 'Step 3',

@@ -210,7 +210,7 @@ export default function MemberDashboardModal({
             {/* Recent Check-Ins Timeline */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h4 className="text-sm font-extrabold text-white">Recent Turnstile Check-Ins</h4>
+                <h4 className="text-sm font-extrabold text-white">Recent Access Gate Check-Ins</h4>
                 <span className="text-[11px] text-gray-500 font-mono">Real-time Telemetry</span>
               </div>
 
@@ -273,7 +273,7 @@ export default function MemberDashboardModal({
                 <div className="p-8 text-center text-gray-400 text-xs">Loading gym leaderboard standings...</div>
               ) : standings.length === 0 ? (
                 <div className="p-8 rounded-2xl bg-[#070709] border border-gray-800 text-center text-gray-500 italic text-xs">
-                  No check-in standings recorded yet for this month. Scan in at the gate turnstile to take the #1 spot!
+                  No check-in standings recorded yet for this month. Scan in at the gate access gate to take the #1 spot!
                 </div>
               ) : (
                 standings.map((item, index) => {

@@ -10,9 +10,9 @@ function MemberProfileContent() {
 
   const member = {
     uuid: uid,
-    firstName: 'Kelechi',
+    firstName: 'John',
     lastName: 'Oshoname',
-    formattedName: 'Kelechi O.',
+    formattedName: 'John D.',
     email: 'kelechi@gmail.com',
     phone: '+234 801 234 5678',
     gender: 'Male',
@@ -22,12 +22,12 @@ function MemberProfileContent() {
     planExpiresAt: '2026-09-15',
     bloodGroup: 'O+',
     genotype: 'AA',
-    emergencyContactName: 'Gabriel Oshoname',
+    emergencyContactName: 'John Doe',
     emergencyContactPhone: '+234 809 999 8888',
     totalCheckIns: 18,
     totalPoints: 180,
     checkInHistory: [
-      { id: 1, date: '2026-08-25 10:45 AM', method: 'QR Code Turnstile' },
+      { id: 1, date: '2026-08-25 10:45 AM', method: 'QR Code Access Gate' },
       { id: 2, date: '2026-08-24 09:15 AM', method: 'Fingerprint Scanner' },
       { id: 3, date: '2026-08-22 08:30 AM', method: 'Manual Front Desk' },
       { id: 4, date: '2026-08-20 11:00 AM', method: 'Geofence Auto-Entry' },

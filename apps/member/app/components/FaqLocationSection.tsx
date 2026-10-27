@@ -15,7 +15,7 @@ const DEFAULT_FAQS = [
   },
   {
     q: 'How do I renew or upgrade my membership plan?',
-    a: 'Simply click "Renew / Upgrade Online" on your dashboard or select any plan on this page. Payments are verified instantly (card, bank transfer, USSD) and your turnstile access extends immediately.',
+    a: 'Simply click "Renew / Upgrade Online" on your dashboard or select any plan on this page. Payments are verified instantly (card, bank transfer, USSD) and your access gate access extends immediately.',
   },
   {
     q: 'Can I pause or freeze my membership if I travel?',
@@ -103,7 +103,7 @@ export default function FaqLocationSection({
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-gray-400">Turnstile Inquiries:</span>
+              <span className="text-gray-400">Gate Inquiries:</span>
               <span className="text-emerald-400 font-bold">Fast-Track Live</span>
             </div>
             <div className="flex items-center justify-between">

@@ -268,7 +268,7 @@ export default function WebsiteCmsPage() {
                         key: 'how_it_works',
                         name: 'How Gate Entry Works',
                         icon: '🚀',
-                        desc: 'Step-by-step visual onboarding showing QR turnstile scanning, biometric gates, and instant check-in.',
+                        desc: 'Step-by-step visual onboarding showing QR access gate scanning, biometric gates, and instant check-in.',
                         editTab: null,
                       },
                       {
@@ -1048,7 +1048,7 @@ export default function WebsiteCmsPage() {
                             avatar: '/images/testimonial/1.webp',
                             rating: 5,
                             achievement: '🔥 Lost 10kg in 90 Days',
-                            comment: 'Fantastic facilities and seamless turnstile access every single morning.',
+                            comment: 'Fantastic facilities and seamless access gate access every single morning.',
                             duration: 'Member for 6 Months',
                           },
                         ]);

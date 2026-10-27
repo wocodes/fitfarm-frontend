@@ -26,7 +26,7 @@ const DEFAULT_SLIDES: SlideItem[] = [
   },
   {
     src: '/images/hero/2.webp',
-    tagline: 'Turnstile Digital QR Entry & Live Telemetry',
+    tagline: 'Digital QR Entry & Live Telemetry',
   },
   {
     src: '/images/hero/3.webp',
@@ -142,7 +142,7 @@ export default function HeroSlider({
         {/* Dynamic Tagline from Current Slide */}
         <p className="text-gray-300 max-w-2xl mx-auto text-sm sm:text-base md:text-lg font-medium leading-relaxed drop-shadow-md">
           {effectiveSlides[currentIndex]?.subtitle || (
-            `${effectiveSlides[currentIndex]?.tagline || 'High-Performance Training Arena'} — Scan your digital QR pass at turnstile kiosks, track workout progress, and manage memberships online.`
+            `${effectiveSlides[currentIndex]?.tagline || 'High-Performance Training Arena'} — Scan your digital QR pass at access gate kiosks, track workout progress, and manage memberships online.`
           )}
         </p>
 

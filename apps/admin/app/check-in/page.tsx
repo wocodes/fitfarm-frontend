@@ -361,7 +361,7 @@ export default function CheckInKioskPage() {
                     </span>
                   )}
                 </div>
-                <h2 className="text-2xl font-black tracking-tight text-white mt-0.5">Biometric Turnstile Gate</h2>
+                <h2 className="text-2xl font-black tracking-tight text-white mt-0.5">Biometric Access Gate</h2>
               </div>
 
               <div className="flex items-center gap-2">

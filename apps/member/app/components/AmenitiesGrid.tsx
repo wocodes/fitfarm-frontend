@@ -34,7 +34,7 @@ const AMENITIES = [
     image: '/images/amenities/l3.webp',
   },
   {
-    title: 'Contactless Optical Turnstiles',
+    title: 'Contactless Optical Access Gates',
     subtitle: 'Sub-second QR gate scan and fingerprint access with zero check-in lines.',
     tag: 'Fast-Track Entry',
     image: '/images/amenities/c2.webp',

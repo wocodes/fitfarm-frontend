@@ -381,7 +381,7 @@ export default function ClassScheduleSection({
             Class Schedule & Group Sessions
           </h2>
           <p className="text-xs text-gray-400 mt-1 max-w-xl">
-            From high-octane morning strength to evening combat drills. Turnstile entry is included with all active memberships at {tenantName}.
+            From high-octane morning strength to evening combat drills. Access Gate entry is included with all active memberships at {tenantName}.
           </p>
         </div>
 

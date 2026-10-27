@@ -415,7 +415,7 @@ export default function MemberPortalPage() {
         />
       )}
 
-      {/* 3. How Turnstile Gate Access Works */}
+      {/* 3. How Gate Access Works */}
       {(cmsContent?.section_visibility?.how_it_works !== false) && (
         <HowItWorksSection />
       )}

@@ -198,7 +198,7 @@ export default function MemberAuthModals({
               <span className="text-[10px] font-bold uppercase tracking-wider text-orange-400">Join the Gym</span>
               <h3 className="text-2xl font-extrabold text-white mt-1">Create Member Account</h3>
               <p className="text-xs text-gray-400 mt-1">
-                Register instantly to generate your turnstile gate barcode and select a plan.
+                Register instantly to generate your access gate barcode and select a plan.
               </p>
             </div>
 

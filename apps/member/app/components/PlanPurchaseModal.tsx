@@ -205,7 +205,7 @@ export default function PlanPurchaseModal({
           </button>
 
           <p className="text-[10px] text-center text-gray-500 font-medium">
-            256-bit SSL encrypted • Instant turnstile gate pass activation upon payment
+            256-bit SSL encrypted • Instant access gate pass activation upon payment
           </p>
         </div>
       </div>

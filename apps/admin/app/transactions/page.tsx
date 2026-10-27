@@ -78,7 +78,7 @@ export default function TransactionsPage() {
   // Reference Data
   const [membersList, setMembersList] = useState<any[]>([]);
   const [pricingPlans, setPricingPlans] = useState<any[]>([]);
-  const [adminsList, setAdminsList] = useState<string[]>(['Super Admin', 'Kelechi Sunday', 'Onome Ataro', 'Janet Peter']);
+  const [adminsList, setAdminsList] = useState<string[]>(['Super Admin', 'Sunday Ade', 'Grace Williams', 'Mary Johnson']);
 
   // Manual Transaction Form Fields
   const [formMemberId, setFormMemberId] = useState('');

@@ -25,8 +25,37 @@ export default function SuperAdminPage() {
   const [generatedKey, setGeneratedKey] = useState<string | null>(null);
   const [planTier, setPlanTier] = useState('pro');
   const [maxMembers, setMaxMembers] = useState(500);
+  const [authorizing, setAuthorizing] = useState(true);
+  const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
+    const token = localStorage.getItem('fitcloud_token') || localStorage.getItem('polanfit_token');
+
+    if (!token) {
+      setAuthorizing(false);
+      window.location.replace('/');
+      return;
+    }
+
+    fetch(`${API_URL}/central/auth/profile`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        const role = String(json?.data?.role || '').toLowerCase();
+        if (json.success && (role.includes('super_admin') || role.includes('superadmin'))) {
+          setAuthorized(true);
+        } else {
+          window.location.replace('/');
+        }
+      })
+      .catch(() => window.location.replace('/'))
+      .finally(() => setAuthorizing(false));
+  }, []);
+
+  useEffect(() => {
+    if (!authorized) return;
+
     const token = localStorage.getItem('fitcloud_token') || localStorage.getItem('polanfit_token');
     if (!token) return;
 
@@ -61,7 +90,7 @@ export default function SuperAdminPage() {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [authorized]);
 
   const handleSavePlatformContent = async () => {
     const token = localStorage.getItem('fitcloud_token') || localStorage.getItem('polanfit_token');
@@ -173,6 +202,19 @@ export default function SuperAdminPage() {
     const newStatus = currentStatus === 'active' ? 'suspended' : 'active';
     setTenants(tenants.map(t => t.uuid === uuid ? { ...t, status: newStatus } : t));
   };
+
+  if (authorizing) {
+    return (
+      <div className="min-h-screen bg-[#0f0f11] text-white flex items-center justify-center font-sans">
+        <div className="text-center space-y-3">
+          <div className="w-10 h-10 rounded-full border-2 border-orange-500 border-t-transparent animate-spin mx-auto" />
+          <p className="text-sm text-gray-400">Verifying platform administrator access...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!authorized) return null;
 
   return (
     <div className="min-h-screen bg-[#0f0f11] text-white flex flex-col font-sans p-6 md:p-10 space-y-8">

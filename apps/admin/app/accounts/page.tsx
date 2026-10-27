@@ -80,7 +80,7 @@ export default function AccountsPage() {
       id: 1,
       action: 'PLAN_EXTENDED',
       performer: 'Super Admin',
-      target: 'Member: Kelechi Sunday',
+      target: 'Member: Sunday Ade',
       description: 'Extended subscription by 30 days. Payment of NGN 25,000 recorded via Bank Transfer.',
       timestamp: '2026-09-01 10:50 AM',
     },
@@ -103,7 +103,7 @@ export default function AccountsPage() {
     {
       id: 4,
       action: 'PLAN_PAUSED',
-      performer: 'Onome Ataro',
+      performer: 'Grace Williams',
       target: 'Member: David Alaba',
       description: 'Paused active membership upon member medical request.',
       timestamp: '2026-08-30 09:00 AM',

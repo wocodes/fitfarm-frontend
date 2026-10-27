@@ -22,7 +22,7 @@ const TESTIMONIALS: Testimonial[] = [
     rating: 5,
     achievement: '🔥 Lost 14kg & Built 5kg Muscle',
     comment:
-      'The speed of the turnstiles is insane. Having my pass right on my phone with zero plastic cards or delays makes training at 6 AM completely frictionless. The coaching here is genuinely elite.',
+      'The speed of the access gates is insane. Having my pass right on my phone with zero plastic cards or delays makes training at 6 AM completely frictionless. The coaching here is genuinely elite.',
     duration: 'Member for 14 Months',
   },
   {
@@ -85,7 +85,7 @@ export default function TestimonialsSection({
 
         <div className="text-center space-y-0.5 border-l border-gray-800">
           <span className="text-3xl font-black text-orange-400 font-mono tracking-tight">1,200+</span>
-          <p className="text-xs font-bold text-gray-200">Active Turnstile Taps</p>
+          <p className="text-xs font-bold text-gray-200">Active Access Gate Taps</p>
           <p className="text-[11px] text-gray-400 font-medium">Monthly Visits</p>
         </div>
 
@@ -170,7 +170,7 @@ export default function TestimonialsSection({
             {/* Bottom Subtle Bar */}
             <div className="pt-2 border-t border-gray-800/50 flex items-center justify-between text-[10px] text-gray-500 font-mono">
               <span>{tenantName} Community</span>
-              <span>Encrypted Turnstile Telemetry</span>
+              <span>Encrypted Gate Telemetry</span>
             </div>
           </div>
         ))}
